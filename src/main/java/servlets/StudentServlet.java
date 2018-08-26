@@ -9,6 +9,7 @@ import beans.Student;
 import controllers.StudentController;
 import controllers.UserController;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -24,6 +25,14 @@ public class StudentServlet {
     private static StudentController stdCtrl;
 
     public StudentServlet() {
+    }
+    
+    @GET
+    @Path("/read")
+    @Produces({MediaType.APPLICATION_JSON})
+    public StudentController getJson() {
+        stdCtrl = new StudentController();
+        return stdCtrl;
     }
     
     @POST

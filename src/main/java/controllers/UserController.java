@@ -98,9 +98,6 @@ public class UserController {
         Connection conn = DbConnection.conn();
         User user = null;
         try {  
-            /*if(param != null)   
-                whereQuery = " WHERE u.id LIKE '%" + param + "%'"; */
-            
             PreparedStatement cmd = conn.prepareStatement("SELECT u.id, u.name, u.surname, u.username, u.pass, u.phone, u.email, u.state FROM users u WHERE u.id = " + id);
             
             ResultSet rs = cmd.executeQuery();

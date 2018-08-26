@@ -48,6 +48,46 @@ public class StudentController {
         }
     }
     
+    @XmlElement  
+    public List getStudent() {   
+        try {    
+            students = getStudentList(param);   
+        } 
+        catch (Exception e) {        
+            e.printStackTrace();   
+        }      
+        return this.students;  
+    }
+    
+    public void setStudent(List<Student> students) {   
+        this.students = students;     
+    } 
+    
+    public List<Student> getStudentList(String param) throws Exception {      
+        Connection conn = DbConnection.conn();
+        try {  
+            
+            PreparedStatement cmd = conn.prepareStatement("SELECT id, user_id, state FROM students");
+            
+            ResultSet rs = cmd.executeQuery();
+            
+            while (rs.next()) {
+                Student tmpStd = new Student(
+                        rs.getInt(1),
+                        new UserController().getUserById(rs.getInt(2)),
+                        rs.getBoolean(3)
+                );
+                
+                students.add(tmpStd);
+            }
+        } catch (SQLException ex) {
+            System.err.println("Error retrieving data for Students: " + ex.getMessage());
+        } finally {
+            DbConnection.close(conn, "getStudentList");
+        }
+        return students; 
+    }
+    
     public Student getStudentByUser (int userId) throws Exception {
         Connection conn = DbConnection.conn();
         Student student = null;
