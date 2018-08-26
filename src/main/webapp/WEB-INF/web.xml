@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<web-app> 
+ 
+    <!--CONFIGURACION DE JERSEY--> 
+    <servlet> 
+        <servlet-name>Jersey REST Service</servlet-name>  
+        <servlet-class>    
+            com.sun.jersey.spi.container.servlet.ServletContainer  
+        </servlet-class> 
+        <init-param>     
+            <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>     
+            <param-value>com.sun.jersey.api.container.filter.LoggingFilter</param-value> 
+        </init-param>  
+        <load-on-startup>1</load-on-startup> 
+    </servlet> 
+    <!-- FIN DE CONFIGURACION DE JERSEY--> 
+    
+    <!-- CONFIGURACION DE CORS--> 
+ 
+    <filter>   
+        <filter-name>CorsFilter</filter-name>   
+        <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>   
+        <init-param>     
+            <param-name>cors.allowed.methods</param-name>     
+            <param-value>GET, POST, HEAD, PUT, DELETE</param-value>   
+        </init-param>      
+        <init-param> 
+            <param-name>cors.allowOrigin</param-name> 
+            <param-value>*</param-value> 
+        </init-param>      
+        <init-param>     
+            <param-name>cors.allowed.origins</param-name>     
+            <param-value>*</param-value>   
+        </init-param>      
+        <init-param>     
+            <param-name>cors.allowed.headers</param-name>     
+            <param-value>Content-Type,X-Requested-With,accept,Origin,Access-Control-RequestMethod,Access-Control-Request-Headers</param-value>   
+        </init-param> 
+    </filter> 
+ 
+    <filter-mapping>   
+        <filter-name>CorsFilter</filter-name>   
+        <url-pattern>/*</url-pattern> 
+    </filter-mapping> 
+ 
+    <!-- FIN CONFIGURACION DE CORS--> 
+ 
+    <!-- SERVLET MAPPING --> 
+    <servlet-mapping>         
+        <servlet-name>Jersey REST Service</servlet-name>         
+        <url-pattern>/REST/*</url-pattern> 
+    </servlet-mapping> <!-- FIN SERVLET MAPPING -->        
+    <welcome-file-list>     
+        <welcome-file>index.html</welcome-file>     
+        <welcome-file>index.htm</welcome-file>     
+        <welcome-file>index.jsp</welcome-file>     
+        <welcome-file>default.html</welcome-file>     
+        <welcome-file>default.htm</welcome-file>
+        <welcome-file>default.jsp</welcome-file>   
+    </welcome-file-list> 
+</web-app> 
+    
