@@ -9,11 +9,38 @@ Response exitosa:<br>
   * Estudiante
     * Usuario
     
+### /read/{param}
+Método: GET<br>
+Parámetros: param(en url)<br>
+Response exitosa:<br>
+* Lista de estudiantes
+  * Estudiante
+    * Usuario
+    
+### /readByUser/{userId}
+Método: GET<br>
+Parámetros: userId(en url)<br>
+Response exitosa:<br>
+* Estudiante
+    * Usuario
+    
 ### /create
 Método: POST<br>
 Parámetros: name, surname, pass, passConfirm, email, phone<br>
 Response exitosa:<br>
 * Student created with user id {userId} and student id {studentId}
+
+### /update
+Método: PUT<br>
+Parámetros: name, surname, pass(opcional), passConfirm(opcional), email, phone, userId<br>
+Response exitosa:<br>
+* Student updated with user id {userId}
+
+### /delete/{userId}
+Método: DELETE<br>
+Parámetros: userId(en url)<br>
+Response exitosa:<br>
+* Student with user id {userId} deleted
 
 ### /login
 Método: POST<br>
