@@ -129,9 +129,12 @@ public class UserController {
         Connection conn = new DbConnection().conn();  
         try {
             Statement st = conn.createStatement();
-            ResultSet res = st.executeQuery("SELECT COUNT(*) FROM users WHERE username LIKE '%" + Calendar.getInstance().get(Calendar.YEAR) + "%'");   
+            ResultSet res = st.executeQuery("SELECT MAX(id) FROM users WHERE username LIKE '%" + Calendar.getInstance().get(Calendar.YEAR) + "%'");   
             res.next();   
-            id = res.getInt(1);
+            int registerId = res.getInt(1);
+            res = st.executeQuery("SELECT username FROM users WHERE id = " + registerId);   
+            res.next();  
+            id = Integer.parseInt((res.getString(1)).substring(6, 10));
         } catch (Exception ex) {
             System.err.println("Error creating User: " + ex.getMessage());
         } finally {
@@ -160,7 +163,7 @@ public class UserController {
         return id;
     }
     
-    public String update(String name, String surname, String pass, String phone, String email, String id) throws Exception {  
+    public String update(String name, String surname, String pass, String phone, String email, String state, String id) throws Exception {  
         Connection conn = new DbConnection().conn();  
         String outputId = "-1";
         try {
@@ -171,7 +174,7 @@ public class UserController {
             
             Statement st = conn.createStatement();      
             String sql = "UPDATE users SET name='" + name + "', surname='" + surname + "', "
-                    + passQuery + "phone='" + phone + "', email='" + email + "' WHERE id=" + id;      
+                    + passQuery + "phone='" + phone + "', email='" + email + "', state = '" + state + "' WHERE id=" + id;      
             st.executeUpdate(sql);  
             outputId = id; //Operacion exitosa, devolver el id modificado
         } catch (SQLException ex) {

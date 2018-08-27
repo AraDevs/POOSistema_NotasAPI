@@ -118,22 +118,22 @@ public class StudentServlet {
         stdCtrl = new StudentController(false);
         
         String msg = "";
-        if (name == null) {
+        if (name == null || name.equals("")) {
             msg += " name";
         }
-        if (surname == null) {
+        if (surname == null || surname.equals("")) {
             msg += " surname";
         }
-        if (pass == null) {
+        if (pass == null || pass.equals("")) {
             msg += " pass";
         }
-        if (passConfirm == null) {
+        if (passConfirm == null || passConfirm.equals("")) {
             msg += " passConfirm";
         }
-        if (phone == null) {
+        if (phone == null || phone.equals("")) {
             msg += " phone";
         }
-        if (email == null) {
+        if (email == null || email.equals("")) {
             msg += " email";
         }
         
@@ -169,7 +169,7 @@ public class StudentServlet {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error ocurred").type(MediaType.TEXT_PLAIN).build();
             }
             
-            String studentId = new StudentController().add(userId);
+            String studentId = stdCtrl.add(userId);
             if (!Helpers.isInt(studentId)) {
                 return Response.status(Response.Status.CONFLICT).entity(studentId).type(MediaType.TEXT_PLAIN).build();
             }
@@ -197,24 +197,28 @@ public class StudentServlet {
     @Produces({MediaType.TEXT_PLAIN})
     public Response update (@FormParam("name") String name, @FormParam("surname") String surname, 
             @FormParam("pass") String pass, @FormParam("passConfirm") String passConfirm, 
-            @FormParam("phone") String phone, @FormParam("email") String email, @FormParam("userId") String userId) {
+            @FormParam("phone") String phone, @FormParam("email") String email, @FormParam("state") String state,
+            @FormParam("userId") String userId) {
         
         stdCtrl = new StudentController(false);
         
         String msg = "";
-        if (name == null) {
+        if (name == null || name.equals("")) {
             msg += " name";
         }
-        if (surname == null) {
+        if (surname == null || surname.equals("")) {
             msg += " surname";
         }
-        if (phone == null) {
+        if (phone == null || phone.equals("")) {
             msg += " phone";
         }
-        if (email == null) {
+        if (email == null || email.equals("")) {
             msg += " email";
         }
-        if (userId == null) {
+        if (state == null || state.equals("")) {
+            msg += " state";
+        }
+        if (userId == null || userId.equals("")) {
             msg += " userId";
         }
         
@@ -236,7 +240,7 @@ public class StudentServlet {
         
         
         try {
-            String updUserId = new UserController().update(name, surname, pass, phone, email, userId);
+            String updUserId = new UserController().update(name, surname, pass, phone, email, state, userId);
             if (!Helpers.isInt(updUserId)) {
                 return Response.status(Response.Status.CONFLICT).entity(userId).type(MediaType.TEXT_PLAIN).build();
             }
