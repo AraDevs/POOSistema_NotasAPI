@@ -1,6 +1,6 @@
 # Rutas
 
-## /Student
+## /Students
 ### /read
 Método: GET<br>
 Parámetros: Ninguno<br>
@@ -56,7 +56,7 @@ Response exitosa:<br>
 * Estudiante logueado
   * Usuario
   
-## /Faculty
+## /Faculties
 ### /read
 Método: GET<br>
 Parámetros: Ninguno<br>
@@ -101,7 +101,7 @@ Tipo de Response: Plain text<br>
 Response exitosa:<br>
 * Faculty with id {userId} deleted  
 
-## /RegisteredCourse
+## /RegisteredCourses
 ### /read/{student_id}
 Método: GET<br>
 Parámetros: student_id<br>
