@@ -48,6 +48,18 @@ public class StudentServlet {
         return stdCtrl;
     }
     
+    @GET
+    @Path("/readByUser/{userId}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Student getStudentById (@PathParam("userId") String userId) {
+        try {
+            return new StudentController().getStudentByUser(Integer.parseInt(userId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
     @POST
     @Path("/login")
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
