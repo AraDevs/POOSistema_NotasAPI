@@ -13,6 +13,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.xml.bind.annotation.XmlElement;
@@ -120,6 +122,42 @@ public class UserController {
             DbConnection.close(conn, "getUserById");
         }
         return user; 
+    }
+    
+    public int getYearIndex() throws Exception {   
+        int id = -1;  
+        Connection conn = new DbConnection().conn();  
+        try {
+            Statement st = conn.createStatement();
+            ResultSet res = st.executeQuery("SELECT COUNT(*) FROM users WHERE username LIKE '%" + Calendar.getInstance().get(Calendar.YEAR) + "%'");   
+            res.next();   
+            id = res.getInt(1);
+        } catch (Exception ex) {
+            System.err.println("Error creating User: " + ex.getMessage());
+        } finally {
+            DbConnection.close(conn, "addUser");
+        }
+        return id;
+    }
+    
+    public String add(String name, String surname, String username, String pass, String phone, String email) throws Exception {   
+        String id = "-1";  
+        Connection conn = new DbConnection().conn();  
+        try {
+            Statement st = conn.createStatement();     
+            String sql = "INSERT INTO users VALUES(null, '" + name + "', '" + surname + "', '" + username + "', '" + pass + "', '" + phone + "', '" + email + "', 1)";      
+            st.executeUpdate(sql);  
+            ResultSet res = st.executeQuery("SELECT max(id) as id FROM users");   
+            res.next();   
+            id = res.getString(1);
+        } catch (SQLException ex) {
+            id = ex.getMessage();
+        } catch (Exception ex) {
+            System.err.println("Error creating User: " + ex.getMessage());
+        } finally {
+            DbConnection.close(conn, "addUser");
+        }
+        return id;
     }
     
     /**

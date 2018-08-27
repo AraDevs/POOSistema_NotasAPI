@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.xml.bind.annotation.XmlElement;
@@ -66,8 +67,13 @@ public class StudentController {
     public List<Student> getStudentList(String param) throws Exception {      
         Connection conn = DbConnection.conn();
         try {  
+            String whereQuery = "";
+            if (param != null) {
+                whereQuery = " INNER JOIN users u ON s.user_id = u.id WHERE u.name LIKE '%" + param + "%' OR u.surname LIKE '%" + param + "%' " +
+                             "OR u.username LIKE '%" + param + "%' OR u.email LIKE '%" + param + "%' OR u.phone LIKE '%" + param + "%'";
+            }
             
-            PreparedStatement cmd = conn.prepareStatement("SELECT id, user_id, state FROM students");
+            PreparedStatement cmd = conn.prepareStatement("SELECT s.id, s.user_id, s.state FROM students s" + whereQuery);
             
             ResultSet rs = cmd.executeQuery();
             
@@ -110,5 +116,25 @@ public class StudentController {
             DbConnection.close(conn, "getStudentByUser");
         }
         return student; 
+    }
+    
+    public String add(String userId) throws Exception {   
+        String id = "-1";  
+        Connection conn = new DbConnection().conn();  
+        try {
+            Statement st = conn.createStatement();     
+            String sql = "INSERT INTO students VALUES(null, " + userId + ", 1)";      
+            st.executeUpdate(sql);  
+            ResultSet res = st.executeQuery("SELECT max(id) as id FROM students");   
+            res.next();   
+            id = res.getString(1);
+        } catch (SQLException ex) {
+            id = ex.getMessage();
+        } catch (Exception ex) {
+            System.err.println("Error creating Student: " + ex.getMessage());
+        } finally {
+            DbConnection.close(conn, "addStudent");
+        }
+        return id;
     }
 }
