@@ -8,6 +8,12 @@ Response exitosa:<br>
 * Lista de estudiantes
   * Estudiante
     * Usuario
+    
+### /create
+Método: POST<br>
+Parámetros: name, surname, pass, passConfirm, email, phone<br>
+Response exitosa:<br>
+* Student created with user id {userId} and student id {studentId}
 
 ### /login
 Método: POST<br>
