@@ -160,6 +160,49 @@ public class UserController {
         return id;
     }
     
+    public String update(String name, String surname, String pass, String phone, String email, String id) throws Exception {  
+        Connection conn = new DbConnection().conn();  
+        String outputId = "-1";
+        try {
+            String passQuery = "";
+            if (pass != null) {
+                passQuery = "pass='" + pass + "', ";
+            }
+            
+            Statement st = conn.createStatement();      
+            String sql = "UPDATE users SET name='" + name + "', surname='" + surname + "', "
+                    + passQuery + "phone='" + phone + "', email='" + email + "' WHERE id=" + id;      
+            st.executeUpdate(sql);  
+            outputId = id; //Operacion exitosa, devolver el id modificado
+        } catch (SQLException ex) {
+            outputId = ex.getMessage();
+        } catch (Exception ex) {
+            System.err.println("Error updating User: " + ex.getMessage());
+        } finally {
+            DbConnection.close(conn, "updateUser");
+        }
+        return outputId;
+    }
+    
+    public String delete(String id) throws Exception {   
+        
+        Connection conn = new DbConnection().conn();  
+        String outputId = "-1"; 
+        try {           
+            String sql= "DELETE FROM users WHERE id=" + id;       
+            Statement st = conn.createStatement();    
+            st.executeUpdate(sql);
+            outputId = id; //Operacion exitosa  
+        } catch (SQLException ex) {
+            outputId = ex.getMessage();
+        } catch (Exception ex) {
+            System.err.println("Error deleting User: " + ex.getMessage());
+        } finally {
+            DbConnection.close(conn, "deleteUser");
+        }
+        return outputId;  
+    } 
+    
     /**
      * 
      * @param username

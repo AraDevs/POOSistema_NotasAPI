@@ -137,4 +137,23 @@ public class StudentController {
         }
         return id;
     }
+    
+    public String delete(String userId) throws Exception {   
+        
+        Connection conn = new DbConnection().conn();  
+        String outputId = "-1"; 
+        try {           
+            String sql= "DELETE FROM students WHERE user_id=" + userId;       
+            Statement st = conn.createStatement();    
+            st.executeUpdate(sql);
+            outputId = userId; //Operacion exitosa  
+        } catch (SQLException ex) {
+            outputId = ex.getMessage();
+        } catch (Exception ex) {
+            System.err.println("Error deleting Student: " + ex.getMessage());
+        } finally {
+            DbConnection.close(conn, "deleteStudent");
+        }
+        return outputId;  
+    } 
 }

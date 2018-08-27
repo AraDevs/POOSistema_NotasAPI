@@ -10,9 +10,11 @@ import controllers.StudentController;
 import controllers.UserController;
 import helpers.Helpers;
 import java.util.Calendar;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -174,5 +176,118 @@ public class StudentServlet {
         msg = "Could not insert the student";
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+    }
+    
+    
+    
+    @PUT
+    @Path("/update")
+    @Produces({MediaType.TEXT_PLAIN})
+    public Response update (@FormParam("name") String name, @FormParam("surname") String surname, 
+            @FormParam("pass") String pass, @FormParam("passConfirm") String passConfirm, 
+            @FormParam("phone") String phone, @FormParam("email") String email, @FormParam("userId") String userId) {
+        
+        stdCtrl = new StudentController(false);
+        
+        String msg = "";
+        if (name == null) {
+            msg += " name";
+        }
+        if (surname == null) {
+            msg += " surname";
+        }
+        if (phone == null) {
+            msg += " phone";
+        }
+        if (email == null) {
+            msg += " email";
+        }
+        if (userId == null) {
+            msg += " userId";
+        }
+        
+        if (!msg.equals("")) {
+            msg = "Must specify following parameters:" + msg + ".";
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        if (pass != null && !(pass.equals(passConfirm))) {
+            msg = "Given passwords do not match.";
+            return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        }
+        try {
+            if (new UserController().getUserById(Integer.parseInt(userId)) == null) {
+                msg = "Given userId does not exist.";
+                return Response.status(Response.Status.CONFLICT).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {}
+        
+        
+        try {
+            String updUserId = new UserController().update(name, surname, pass, phone, email, userId);
+            if (!Helpers.isInt(updUserId)) {
+                return Response.status(Response.Status.CONFLICT).entity(userId).type(MediaType.TEXT_PLAIN).build();
+            }
+            if (Integer.parseInt(updUserId) <= 0) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error ocurred").type(MediaType.TEXT_PLAIN).build();
+            }
+            
+            msg = "Student updated with user id " + userId;
+            return Response.ok(msg, "text/plain").build();
+            
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        msg = "Could not update the student";
+        
+        return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+    }
+    
+    
+    @DELETE
+    @Path("/delete/{userId: \\d+}")
+    @Produces({MediaType.TEXT_PLAIN})
+    public Response delete (@PathParam("userId") String userId) {
+        
+        String msg = "";
+        
+        try {
+            if (new UserController().getUserById(Integer.parseInt(userId)) == null) {
+                msg = "Given userId does not exist.";
+                return Response.status(Response.Status.CONFLICT).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {}
+        
+        try {
+            String dltUserId = new StudentController().delete(userId);
+            if (!Helpers.isInt(dltUserId)) {
+                msg = "Cannot delete a parent row";
+                return Response.status(Response.Status.CONFLICT).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            if (Integer.parseInt(dltUserId) <= 0) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error ocurred").type(MediaType.TEXT_PLAIN).build();
+            }
+            
+            dltUserId = new UserController().delete(userId);
+            if (!Helpers.isInt(dltUserId)) {
+                msg = "Cannot delete a parent row";
+                return Response.status(Response.Status.CONFLICT).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            if (Integer.parseInt(dltUserId) <= 0) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error ocurred").type(MediaType.TEXT_PLAIN).build();
+            }
+            
+            msg = "Student with user id " + dltUserId + " deleted";
+            return Response.ok(msg, "text/plain").build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        msg = "Could not delete the student";
+        
+        return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        
     }
 }
