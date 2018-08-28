@@ -54,6 +54,7 @@ Response exitosa:<br>
 Posibles errores:<br>
 * 400
   * Must specify following parameters: {parameter list}.
+  * Must specify both pass and passConfirm, or not specify any of them.
   * Could not update the student
 * 404
   * Given userId does not exist.
