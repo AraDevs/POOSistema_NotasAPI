@@ -34,6 +34,12 @@ Tipo de Response: Plain text<br>
 Response exitosa:<br>
 * Student created with user id {userId} and student id {studentId}
 
+Posibles errores:<br>
+* 400
+  * Must specify following parameters: {lista de parámetros}.
+* 406
+  * Given passwords do not match.
+  
 ### /update
 Método: PUT<br>
 Parámetros: name, surname, pass(opcional), passConfirm(opcional), email, phone, state, userId<br>
@@ -55,6 +61,17 @@ Tipo de Response: JSON<br>
 Response exitosa:<br>
 * Estudiante logueado
   * Usuario
+  
+Posibles errores:<br>
+* 400
+  * Must specify username
+  * Must specify password
+  * Could not make login
+* 401
+  * Username or password not found
+* 403
+  * This service is meant for students only
+  * Your user is deactivated
   
 ## /Faculties
 ### /read
