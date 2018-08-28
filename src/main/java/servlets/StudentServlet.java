@@ -163,7 +163,7 @@ public class StudentServlet {
         try {
             String userId = new UserController().add(name, surname, username, pass, phone, email);
             if (!Helpers.isInt(userId)) {
-                return Response.status(Response.Status.CONFLICT).entity(userId).type(MediaType.TEXT_PLAIN).build();
+                return Response.status(Response.Status.CONFLICT).entity(Helpers.parseSqlError(userId)).type(MediaType.TEXT_PLAIN).build();
             }
             if (Integer.parseInt(userId) <= 0) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error ocurred").type(MediaType.TEXT_PLAIN).build();
@@ -171,7 +171,7 @@ public class StudentServlet {
             
             String studentId = stdCtrl.add(userId);
             if (!Helpers.isInt(studentId)) {
-                return Response.status(Response.Status.CONFLICT).entity(studentId).type(MediaType.TEXT_PLAIN).build();
+                return Response.status(Response.Status.CONFLICT).entity(Helpers.parseSqlError(studentId)).type(MediaType.TEXT_PLAIN).build();
             }
             if (Integer.parseInt(studentId) <= 0) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error ocurred").type(MediaType.TEXT_PLAIN).build();
@@ -227,6 +227,11 @@ public class StudentServlet {
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
         }
         
+        if ((pass != null && !pass.equals("")) ^ (passConfirm != null && !passConfirm.equals(""))) {
+            msg = "Must specify both pass and passConfirm, or not specify any of them.";
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        }
+        
         if (pass != null && !(pass.equals(passConfirm))) {
             msg = "Given passwords do not match.";
             return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
@@ -234,7 +239,7 @@ public class StudentServlet {
         try {
             if (new UserController().getUserById(Integer.parseInt(userId)) == null) {
                 msg = "Given userId does not exist.";
-                return Response.status(Response.Status.CONFLICT).entity(msg).type(MediaType.TEXT_PLAIN).build();
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
         } catch (Exception e) {}
         
@@ -242,7 +247,7 @@ public class StudentServlet {
         try {
             String updUserId = new UserController().update(name, surname, pass, phone, email, state, userId);
             if (!Helpers.isInt(updUserId)) {
-                return Response.status(Response.Status.CONFLICT).entity(userId).type(MediaType.TEXT_PLAIN).build();
+                return Response.status(Response.Status.CONFLICT).entity(Helpers.parseSqlError(updUserId)).type(MediaType.TEXT_PLAIN).build();
             }
             if (Integer.parseInt(updUserId) <= 0) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error ocurred").type(MediaType.TEXT_PLAIN).build();
@@ -272,15 +277,14 @@ public class StudentServlet {
         try {
             if (new UserController().getUserById(Integer.parseInt(userId)) == null) {
                 msg = "Given userId does not exist.";
-                return Response.status(Response.Status.CONFLICT).entity(msg).type(MediaType.TEXT_PLAIN).build();
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
         } catch (Exception e) {}
         
         try {
             String dltUserId = new StudentController().delete(userId);
             if (!Helpers.isInt(dltUserId)) {
-                msg = "Cannot delete a parent row";
-                return Response.status(Response.Status.CONFLICT).entity(msg).type(MediaType.TEXT_PLAIN).build();
+                return Response.status(Response.Status.CONFLICT).entity(Helpers.parseSqlError(dltUserId)).type(MediaType.TEXT_PLAIN).build();
             }
             if (Integer.parseInt(dltUserId) <= 0) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error ocurred").type(MediaType.TEXT_PLAIN).build();
@@ -288,8 +292,7 @@ public class StudentServlet {
             
             dltUserId = new UserController().delete(userId);
             if (!Helpers.isInt(dltUserId)) {
-                msg = "Cannot delete a parent row";
-                return Response.status(Response.Status.CONFLICT).entity(msg).type(MediaType.TEXT_PLAIN).build();
+                return Response.status(Response.Status.CONFLICT).entity(Helpers.parseSqlError(dltUserId)).type(MediaType.TEXT_PLAIN).build();
             }
             if (Integer.parseInt(dltUserId) <= 0) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error ocurred").type(MediaType.TEXT_PLAIN).build();

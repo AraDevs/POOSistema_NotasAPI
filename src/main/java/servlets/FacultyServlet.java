@@ -74,7 +74,7 @@ public class FacultyServlet {
         try {
             String outputId = fctCtrl.add(name);
             if (!Helpers.isInt(outputId)) {
-                return Response.status(Response.Status.CONFLICT).entity(outputId).type(MediaType.TEXT_PLAIN).build();
+                return Response.status(Response.Status.CONFLICT).entity(Helpers.parseSqlError(outputId)).type(MediaType.TEXT_PLAIN).build();
             }
             if (Integer.parseInt(outputId) <= 0) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error ocurred").type(MediaType.TEXT_PLAIN).build();
@@ -119,7 +119,7 @@ public class FacultyServlet {
         try {
             if (fctCtrl.getFacultyById(id) == null) {
                 msg = "Given id does not exist.";
-                return Response.status(Response.Status.CONFLICT).entity(msg).type(MediaType.TEXT_PLAIN).build();
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
         } catch (Exception e) {}
         
@@ -127,7 +127,7 @@ public class FacultyServlet {
         try {
             String updFactId = fctCtrl.update(name, state, id);
             if (!Helpers.isInt(updFactId)) {
-                return Response.status(Response.Status.CONFLICT).entity(updFactId).type(MediaType.TEXT_PLAIN).build();
+                return Response.status(Response.Status.CONFLICT).entity(Helpers.parseSqlError(updFactId)).type(MediaType.TEXT_PLAIN).build();
             }
             if (Integer.parseInt(updFactId) <= 0) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error ocurred").type(MediaType.TEXT_PLAIN).build();
@@ -141,7 +141,7 @@ public class FacultyServlet {
             e.printStackTrace();
         }
         
-        msg = "Could not update the student";
+        msg = "Could not update the faculty";
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
     }
@@ -157,15 +157,14 @@ public class FacultyServlet {
         try {
             if (fctCtrl.getFacultyById(id) == null) {
                 msg = "Given id does not exist.";
-                return Response.status(Response.Status.CONFLICT).entity(msg).type(MediaType.TEXT_PLAIN).build();
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
         } catch (Exception e) {}
         
         try {
             String outputId = fctCtrl.delete(id);
             if (!Helpers.isInt(outputId)) {
-                msg = "Cannot delete a parent row";
-                return Response.status(Response.Status.CONFLICT).entity(msg).type(MediaType.TEXT_PLAIN).build();
+                return Response.status(Response.Status.CONFLICT).entity(Helpers.parseSqlError(outputId)).type(MediaType.TEXT_PLAIN).build();
             }
             if (Integer.parseInt(outputId) <= 0) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error ocurred").type(MediaType.TEXT_PLAIN).build();

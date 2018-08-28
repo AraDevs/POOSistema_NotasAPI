@@ -129,7 +129,7 @@ public class StudentController {
             res.next();   
             id = res.getString(1);
         } catch (SQLException ex) {
-            id = ex.getMessage();
+            id = "sqlError: " + ex.getErrorCode();
         } catch (Exception ex) {
             System.err.println("Error creating Student: " + ex.getMessage());
         } finally {
@@ -148,7 +148,7 @@ public class StudentController {
             st.executeUpdate(sql);
             outputId = userId; //Operacion exitosa  
         } catch (SQLException ex) {
-            outputId = ex.getMessage();
+            outputId = "sqlError: " + ex.getErrorCode();
         } catch (Exception ex) {
             System.err.println("Error deleting Student: " + ex.getMessage());
         } finally {

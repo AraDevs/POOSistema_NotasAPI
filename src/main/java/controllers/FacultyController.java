@@ -124,7 +124,7 @@ public class FacultyController {
             res.next();   
             id = res.getString(1);
         } catch (SQLException ex) {
-            id = ex.getMessage();
+            id = "sqlError: " + ex.getErrorCode();
         } catch (Exception ex) {
             System.err.println("Error creating Faculty: " + ex.getMessage());
         } finally {
@@ -142,7 +142,7 @@ public class FacultyController {
             st.executeUpdate(sql);  
             outputId = id; //Operacion exitosa, devolver el id modificado
         } catch (SQLException ex) {
-            outputId = ex.getMessage();
+            outputId = "sqlError: " + ex.getErrorCode();
         } catch (Exception ex) {
             System.err.println("Error updating Faculty: " + ex.getMessage());
         } finally {
@@ -161,7 +161,7 @@ public class FacultyController {
             st.executeUpdate(sql);
             outputId = id; //Operacion exitosa  
         } catch (SQLException ex) {
-            outputId = ex.getMessage();
+            outputId = "sqlError: " + ex.getErrorCode();
         } catch (Exception ex) {
             System.err.println("Error deleting Faculty: " + ex.getMessage());
         } finally {

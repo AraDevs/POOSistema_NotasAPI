@@ -154,7 +154,7 @@ public class UserController {
             res.next();   
             id = res.getString(1);
         } catch (SQLException ex) {
-            id = ex.getMessage();
+            id = "sqlError: " + ex.getErrorCode();
         } catch (Exception ex) {
             System.err.println("Error creating User: " + ex.getMessage());
         } finally {
@@ -168,7 +168,7 @@ public class UserController {
         String outputId = "-1";
         try {
             String passQuery = "";
-            if (pass != null) {
+            if (pass != null && !pass.equals("")) {
                 passQuery = "pass='" + pass + "', ";
             }
             
@@ -178,7 +178,7 @@ public class UserController {
             st.executeUpdate(sql);  
             outputId = id; //Operacion exitosa, devolver el id modificado
         } catch (SQLException ex) {
-            outputId = ex.getMessage();
+            outputId = "sqlError: " + ex.getErrorCode();
         } catch (Exception ex) {
             System.err.println("Error updating User: " + ex.getMessage());
         } finally {
@@ -197,7 +197,7 @@ public class UserController {
             st.executeUpdate(sql);
             outputId = id; //Operacion exitosa  
         } catch (SQLException ex) {
-            outputId = ex.getMessage();
+            outputId = "sqlError: " + ex.getErrorCode();
         } catch (Exception ex) {
             System.err.println("Error deleting User: " + ex.getMessage());
         } finally {
