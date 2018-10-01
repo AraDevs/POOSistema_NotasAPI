@@ -8,4 +8,12 @@
                 <goal>install</goal>
             </goals>
         </action>
+        <action>
+            <actionName>CUSTOM-compile war:war</actionName>
+            <displayName>compile war:war</displayName>
+            <goals>
+                <goal>compile</goal>
+                <goal>war:war</goal>
+            </goals>
+        </action>
     </actions>

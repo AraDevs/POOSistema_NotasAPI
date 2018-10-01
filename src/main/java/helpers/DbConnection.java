@@ -49,17 +49,17 @@ public class DbConnection {
         return resp;
     }*/
     
-    static String url = "jdbc:mysql://localhost:3306/";  
+    static String url = "jdbc:mysql://localhost/";  
     static String dbName = "gradecheck";  
-    static String timeZone = "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+    static String timeZone = ""/*"?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC"*/;
     static String driver = "com.mysql.jdbc.Driver";  
-    static String userName = "root";  
-    static String password = ""; 
+    static String userName = "kevin";  
+    static String password = "fedora98"; 
     
     public static Connection conn() throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {      
-        Class.forName(driver).newInstance();   
+        Class.forName(driver).newInstance(); 
+        System.out.println(url + dbName + timeZone);
         Connection conn = DriverManager.getConnection(url + dbName + timeZone, userName, password); 
- 
         return conn;  
     }
     
