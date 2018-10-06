@@ -5,14 +5,14 @@
  */
 package controllers;
 
-import beans.Course;
-import beans.CourseTeacher;
-import beans.Employee;
-import beans.Evaluation;
-import beans.Grade;
-import beans.RegisteredCourse;
-import beans.Student;
-import beans.User;
+import aaaaa.Course;
+import aaaaa.CourseTeacher;
+import aaaaa.Employee;
+import aaaaa.Evaluation;
+import aaaaa.Grade;
+import aaaaa.RegisteredCourse;
+import aaaaa.Student;
+import aaaaa.UserDTO;
 import helpers.DbConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

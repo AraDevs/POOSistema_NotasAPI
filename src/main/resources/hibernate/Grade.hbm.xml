@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 10-06-2018 09:26:52 AM by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="hibernate.Grade" table="grade" catalog="gradecheck" optimistic-lock="version">
+        <id name="id" type="java.lang.Integer">
+            <column name="id" />
+            <generator class="identity" />
+        </id>
+        <many-to-one name="evaluation" class="hibernate.Evaluation" fetch="select">
+            <column name="evaluation_id" not-null="true" />
+        </many-to-one>
+        <many-to-one name="registeredCourse" class="hibernate.RegisteredCourse" fetch="select">
+            <column name="registered_course_id" not-null="true" />
+        </many-to-one>
+        <property name="grade" type="float">
+            <column name="grade" precision="4" not-null="true" />
+        </property>
+        <property name="observations" type="string">
+            <column name="observations" length="1000" />
+        </property>
+        <property name="state" type="java.lang.Boolean">
+            <column name="state" />
+        </property>
+        <set name="corrections" table="correction" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="grade_id" not-null="true" />
+            </key>
+            <one-to-many class="hibernate.Correction" />
+        </set>
+    </class>
+</hibernate-mapping>

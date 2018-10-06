@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 10-06-2018 09:26:52 AM by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="hibernate.Person" table="person" catalog="gradecheck" optimistic-lock="version">
+        <id name="id" type="java.lang.Integer">
+            <column name="id" />
+            <generator class="identity" />
+        </id>
+        <property name="name" type="string">
+            <column name="name" length="50" not-null="true" />
+        </property>
+        <property name="surname" type="string">
+            <column name="surname" length="50" not-null="true" />
+        </property>
+        <property name="phone" type="string">
+            <column name="phone" length="8" not-null="true" />
+        </property>
+        <property name="email" type="string">
+            <column name="email" not-null="true" unique="true" />
+        </property>
+        <property name="dui" type="string">
+            <column name="dui" length="10" not-null="true" unique="true" />
+        </property>
+        <property name="address" type="string">
+            <column name="address" length="500" not-null="true" />
+        </property>
+        <property name="state" type="java.lang.Boolean">
+            <column name="state" />
+        </property>
+        <set name="users" table="user" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="person_id" not-null="true" />
+            </key>
+            <one-to-many class="hibernate.User" />
+        </set>
+    </class>
+</hibernate-mapping>

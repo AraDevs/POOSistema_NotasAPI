@@ -5,7 +5,7 @@
  */
 package servlets;
 
-import controllers.RegisteredCourseController;
+import dao.RegisteredCourseDAO;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -16,18 +16,18 @@ import javax.ws.rs.core.MediaType;
  *
  * @author kevin
  */
-@Path("/")
+@Path("/registeredCourses")
 public class RegisteredCourseServlet {
-    private static RegisteredCourseController regCrsCtrl;
+    private static RegisteredCourseDAO regCrsDAO;
 
     public RegisteredCourseServlet() {
     }
     
     @GET
-    @Path("/read/{student_id}")
+    @Path("/byStudent/{student_id}/full")
     @Produces({MediaType.APPLICATION_JSON})
-    public RegisteredCourseController getJson(@PathParam("student_id") String studentId) {
-        regCrsCtrl = new RegisteredCourseController(studentId);
-        return regCrsCtrl;
+    public RegisteredCourseDAO getJson(@PathParam("student_id") String studentId) {
+        regCrsDAO = new RegisteredCourseDAO(studentId);
+        return regCrsDAO;
     }
 }

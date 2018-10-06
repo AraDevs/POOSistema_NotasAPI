@@ -5,9 +5,11 @@
  */
 package servlets;
 
-import beans.Student;
+import hibernate.Student;
 import controllers.StudentController;
 import controllers.UserController;
+import dao.StudentDAO;
+import dao.UserDAO;
 import helpers.Helpers;
 import java.util.Calendar;
 import javax.ws.rs.DELETE;
@@ -25,9 +27,9 @@ import javax.ws.rs.core.Response;
  *
  * @author kevin
  */
-@Path("/")
+@Path("/students")
 public class StudentServlet {
-    private static StudentController stdCtrl;
+    private static StudentDAO stdDAO;
 
     public StudentServlet() {
     }
@@ -35,25 +37,25 @@ public class StudentServlet {
     @GET
     @Path("/read")
     @Produces({MediaType.APPLICATION_JSON})
-    public StudentController getJson() {
-        stdCtrl = new StudentController();
-        return stdCtrl;
+    public StudentDAO getJson() {
+        stdDAO = new StudentDAO();
+        return stdDAO;
     }
     
     @GET
     @Path("/read/{param}")
     @Produces({MediaType.APPLICATION_JSON})
-    public StudentController getJson (@PathParam("param") String param) {
-        stdCtrl = new StudentController(param);
-        return stdCtrl;
+    public StudentDAO getJson (@PathParam("param") String param) {
+        stdDAO = new StudentDAO(param);
+        return stdDAO;
     }
     
     @GET
-    @Path("/readByUser/{userId}")
+    @Path("/users/{id}/people")
     @Produces({MediaType.APPLICATION_JSON})
-    public Student getStudentById (@PathParam("userId") String userId) {
+    public hibernate.Student getStudentByUserId (@PathParam("id") String userId) {
         try {
-            return new StudentController().getStudentByUser(Integer.parseInt(userId));
+            return new StudentDAO().getStudentByUser(Integer.parseInt(userId), StudentDAO.PERSON);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -64,34 +66,34 @@ public class StudentServlet {
     @Path("/login")
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
     public Response login (@FormParam("username") String username, @FormParam("pass") String pass) {
-        stdCtrl = new StudentController(false);
+        stdDAO = new StudentDAO(false);
         String msg;
         
         if (username == null) {
-            msg = "Must specify username";
+            msg = "Ingrese el nombre de usuario.";
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
         }
         
         if (pass == null) {
-            msg = "Must specify password";
+            msg = "Ingrese la contraseña.";
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
         }
         
         try {
-            int userId = new UserController().login(username, pass);
+            int userId = new UserDAO().login(username, pass);
             if (userId == 0) {
-                msg = "Username or password not found";
+                msg = "Nombre de usuario y contraseña no concuerdan.";
                 return Response.status(Response.Status.UNAUTHORIZED).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
             
-            Student student = stdCtrl.getStudentByUser(userId);
+            Student student = stdDAO.getStudentByUser(userId, StudentDAO.PERSON);
             if (student == null) {
-                msg = "This service is meant for students only";
+                msg = "Este servicio está disponible solo para estudiantes.";
                 return Response.status(Response.Status.FORBIDDEN).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
             
             if(!(student.getState() && student.getUser().getState())) {
-                msg = "Your user is deactivated";
+                msg = "Tu cuenta está desactivada.";
                 return Response.status(Response.Status.FORBIDDEN).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
             
@@ -103,11 +105,11 @@ public class StudentServlet {
             e.printStackTrace();
         }
         
-        msg = "Could not make login";
+        msg = "No se pudo hacer login.";
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
     }
-    
+    /*
     @POST
     @Path("/create")
     @Produces({MediaType.TEXT_PLAIN})
@@ -115,7 +117,7 @@ public class StudentServlet {
             @FormParam("pass") String pass, @FormParam("passConfirm") String passConfirm, 
             @FormParam("phone") String phone, @FormParam("email") String email) {
         
-        stdCtrl = new StudentController(false);
+        stdDAO = new StudentController(false);
         
         String msg = "";
         if (name == null || name.equals("")) {
@@ -169,7 +171,7 @@ public class StudentServlet {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error ocurred").type(MediaType.TEXT_PLAIN).build();
             }
             
-            String studentId = stdCtrl.add(userId);
+            String studentId = stdDAO.add(userId);
             if (!Helpers.isInt(studentId)) {
                 return Response.status(Response.Status.CONFLICT).entity(Helpers.parseSqlError(studentId)).type(MediaType.TEXT_PLAIN).build();
             }
@@ -200,7 +202,7 @@ public class StudentServlet {
             @FormParam("phone") String phone, @FormParam("email") String email, @FormParam("state") String state,
             @FormParam("userId") String userId) {
         
-        stdCtrl = new StudentController(false);
+        stdDAO = new StudentController(false);
         
         String msg = "";
         if (name == null || name.equals("")) {
@@ -308,5 +310,5 @@ public class StudentServlet {
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
         
-    }
+    }*/
 }

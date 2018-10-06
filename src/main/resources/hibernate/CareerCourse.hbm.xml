@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 10-06-2018 09:26:52 AM by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="hibernate.CareerCourse" table="career_course" catalog="gradecheck" optimistic-lock="version">
+        <id name="id" type="java.lang.Integer">
+            <column name="id" />
+            <generator class="identity" />
+        </id>
+        <many-to-one name="career" class="hibernate.Career" fetch="select">
+            <column name="career_id" not-null="true" />
+        </many-to-one>
+        <many-to-one name="course" class="hibernate.Course" fetch="select">
+            <column name="course_id" not-null="true" />
+        </many-to-one>
+        <property name="plan" type="int">
+            <column name="plan" not-null="true" />
+        </property>
+        <property name="pensumYear" type="string">
+            <column name="pensum_year" length="2" />
+        </property>
+        <property name="pensumSemester" type="string">
+            <column name="pensum_semester" length="2" />
+        </property>
+        <property name="state" type="java.lang.Boolean">
+            <column name="state" />
+        </property>
+    </class>
+</hibernate-mapping>

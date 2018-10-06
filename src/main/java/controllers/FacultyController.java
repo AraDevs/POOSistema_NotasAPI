@@ -5,7 +5,7 @@
  */
 package controllers;
 
-import beans.Faculty;
+import aaaaa.Faculty;
 import helpers.DbConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -70,7 +70,7 @@ public class FacultyController {
             if(param != null)   
                 whereQuery = " WHERE name LIKE '%" + param + "%'"; 
             
-            PreparedStatement cmd = conn.prepareStatement("SELECT id, name, state FROM faculties" + whereQuery);
+            PreparedStatement cmd = conn.prepareStatement("SELECT id, name, state FROM faculty" + whereQuery);
             
             ResultSet rs = cmd.executeQuery();
             

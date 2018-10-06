@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 10-06-2018 09:26:52 AM by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="hibernate.Role" table="role" catalog="gradecheck" optimistic-lock="version">
+        <id name="id" type="java.lang.Integer">
+            <column name="id" />
+            <generator class="identity" />
+        </id>
+        <property name="role" type="string">
+            <column name="role" length="50" not-null="true" unique="true" />
+        </property>
+        <property name="teach" type="java.lang.Boolean">
+            <column name="teach" />
+        </property>
+        <property name="manageUsers" type="java.lang.Boolean">
+            <column name="manage_users" />
+        </property>
+        <property name="manageStudents" type="java.lang.Boolean">
+            <column name="manage_students" />
+        </property>
+        <property name="manageEmployees" type="java.lang.Boolean">
+            <column name="manage_employees" />
+        </property>
+        <property name="manageFaculties" type="java.lang.Boolean">
+            <column name="manage_faculties" />
+        </property>
+        <property name="manageCareers" type="java.lang.Boolean">
+            <column name="manage_careers" />
+        </property>
+        <property name="manageCourses" type="java.lang.Boolean">
+            <column name="manage_courses" />
+        </property>
+        <property name="managePensums" type="java.lang.Boolean">
+            <column name="manage_pensums" />
+        </property>
+        <property name="manageEvaluations" type="java.lang.Boolean">
+            <column name="manage_evaluations" />
+        </property>
+        <property name="manageRoles" type="java.lang.Boolean">
+            <column name="manage_roles" />
+        </property>
+        <property name="state" type="java.lang.Boolean">
+            <column name="state" />
+        </property>
+        <set name="employees" table="employee" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="role_id" not-null="true" />
+            </key>
+            <one-to-many class="hibernate.Employee" />
+        </set>
+    </class>
+</hibernate-mapping>

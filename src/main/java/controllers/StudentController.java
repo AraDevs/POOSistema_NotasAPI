@@ -5,8 +5,8 @@
  */
 package controllers;
 
-import beans.Student;
-import beans.User;
+import aaaaa.Student;
+import aaaaa.UserDTO;
 import helpers.DbConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
  * @author kevin
  */
 @XmlRootElement ( name = "studentController") 
-@XmlSeeAlso( { Student.class, User.class })
+@XmlSeeAlso( { Student.class, UserDTO.class })
 public class StudentController {
     private List<Student> students;
     String param;

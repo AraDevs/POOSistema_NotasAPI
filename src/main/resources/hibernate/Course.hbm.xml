@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 10-06-2018 09:26:52 AM by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="hibernate.Course" table="course" catalog="gradecheck" optimistic-lock="version">
+        <id name="id" type="java.lang.Integer">
+            <column name="id" />
+            <generator class="identity" />
+        </id>
+        <many-to-one name="course" class="hibernate.Course" fetch="select">
+            <column name="prerequisite_id" />
+        </many-to-one>
+        <many-to-one name="faculty" class="hibernate.Faculty" fetch="select">
+            <column name="faculty_id" />
+        </many-to-one>
+        <property name="name" type="string">
+            <column name="name" length="50" not-null="true" />
+        </property>
+        <property name="courseCode" type="string">
+            <column name="course_code" length="10" not-null="true" unique="true" />
+        </property>
+        <property name="semester" type="string">
+            <column name="semester" length="2" not-null="true" />
+        </property>
+        <property name="inter" type="java.lang.Boolean">
+            <column name="inter" />
+        </property>
+        <property name="laboratory" type="java.lang.Boolean">
+            <column name="laboratory" />
+        </property>
+        <property name="uv" type="int">
+            <column name="uv" not-null="true" />
+        </property>
+        <property name="state" type="java.lang.Boolean">
+            <column name="state" />
+        </property>
+        <set name="evaluations" table="evaluation" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="course_id" not-null="true" />
+            </key>
+            <one-to-many class="hibernate.Evaluation" />
+        </set>
+        <set name="careerCourses" table="career_course" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="course_id" not-null="true" />
+            </key>
+            <one-to-many class="hibernate.CareerCourse" />
+        </set>
+        <set name="courses" table="course" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="prerequisite_id" />
+            </key>
+            <one-to-many class="hibernate.Course" />
+        </set>
+        <set name="courseTeachers" table="course_teacher" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="course_id" not-null="true" />
+            </key>
+            <one-to-many class="hibernate.CourseTeacher" />
+        </set>
+    </class>
+</hibernate-mapping>

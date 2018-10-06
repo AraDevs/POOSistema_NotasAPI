@@ -7,8 +7,9 @@ package controllers;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
-import beans.User;
+import aaaaa.UserDTO;
 import helpers.DbConnection;
+import hibernate.User;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,18 +25,18 @@ import javax.xml.bind.annotation.XmlElement;
  * @author kevin
  */
 @XmlRootElement ( name = "userController") 
-@XmlSeeAlso( { User.class })
+@XmlSeeAlso( { UserDTO.class })
 public class UserController {
-    private List<User> users;
+    private List<UserDTO> users;
     String param;
     
     public UserController() {
-        users = new CopyOnWriteArrayList<User>(); 
+        users = new CopyOnWriteArrayList<UserDTO>(); 
         param = null;
     }
     
     public UserController(String name) {   
-        users = new CopyOnWriteArrayList<User>();   
+        users = new CopyOnWriteArrayList<UserDTO>();   
         param = name;  
     }
     
@@ -44,7 +45,7 @@ public class UserController {
             //don't load data   
         }
         else {    
-            users = new CopyOnWriteArrayList<User>();
+            users = new CopyOnWriteArrayList<UserDTO>();
             param = null;  
         }
     }
@@ -60,11 +61,11 @@ public class UserController {
         return this.users;  
     }
     
-    public void setUser(List<User> users) {   
+    public void setUser(List<UserDTO> users) {   
         this.users = users;     
     } 
     
-    public List<User> getUserList(String param) throws Exception {      
+    public List<UserDTO> getUserList(String param) throws Exception {      
         Connection conn = DbConnection.conn();
         try {
             String whereQuery="";   
@@ -75,7 +76,7 @@ public class UserController {
             
             ResultSet rs = cmd.executeQuery();
             
-            while (rs.next()) {
+            /*while (rs.next()) {
                 User tmpUser = new User(
                         rs.getInt(1),
                         rs.getString(2),
@@ -87,7 +88,7 @@ public class UserController {
                         rs.getBoolean(8)
                 );
                 users.add(tmpUser);
-            }
+            }*/
         } catch (SQLException ex) {
             System.err.println("Error retrieving data for Users: " + ex.getMessage());
         } finally {
@@ -96,16 +97,16 @@ public class UserController {
         return users; 
     }
     
-    public User getUserById(int id) throws Exception {      
+    public UserDTO getUserById(int id) throws Exception {      
         Connection conn = DbConnection.conn();
-        User user = null;
+        UserDTO user = null;
         try {  
             PreparedStatement cmd = conn.prepareStatement("SELECT u.id, u.name, u.surname, u.username, u.pass, u.phone, u.email, u.state FROM users u WHERE u.id = " + id);
             
             ResultSet rs = cmd.executeQuery();
             
             while (rs.next()) {
-                user = new User(
+                user = new UserDTO(
                         rs.getInt(1),
                         rs.getString(2),
                         rs.getString(3),

@@ -53,8 +53,8 @@ public class DbConnection {
     static String dbName = "gradecheck";  
     static String timeZone = ""/*"?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC"*/;
     static String driver = "com.mysql.jdbc.Driver";  
-    static String userName = "kevin";  
-    static String password = "fedora98"; 
+    static String userName = "root";  
+    static String password = ""; 
     
     public static Connection conn() throws ClassNotFoundException, SQLException, InstantiationException, IllegalAccessException {      
         Class.forName(driver).newInstance(); 

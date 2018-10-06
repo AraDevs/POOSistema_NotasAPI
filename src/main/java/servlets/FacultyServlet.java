@@ -5,7 +5,7 @@
  */
 package servlets;
 
-import beans.Faculty;
+import aaaaa.Faculty;
 import controllers.FacultyController;
 import helpers.Helpers;
 import javax.ws.rs.DELETE;

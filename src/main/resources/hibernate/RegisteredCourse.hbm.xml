@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated 10-06-2018 09:26:52 AM by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="hibernate.RegisteredCourse" table="registered_course" catalog="gradecheck" optimistic-lock="version">
+        <id name="id" type="java.lang.Integer">
+            <column name="id" />
+            <generator class="identity" />
+        </id>
+        <many-to-one name="courseTeacher" class="hibernate.CourseTeacher" fetch="select">
+            <column name="course_teacher_id" not-null="true" />
+        </many-to-one>
+        <many-to-one name="student" class="hibernate.Student" fetch="select">
+            <column name="student_id" not-null="true" />
+        </many-to-one>
+        <property name="courseState" type="string">
+            <column name="course_state" length="9" />
+        </property>
+        <property name="state" type="java.lang.Boolean">
+            <column name="state" />
+        </property>
+        <set name="grades" table="grade" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="registered_course_id" not-null="true" />
+            </key>
+            <one-to-many class="hibernate.Grade" />
+        </set>
+        <set name="unattendances" table="unattendance" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="registered_course_id" not-null="true" />
+            </key>
+            <one-to-many class="hibernate.Unattendance" />
+        </set>
+    </class>
+</hibernate-mapping>
