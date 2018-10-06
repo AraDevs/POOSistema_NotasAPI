@@ -117,4 +117,47 @@ public class RegisteredCourseDAO {
         return regCourses;
         
     }
+    
+    public List<RegisteredCourse> getRegisteredCourseWithCourse(int id) throws Exception {
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "SELECT DISTINCT rc FROM RegisteredCourse rc join fetch rc.courseTeacher ct "
+                    + "join fetch ct.course c join fetch rc.student s where rc.student.id = :id";
+            Query query = ses.createQuery(queryString, RegisteredCourse.class);
+            query.setParameter("id", id);
+            regCourses = query.list();
+            
+            for (RegisteredCourse rc : regCourses) {
+                rc.setStudent(null);
+                rc.setUnattendances(null);
+                rc.setGrades(null);
+                
+                rc.getCourseTeacher().setEmployee(null);
+                rc.getCourseTeacher().setRegisteredCourses(null);
+                
+                rc.getCourseTeacher().getCourse().setCareerCourses(null);
+                rc.getCourseTeacher().getCourse().setCourse(null);
+                rc.getCourseTeacher().getCourse().setCourses(null);
+                rc.getCourseTeacher().getCourse().setCourseTeachers(null);
+                rc.getCourseTeacher().getCourse().setEvaluations(null);
+                rc.getCourseTeacher().getCourse().setFaculty(null);
+            }
+            
+        } catch (HibernateException e) {
+            e.printStackTrace();
+            if(tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return regCourses;
+        
+    }
 }

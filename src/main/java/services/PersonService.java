@@ -10,6 +10,9 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
+import servlets.CourseServlet;
+import servlets.EvaluationServlet;
+import servlets.GradeServlet;
 import servlets.PersonServlet;
 import servlets.RegisteredCourseServlet;
 import servlets.StudentServlet;
@@ -26,6 +29,9 @@ public class PersonService extends Application {
         set.add(PersonServlet.class);
         set.add(StudentServlet.class);
         set.add(RegisteredCourseServlet.class);
+        set.add(GradeServlet.class);
+        set.add(CourseServlet.class);
+        set.add(EvaluationServlet.class);
         return set;
     }
 }

@@ -109,4 +109,39 @@ public class CourseDAO {
         return courses;
         
     }*/
+    
+    public Course getCourseByRegisteredCourse(int regCourseId) {
+        Course course = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM Course c join fetch c.courseTeachers ct "
+                    + "join fetch ct.registeredCourses rc where rc.id = :regCourseId";
+            Query query = ses.createQuery(queryString, Course.class);
+            query.setParameter("regCourseId", regCourseId);
+            course = (Course) query.uniqueResult();
+            
+            course.setCareerCourses(null);
+            course.setCourse(null);
+            course.setCourses(null);
+            course.setEvaluations(null);
+            course.setFaculty(null);
+            course.setCourseTeachers(null);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return course;
+    }
 }

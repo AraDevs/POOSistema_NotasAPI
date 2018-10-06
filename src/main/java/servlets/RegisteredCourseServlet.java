@@ -6,11 +6,14 @@
 package servlets;
 
 import dao.RegisteredCourseDAO;
+import hibernate.RegisteredCourse;
+import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  *
@@ -29,5 +32,18 @@ public class RegisteredCourseServlet {
     public RegisteredCourseDAO getJson(@PathParam("student_id") String studentId) {
         regCrsDAO = new RegisteredCourseDAO(studentId);
         return regCrsDAO;
+    }
+    
+    
+    @GET
+    @Path("/byStudent/{student_id}/courses")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<RegisteredCourse> getRegisteredCoursesWithCourses(@PathParam("student_id") String studentId) {
+        try {
+            return new RegisteredCourseDAO().getRegisteredCourseWithCourse(Integer.parseInt(studentId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
