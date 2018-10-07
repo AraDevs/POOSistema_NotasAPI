@@ -52,7 +52,7 @@ public class EvaluationDAO {
     @XmlElement    
     public List getEvaluations() {        
         try {            
-            evaluations = getEvaluationList(param);            
+            //evaluations = getEvaluationList(param, false);            
         } catch (Exception e) {            
             e.printStackTrace();            
         }        
@@ -63,7 +63,8 @@ public class EvaluationDAO {
         this.evaluations = evaluations;        
     }
     
-    public List<Evaluation> getEvaluationList(String param) {
+    public Evaluation getEvaluation(int id) {
+        Evaluation evaluation = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
@@ -71,12 +72,49 @@ public class EvaluationDAO {
         
         try {
             tra = ses.beginTransaction();
-            String queryString = "FROM Evaluation";
+            String queryString = "FROM Evaluation where id = :id";
             Query query = ses.createQuery(queryString, Evaluation.class);
+            query.setParameter("id", id);
+            evaluation = (Evaluation) query.uniqueResult();
+            
+            evaluation.setCourse(null);
+            evaluation.setGrades(null);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return evaluation;
+    }
+    
+    public List<Evaluation> getEvaluationByCourse(int courseId, boolean active) {
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            String activeQuery = "";
+            if (active) {
+                activeQuery = " and state = true";
+            }
+            
+            tra = ses.beginTransaction();
+            String queryString = "FROM Evaluation e where e.course.id = :courseId" + activeQuery; //Recordar que state = false significa que la evaluación es de un ciclo pasado
+            Query query = ses.createQuery(queryString, Evaluation.class);
+            query.setParameter("courseId", courseId);
             evaluations = query.list();
             
-            for (Evaluation rc : evaluations) {
-                
+            for (Evaluation e : evaluations) {
+                e.setCourse(null);
+                e.setGrades(null);
             }
             
         } catch (Exception e) {

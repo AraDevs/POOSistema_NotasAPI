@@ -28,6 +28,42 @@ public class EvaluationServlet {
     }
     
     @GET
+    @Path("/byCourse/{courseId}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<Evaluation> getEvaluations(@PathParam("courseId") String courseId) {
+        try {
+            return new EvaluationDAO().getEvaluationByCourse(Integer.parseInt(courseId), false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
+    @Path("/byCourse/{courseId}/active")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<Evaluation> getActiveEvaluations(@PathParam("courseId") String courseId) {
+        try {
+            return new EvaluationDAO().getEvaluationByCourse(Integer.parseInt(courseId), true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
+    @Path("/{evaluationId}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Evaluation getEvaluation(@PathParam("evaluationId") String evaluationId) {
+        try {
+            return new EvaluationDAO().getEvaluation(Integer.parseInt(evaluationId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
     @Path("/byRegisteredCourse/{regCourseId}/grades")
     @Produces({MediaType.APPLICATION_JSON})
     public List<Evaluation> getEvaluationsByRegisteredCourse(@PathParam("regCourseId") String regCourseId) {
