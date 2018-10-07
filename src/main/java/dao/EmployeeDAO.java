@@ -180,22 +180,21 @@ public class EmployeeDAO {
             query.setParameter("employeeId", employeeId);
             employee = (Employee) query.uniqueResult();
             
-            for (Employee e : employees) {
-                e.setRole(null);
-                e.getUser().setStudents(null);
-                e.getUser().setPass(null);
-                e.getUser().setEmployees(null);
-                e.getUser().getPerson().setUsers(null);
-                
-                for (Object ct : e.getCourseTeachers()) {
-                    ((CourseTeacher) ct).setRegisteredCourses(null);
-                    ((CourseTeacher) ct).getCourse().setCareerCourses(null);
-                    ((CourseTeacher) ct).getCourse().setCourse(null);
-                    ((CourseTeacher) ct).getCourse().setCourses(null);
-                    ((CourseTeacher) ct).getCourse().setEvaluations(null);
-                    ((CourseTeacher) ct).getCourse().setFaculty(null);
-                    ((CourseTeacher) ct).getCourse().setCourseTeachers(null);
-                }
+            employee.setRole(null);
+            employee.getUser().setStudents(null);
+            employee.getUser().setPass(null);
+            employee.getUser().setEmployees(null);
+            employee.getUser().getPerson().setUsers(null);
+
+            for (Object ct : employee.getCourseTeachers()) {
+                ((CourseTeacher) ct).setEmployee(null);
+                ((CourseTeacher) ct).setRegisteredCourses(null);
+                ((CourseTeacher) ct).getCourse().setCareerCourses(null);
+                ((CourseTeacher) ct).getCourse().setCourse(null);
+                ((CourseTeacher) ct).getCourse().setCourses(null);
+                ((CourseTeacher) ct).getCourse().setEvaluations(null);
+                ((CourseTeacher) ct).getCourse().setFaculty(null);
+                ((CourseTeacher) ct).getCourse().setCourseTeachers(null);
             }
             
         } catch (Exception e) {
