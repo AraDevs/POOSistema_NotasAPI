@@ -5,11 +5,13 @@
  */
 package services;
 
+import helpers.JAXBContextResolver;
 import helpers.ObjectMapperContextResolver;
 import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
+import servlets.CareerServlet;
 import servlets.CareerTypeServlet;
 import servlets.CourseServlet;
 import servlets.CourseTeacherServlet;
@@ -29,7 +31,7 @@ import servlets.StudentServlet;
 public class PersonService extends Application {
     public Set<Class<?>> getClasses() {
         Set<Class<?>> set = new HashSet<Class<?>>();
-        set.add(ObjectMapperContextResolver.class);
+        set.add(JAXBContextResolver.class);
         set.add(PersonServlet.class);
         set.add(StudentServlet.class);
         set.add(RegisteredCourseServlet.class);
@@ -40,6 +42,7 @@ public class PersonService extends Application {
         set.add(CourseTeacherServlet.class);
         set.add(FacultyServlet.class);
         set.add(CareerTypeServlet.class);
+        set.add(CareerServlet.class);
         return set;
     }
 }

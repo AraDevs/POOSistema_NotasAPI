@@ -127,7 +127,7 @@ CREATE TABLE career_student(
    career_id int not null,
    student_id int not null,
 	income_year int not null, -- El año en el que comenzó la carrera
-   career_state enum('En curso', 'Egresado', 'Abandonado'),
+   career_state enum('En curso', 'Egresado', 'Abandonado') not null,
    state bool default 1,
    FOREIGN KEY (career_id) REFERENCES career(id) ON DELETE RESTRICT,
    FOREIGN KEY (student_id) REFERENCES student(id) ON DELETE RESTRICT

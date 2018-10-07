@@ -17,6 +17,9 @@
         <property name="incomeYear" type="int">
             <column name="income_year" not-null="true" />
         </property>
+        <property name="careerState" type="string">
+            <column name="career_state" length="10" />
+        </property>
         <property name="state" type="java.lang.Boolean">
             <column name="state" />
         </property>

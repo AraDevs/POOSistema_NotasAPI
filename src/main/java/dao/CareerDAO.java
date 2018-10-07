@@ -79,7 +79,12 @@ public class CareerDAO {
             careers = query.list();
             
             for (Career c : careers) {
-                //voy aquí xd
+                c.setCareerStudents(null);
+                c.setCareerCourses(null);
+                
+                c.getCareerType().setCareers(null);
+                c.getFaculty().setCourses(null);
+                c.getFaculty().setCareers(null);
             }
             
         } catch (Exception e) {
@@ -93,5 +98,40 @@ public class CareerDAO {
         }
         
         return careers;
+    }
+    
+    public Career getCareer(int id) {
+        Career career = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            String queryString = "FROM Career c join fetch c.faculty join fetch c.careerType where c.id = :id";
+            Query query = ses.createQuery(queryString, Career.class);
+            query.setParameter("id", id);
+            career = (Career) query.uniqueResult();
+            
+            career.setCareerStudents(null);
+            career.setCareerCourses(null);
+
+            career.getCareerType().setCareers(null);
+            career.getFaculty().setCourses(null);
+            career.getFaculty().setCareers(null);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return career;
     }
 }

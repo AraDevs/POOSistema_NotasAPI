@@ -29,6 +29,7 @@ public class CareerStudent  implements java.io.Serializable {
      @JsonManagedReference
      private Student student;
      private int incomeYear;
+     private String careerState;
      private Boolean state;
 
     public CareerStudent() {
@@ -40,7 +41,7 @@ public class CareerStudent  implements java.io.Serializable {
         this.student = student;
         this.incomeYear = incomeYear;
     }
-    public CareerStudent(Career career, Student student, int incomeYear, Boolean state) {
+    public CareerStudent(Career career, Student student, int incomeYear, String careerState, Boolean state) {
        this.career = career;
        this.student = student;
        this.incomeYear = incomeYear;
@@ -89,6 +90,14 @@ public class CareerStudent  implements java.io.Serializable {
         this.incomeYear = incomeYear;
     }
 
+    @Column(name="career_state", length=10, nullable=false)
+    public String getCareerState() {
+        return this.careerState;
+    }
+    
+    public void setCareerState(String careerState) {
+        this.careerState = careerState;
+    }
     
     @Column(name="state")
     public Boolean getState() {

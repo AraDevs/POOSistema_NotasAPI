@@ -16,7 +16,6 @@ import javax.ws.rs.ext.Provider;
  *
  * @author kevin
  */
-@Provider
 public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {
 
     private final ObjectMapper mapper;
