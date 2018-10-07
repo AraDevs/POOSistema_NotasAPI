@@ -5,10 +5,11 @@
  */
 package servlets;
 
-import aaaaa.Faculty;
+import hibernate.Faculty;
 import controllers.FacultyController;
 import dao.FacultyDAO;
 import helpers.Helpers;
+import java.util.List;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -38,6 +39,19 @@ public class FacultyServlet {
         fctDao = new FacultyDAO();
         return fctDao;
     }
+    
+    @GET
+    @Path("/active")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<Faculty> getActiveFaculties () {
+        try {
+            return new FacultyDAO().getFacultyList("", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
     /*
     @GET
     @Path("/read/{param}")
@@ -48,11 +62,11 @@ public class FacultyServlet {
     }
     */
     @GET
-    @Path("/readById/{id}")
+    @Path("/{facultyId}")
     @Produces({MediaType.APPLICATION_JSON})
-    public Faculty getFacultyById (@PathParam("id") String id) {
+    public Faculty getFacultyById (@PathParam("facultyId") String facultyId) {
         try {
-            return new FacultyController().getFacultyById(id);
+            return new FacultyDAO().getFaculty(Integer.parseInt(facultyId));
         } catch (Exception e) {
             e.printStackTrace();
             return null;

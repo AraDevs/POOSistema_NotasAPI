@@ -127,7 +127,8 @@ CREATE TABLE career_student(
    career_id int not null,
    student_id int not null,
 	income_year int not null, -- El año en el que comenzó la carrera
-   state bool default 1, -- Indica si es la carrera actual del estudiante, o si ya fue terminada
+   career_state enum('En curso', 'Egresado', 'Abandonado'),
+   state bool default 1,
    FOREIGN KEY (career_id) REFERENCES career(id) ON DELETE RESTRICT,
    FOREIGN KEY (student_id) REFERENCES student(id) ON DELETE RESTRICT
 );
@@ -250,9 +251,9 @@ INSERT INTO student VALUES(null, 3, 1);
 INSERT INTO student VALUES(null, 4, 1);
 INSERT INTO student VALUES(null, 5, 1);
 
-INSERT INTO career_student VALUES(null, 1, 1, 2018, 1);
-INSERT INTO career_student VALUES(null, 1, 2, 2018, 1);
-INSERT INTO career_student VALUES(null, 1, 3, 2018, 1);
+INSERT INTO career_student VALUES(null, 1, 1, 2018, 1, 1);
+INSERT INTO career_student VALUES(null, 1, 2, 2018, 1, 1);
+INSERT INTO career_student VALUES(null, 1, 3, 2018, 1, 1);
 
 INSERT INTO employee VALUES(null, 1, 1, 1);
 INSERT INTO employee VALUES(null, 2, 2, 1);

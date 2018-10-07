@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
+import servlets.CareerTypeServlet;
 import servlets.CourseServlet;
 import servlets.CourseTeacherServlet;
 import servlets.EmployeeServlet;
@@ -38,6 +39,7 @@ public class PersonService extends Application {
         set.add(EmployeeServlet.class);
         set.add(CourseTeacherServlet.class);
         set.add(FacultyServlet.class);
+        set.add(CareerTypeServlet.class);
         return set;
     }
 }

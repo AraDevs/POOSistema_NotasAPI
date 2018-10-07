@@ -5,7 +5,7 @@
  */
 package dao;
 
-import hibernate.Faculty;
+import hibernate.CareerType;
 import hibernate.HibernateUtil;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -21,47 +21,46 @@ import org.hibernate.query.Query;
  *
  * @author kevin
  */
-@XmlRootElement ( name = "facultyDao") 
-@XmlSeeAlso( {Faculty.class} )
-public class FacultyDAO {
-    
-    private List<Faculty> faculties;
+@XmlRootElement ( name = "careerTypeDao") 
+@XmlSeeAlso( {CareerType.class} )
+public class CareerTypeDAO {
+    private List<CareerType> careerTypes;
     String param;
     
-    public FacultyDAO() {
-        faculties = new CopyOnWriteArrayList<Faculty>();        
+    public CareerTypeDAO() {
+        careerTypes = new CopyOnWriteArrayList<CareerType>();        
         param = null;
     }
     
-    public FacultyDAO(String name) {        
-        faculties = new CopyOnWriteArrayList<Faculty>();        
+    public CareerTypeDAO(String name) {        
+        careerTypes = new CopyOnWriteArrayList<CareerType>();        
         param = name;        
     }
     
-    public FacultyDAO(boolean charge) {        
+    public CareerTypeDAO(boolean charge) {        
         if (charge == false) {
             //don't load data   
         } else {            
-            faculties = new CopyOnWriteArrayList<Faculty>();
+            careerTypes = new CopyOnWriteArrayList<CareerType>();
             param = null;            
         }
     }
     
     @XmlElement    
-    public List getFaculties() {        
+    public List getCareerTypes() {        
         try {            
-            faculties = getFacultyList(param, false);            
+            careerTypes = getCareerTypeList(param, false);            
         } catch (Exception e) {            
             e.printStackTrace();            
         }        
-        return this.faculties;        
+        return this.careerTypes;        
     }
     
-    public void setFaculties(List<Faculty> faculties) {        
-        this.faculties = faculties;        
+    public void setCareerTypes(List<CareerType> careerTypes) {        
+        this.careerTypes = careerTypes;        
     }
     
-    public List<Faculty> getFacultyList(String param, boolean active) {
+    public List<CareerType> getCareerTypeList(String param, boolean active) {
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
@@ -75,13 +74,12 @@ public class FacultyDAO {
             }
             
             tra = ses.beginTransaction();
-            String queryString = "FROM Faculty" + activeQuery;
-            Query query = ses.createQuery(queryString, Faculty.class);
-            faculties = query.list();
+            String queryString = "FROM CareerType" + activeQuery;
+            Query query = ses.createQuery(queryString, CareerType.class);
+            careerTypes = query.list();
             
-            for (Faculty f : faculties) {
-                f.setCareers(null);
-                f.setCourses(null);
+            for (CareerType ct : careerTypes) {
+                ct.setCareers(null);
             }
             
         } catch (Exception e) {
@@ -94,11 +92,11 @@ public class FacultyDAO {
             ses.close();
         }
         
-        return faculties;
+        return careerTypes;
     }
     
-    public Faculty getFaculty(int id) {
-        Faculty faculty = null;
+    public CareerType getCareerType (int id) {
+        CareerType careerType = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
@@ -107,13 +105,12 @@ public class FacultyDAO {
         try {
             
             tra = ses.beginTransaction();
-            String queryString = "FROM Faculty where id = :id";
-            Query query = ses.createQuery(queryString, Faculty.class);
+            String queryString = "FROM CareerType where id = :id";
+            Query query = ses.createQuery(queryString, CareerType.class);
             query.setParameter("id", id);
-            faculty = (Faculty) query.uniqueResult();
+            careerType = (CareerType) query.uniqueResult();
             
-            faculty.setCareers(null);
-            faculty.setCourses(null);
+            careerType.setCareers(null);
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -125,6 +122,6 @@ public class FacultyDAO {
             ses.close();
         }
         
-        return faculty;
+        return careerType;
     }
 }

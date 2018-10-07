@@ -38,9 +38,6 @@ public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper
         for (Object o : mapper.getRegisteredModuleIds()) {
             System.out.println("hola" + o.toString());
         }*/
-        System.out.println("A\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA"
-                + "\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA"
-                + "\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\n");
         return mapper;
     }
 }
