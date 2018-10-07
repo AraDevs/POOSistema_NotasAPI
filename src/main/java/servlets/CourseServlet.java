@@ -7,6 +7,7 @@ package servlets;
 
 import dao.CourseDAO;
 import hibernate.Course;
+import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -22,6 +23,38 @@ public class CourseServlet {
     private static CourseDAO courseDao;
     
     public CourseServlet() {
+    }
+    
+    @GET
+    @Path("/faculties/prerrequisite")
+    @Produces({MediaType.APPLICATION_JSON})
+    public CourseDAO getJson() {
+        courseDao = new CourseDAO();
+        return courseDao;
+    }
+    
+    @GET
+    @Path("/faculties/prerrequisite/active")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<Course> getActiveCourses() {
+        try {
+            return new CourseDAO().getCourseList("", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
+    @Path("{courseId}/faculties/prerrequisite")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Course getCourse(@PathParam("courseId") String courseId) {
+        try {
+            return new CourseDAO().getCourse(Integer.parseInt(courseId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     @GET
