@@ -25,9 +25,13 @@ public class CareerServlet {
     @GET
     @Path("/full")
     @Produces({MediaType.APPLICATION_JSON})
-    public CareerDAO getJson() {
-        carDao = new CareerDAO();
-        return carDao;
+    public List<Career> getCareers () {
+        try {
+            return new CareerDAO().getCareerList("", false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     @GET

@@ -11,10 +11,12 @@ import dao.PersonDao;
 import helpers.DaoStatus;
 import helpers.Helpers;
 import hibernate.Person;
+import java.util.List;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -33,9 +35,37 @@ public class PersonServlet {
     @GET
     @Path("/")
     @Produces({MediaType.APPLICATION_JSON})
-    public PersonDao getJson() {
-        personDao = new PersonDao();
-        return personDao;
+    public List<Person> getPeople() {
+        try {
+            return new PersonDao().getPeopleList("", false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
+    @Path("/active")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<Person> getActivePeople() {
+        try {
+            return new PersonDao().getPeopleList("", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
+    @Path("/{personId}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Person getPerson(@PathParam("personId") String personId) {
+        try {
+            return new PersonDao().getPerson(Integer.parseInt(personId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     @POST

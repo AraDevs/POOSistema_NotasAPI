@@ -35,9 +35,13 @@ public class FacultyServlet {
     @GET
     @Path("/")
     @Produces({MediaType.APPLICATION_JSON})
-    public FacultyDAO getJson() {
-        fctDao = new FacultyDAO();
-        return fctDao;
+    public List<Faculty> getFaculties () {
+        try {
+            return new FacultyDAO().getFacultyList("", false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     @GET

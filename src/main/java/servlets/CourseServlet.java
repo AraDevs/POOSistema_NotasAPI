@@ -28,9 +28,13 @@ public class CourseServlet {
     @GET
     @Path("/faculties/prerrequisite")
     @Produces({MediaType.APPLICATION_JSON})
-    public CourseDAO getJson() {
-        courseDao = new CourseDAO();
-        return courseDao;
+    public List<Course> getCourses() {
+        try {
+            return new CourseDAO().getCourseList("", false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     @GET

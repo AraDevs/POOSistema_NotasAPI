@@ -58,7 +58,7 @@ public class PersonDao {
     @XmlElement  
     public List getPeople() {   
         try {    
-            people = getPeopleList(param);   
+            people = getPeopleList(param, false);   
         } 
         catch (Exception e) {        
             e.printStackTrace();   
@@ -71,50 +71,26 @@ public class PersonDao {
     }
     
     
-    public List<Person> getPeopleList(String param) {
+    public List<Person> getPeopleList(String param, boolean active) {
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
         Transaction tra = null;
         
         try {
-            /*tra = ses.beginTransaction();
-            String queryString = "FROM Person p INNER JOIN FETCH p.users";
+            
+            String activeQuery = "";
+            if (active) {
+                activeQuery = " where state = true";
+            }
+            
+            tra = ses.beginTransaction();
+            String queryString = "FROM Person" + activeQuery;
             Query query = ses.createQuery(queryString, Person.class);
             people = query.list();
 
             for (Person p : people) {
-                for (Object u : p.getUsers()) {
-                    ((User) u).setEmployees(null);
-                    ((User) u).setStudents(null);
-                    ((User) u).setPerson(null);
-                }
-            }*/
-            
-            tra = ses.beginTransaction();
-            String queryString = ""
-                    + "FROM Person p join fetch p.users";
-            Query query = ses.createQuery(queryString, Person.class);
-            people = query.list();
-            
-            
-            
-            
-            /*for (Person p : result) {
-                PersonDTO dto = new PersonDTO(
-                        p.getId(), 
-                        p.getName(), 
-                        p.getSurname(), 
-                        p.getPhone(),
-                        p.getDui(),
-                        p.getEmail(), 
-                        p.getAddress(), 
-                        p.getState(), 
-                        new HashSet<UserDTO>());
-                
-                for (User u : p.getUsers()) {
-                    
-                }
-            }*/
+                p.setUsers(null);
+            }
 
 
         } catch (HibernateException e) {
@@ -128,6 +104,36 @@ public class PersonDao {
         }
         
         return people;
+    }
+    
+    public Person getPerson (int id) {
+        Person person = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            String queryString = "FROM Person where id = :id";
+            Query query = ses.createQuery(queryString, Person.class);
+            query.setParameter("id", id);
+            person = (Person) query.uniqueResult();
+            
+            person.setUsers(null);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return person;
     }
     
     public int add(Person person) {

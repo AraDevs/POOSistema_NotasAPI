@@ -29,9 +29,13 @@ public class RegisteredCourseServlet {
     @GET
     @Path("/byStudent/{student_id}/full")
     @Produces({MediaType.APPLICATION_JSON})
-    public RegisteredCourseDAO getJson(@PathParam("student_id") String studentId) {
-        regCrsDAO = new RegisteredCourseDAO(studentId);
-        return regCrsDAO;
+    public List<RegisteredCourse> getRegisteredCourses(@PathParam("student_id") String studentId) {
+        try {
+            return new RegisteredCourseDAO().getRegisteredCourseList(Integer.parseInt(studentId), false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     @GET
