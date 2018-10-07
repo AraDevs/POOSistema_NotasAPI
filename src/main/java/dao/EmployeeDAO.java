@@ -5,6 +5,8 @@
  */
 package dao;
 
+import hibernate.Course;
+import hibernate.CourseTeacher;
 import hibernate.Employee;
 import hibernate.HibernateUtil;
 import java.util.List;
@@ -124,5 +126,87 @@ public class EmployeeDAO {
         }
         
         return employees;
+    }
+    
+    public Employee getEmployeeByRegisteredCourse(int regCourseId) {
+        
+        Employee employee = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM Employee e join fetch e.user u join fetch u.person p "
+                    + "join fetch e.courseTeachers ct join fetch ct.registeredCourses rc "
+                    + "where rc.id = :regCourseId";
+            Query query = ses.createQuery(queryString, Employee.class);
+            query.setParameter("regCourseId", regCourseId);
+            employee = (Employee) query.uniqueResult();
+            
+            employee.setRole(null);
+            employee.setCourseTeachers(null);
+            employee.getUser().setStudents(null);
+            employee.getUser().setPass(null);
+            employee.getUser().setEmployees(null);
+            employee.getUser().getPerson().setUsers(null);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return employee;
+    }
+    
+    public Employee getTeacher(int employeeId) {
+        Employee employee = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM Employee e join fetch e.user u join fetch u.person p "
+                    + "join fetch e.courseTeachers ct join fetch ct.course c where e.id = :employeeId";
+            Query query = ses.createQuery(queryString, Employee.class);
+            query.setParameter("employeeId", employeeId);
+            employee = (Employee) query.uniqueResult();
+            
+            for (Employee e : employees) {
+                e.setRole(null);
+                e.getUser().setStudents(null);
+                e.getUser().setPass(null);
+                e.getUser().setEmployees(null);
+                e.getUser().getPerson().setUsers(null);
+                
+                for (Object ct : e.getCourseTeachers()) {
+                    ((CourseTeacher) ct).setRegisteredCourses(null);
+                    ((CourseTeacher) ct).getCourse().setCareerCourses(null);
+                    ((CourseTeacher) ct).getCourse().setCourse(null);
+                    ((CourseTeacher) ct).getCourse().setCourses(null);
+                    ((CourseTeacher) ct).getCourse().setEvaluations(null);
+                    ((CourseTeacher) ct).getCourse().setFaculty(null);
+                    ((CourseTeacher) ct).getCourse().setCourseTeachers(null);
+                }
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        return employee;
     }
 }

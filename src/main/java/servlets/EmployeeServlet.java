@@ -6,6 +6,8 @@
 package servlets;
 
 import dao.EmployeeDAO;
+import hibernate.Course;
+import hibernate.CourseTeacher;
 import hibernate.Employee;
 import java.util.List;
 import javax.ws.rs.GET;
@@ -13,6 +15,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.xml.bind.annotation.XmlSeeAlso;
 
 /**
  *
@@ -30,6 +34,31 @@ public class EmployeeServlet {
     public List<Employee> getEmployeeByStudent(@PathParam("studentId") String studentId) {
         try {
             return new EmployeeDAO().getEmployeeByStudent(Integer.parseInt(studentId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
+    @Path("/byRegisteredCourse/{regCourseId}/users/people")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Employee getEmployeeByRegisteredCourse(@PathParam("regCourseId") String regCourseId) {
+        try {
+            return new EmployeeDAO().getEmployeeByRegisteredCourse(Integer.parseInt(regCourseId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    
+    @GET
+    @Path("/{employeeId}/full")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Employee getTeacher(@PathParam("employeeId") String employeeId) {
+        try {
+            return new EmployeeDAO().getTeacher(Integer.parseInt(employeeId));
         } catch (Exception e) {
             e.printStackTrace();
             return null;

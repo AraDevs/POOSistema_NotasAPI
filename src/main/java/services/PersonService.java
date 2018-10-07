@@ -11,6 +11,7 @@ import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import servlets.CourseServlet;
+import servlets.CourseTeacherServlet;
 import servlets.EmployeeServlet;
 import servlets.EvaluationServlet;
 import servlets.GradeServlet;
@@ -34,6 +35,7 @@ public class PersonService extends Application {
         set.add(CourseServlet.class);
         set.add(EvaluationServlet.class);
         set.add(EmployeeServlet.class);
+        set.add(CourseTeacherServlet.class);
         return set;
     }
 }

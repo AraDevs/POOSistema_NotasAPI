@@ -12,17 +12,16 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  * @author kevin
  */
-@XmlRootElement( name = "courseTeacher" )
-public class CourseTeacher {
+public class CourseTeacher2 {
     private int id;
     private Course course;
     private Employee employee;
     private Boolean state;
 
-    public CourseTeacher() {
+    public CourseTeacher2() {
     }
 
-    public CourseTeacher(int id, Course course, Employee employee, Boolean state) {
+    public CourseTeacher2(int id, Course course, Employee employee, Boolean state) {
         this.id = id;
         this.course = course;
         this.employee = employee;

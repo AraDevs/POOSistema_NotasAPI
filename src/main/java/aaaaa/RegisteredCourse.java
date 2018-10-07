@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class RegisteredCourse {
     private int id;
     private Student student;
-    private CourseTeacher courseTeacher;
+    private CourseTeacher2 courseTeacher;
     private String courseState;
     private int courseYear;
     private String semester;
@@ -27,7 +27,7 @@ public class RegisteredCourse {
     public RegisteredCourse() {
     }
 
-    public RegisteredCourse(int id, Student student, CourseTeacher courseTeacher, String courseState, int courseYear, String semester, Boolean state, List<Grade> gradeList) {
+    public RegisteredCourse(int id, Student student, CourseTeacher2 courseTeacher, String courseState, int courseYear, String semester, Boolean state, List<Grade> gradeList) {
         this.id = id;
         this.student = student;
         this.courseTeacher = courseTeacher;
@@ -57,11 +57,11 @@ public class RegisteredCourse {
     }
 
     @XmlElement
-    public CourseTeacher getCourseTeacher() {
+    public CourseTeacher2 getCourseTeacher() {
         return courseTeacher;
     }
 
-    public void setCourseTeacher(CourseTeacher courseTeacher) {
+    public void setCourseTeacher(CourseTeacher2 courseTeacher) {
         this.courseTeacher = courseTeacher;
     }
 

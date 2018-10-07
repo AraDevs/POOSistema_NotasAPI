@@ -112,14 +112,16 @@ public class EvaluationDAO {
                 
                 //Obteniendo notas
                 Grade grade = new GradeDAO().getGrade(regCourseId, e.getId());
+                HashSet<Grade> grades = new HashSet<Grade>();
                 if (grade != null) {
-                    HashSet<Grade> grades = new HashSet<Grade>();
                     grades.add(grade);
-                    e.setGrades(grades);
                 }
-                else {
-                    e.setGrades(null);
+                else { //Si no ha sido evaluado, se añadirá una nota de 0
+                    grade = new Grade();
+                    grade.setGrade(0);
+                    grades.add(grade);
                 }
+                e.setGrades(grades);
             }
             
         } catch (Exception e) {

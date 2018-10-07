@@ -6,7 +6,7 @@
 package controllers;
 
 import aaaaa.Course;
-import aaaaa.CourseTeacher;
+import aaaaa.CourseTeacher2;
 import aaaaa.Employee;
 import aaaaa.Evaluation;
 import aaaaa.Grade;
@@ -29,7 +29,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
  * @author kevin
  */
 @XmlRootElement ( name = "registeredCourseController") 
-@XmlSeeAlso( { RegisteredCourse.class, Grade.class, Evaluation.class, CourseTeacher.class, Course.class })
+@XmlSeeAlso( { RegisteredCourse.class, Grade.class, Evaluation.class, CourseTeacher2.class, Course.class })
 public class RegisteredCourseController {
     private List<RegisteredCourse> regCourses;
     String param;
@@ -84,7 +84,7 @@ public class RegisteredCourseController {
                 RegisteredCourse tmpRegCrs = new RegisteredCourse(
                         rs.getInt(1),
                         null,
-                        new CourseTeacher(
+                        new CourseTeacher2(
                                 rs.getInt(6),
                                 new Course(
                                         rs.getInt(8),
