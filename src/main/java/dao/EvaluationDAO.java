@@ -119,6 +119,7 @@ public class EvaluationDAO {
                 else { //Si no ha sido evaluado, se añadirá una nota de 0
                     grade = new Grade();
                     grade.setGrade(0);
+                    grade.setState(false);
                     grades.add(grade);
                 }
                 e.setGrades(grades);

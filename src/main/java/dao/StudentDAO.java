@@ -61,7 +61,7 @@ public class StudentDAO {
     @XmlElement  
     public List getStudent() {   
         try {    
-            //students = getStudentList(param);   
+            students = getStudentList(param);   
         } 
         catch (Exception e) {        
             e.printStackTrace();   
@@ -71,6 +71,71 @@ public class StudentDAO {
     
     public void setStudent(List<Student> students) {   
         this.students = students;     
+    }
+    
+    public List<Student> getStudentList (String param) {
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM Student s join fetch s.user u join fetch u.person";
+            Query query = ses.createQuery(queryString, Student.class);
+            students = query.list();
+            
+            for (Student s : students) {
+                s.setCareerStudents(null);
+                s.setRegisteredCourses(null);
+                s.getUser().setEmployees(null);
+                s.getUser().setStudents(null);
+                s.getUser().getPerson().setUsers(null);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return students;
+    }
+    
+    public Student getStudent(int id) {
+        Student student = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM Student s join fetch s.user u join fetch u.person where s.id = :id";
+            Query query = ses.createQuery(queryString, Student.class);
+            query.setParameter("id", id);
+            student = (Student) query.uniqueResult();
+            
+            student.setCareerStudents(null);
+            student.setRegisteredCourses(null);
+            student.getUser().setEmployees(null);
+            student.getUser().setStudents(null);
+            student.getUser().getPerson().setUsers(null);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return student;
     }
     
     public Student getStudentByUser(int id, int...fetchOptions) {  

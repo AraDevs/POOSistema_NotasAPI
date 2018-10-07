@@ -35,7 +35,7 @@ public class StudentServlet {
     }
     
     @GET
-    @Path("/read")
+    @Path("/")
     @Produces({MediaType.APPLICATION_JSON})
     public StudentDAO getJson() {
         stdDAO = new StudentDAO();
@@ -48,6 +48,18 @@ public class StudentServlet {
     public StudentDAO getJson (@PathParam("param") String param) {
         stdDAO = new StudentDAO(param);
         return stdDAO;
+    }
+    
+    @GET
+    @Path("/{studentId}/users/people")
+    @Produces({MediaType.APPLICATION_JSON})
+    public hibernate.Student getStudent (@PathParam("studentId") String studentId) {
+        try {
+            return new StudentDAO().getStudent(Integer.parseInt(studentId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     @GET

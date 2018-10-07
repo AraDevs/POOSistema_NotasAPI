@@ -7,6 +7,7 @@ package servlets;
 
 import aaaaa.Faculty;
 import controllers.FacultyController;
+import dao.FacultyDAO;
 import helpers.Helpers;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -23,29 +24,29 @@ import javax.ws.rs.core.Response;
  *
  * @author kevin
  */
-@Path("/")
+@Path("/faculties")
 public class FacultyServlet {
-    private static FacultyController fctCtrl;
+    private static FacultyDAO fctDao;
 
     public FacultyServlet() {
     }
     
     @GET
-    @Path("/read")
+    @Path("/")
     @Produces({MediaType.APPLICATION_JSON})
-    public FacultyController getJson() {
-        fctCtrl = new FacultyController();
-        return fctCtrl;
+    public FacultyDAO getJson() {
+        fctDao = new FacultyDAO();
+        return fctDao;
     }
-    
+    /*
     @GET
     @Path("/read/{param}")
     @Produces({MediaType.APPLICATION_JSON})
     public FacultyController getJson (@PathParam("param") String param) {
-        fctCtrl = new FacultyController(param);
-        return fctCtrl;
+        fctDao = new FacultyController(param);
+        return fctDao;
     }
-    
+    */
     @GET
     @Path("/readById/{id}")
     @Produces({MediaType.APPLICATION_JSON})
@@ -57,13 +58,13 @@ public class FacultyServlet {
             return null;
         }
     }
-    
+    /*
     @POST
     @Path("/create")
     @Produces({MediaType.TEXT_PLAIN})
     public Response create (@FormParam("name") String name) {
         
-        fctCtrl = new FacultyController(false);
+        fctDao = new FacultyController(false);
         
         String msg = "";
         if (name == null || name.equals("")) {
@@ -72,7 +73,7 @@ public class FacultyServlet {
         }
         
         try {
-            String outputId = fctCtrl.add(name);
+            String outputId = fctDao.add(name);
             if (!Helpers.isInt(outputId)) {
                 return Response.status(Response.Status.CONFLICT).entity(Helpers.parseSqlError(outputId)).type(MediaType.TEXT_PLAIN).build();
             }
@@ -98,7 +99,7 @@ public class FacultyServlet {
     @Produces({MediaType.TEXT_PLAIN})
     public Response update (@FormParam("name") String name, @FormParam("state") String state, @FormParam("id") String id) {
         
-        fctCtrl = new FacultyController(false);
+        fctDao = new FacultyController(false);
         
         String msg = "";
         if (name == null || name.equals("")) {
@@ -117,7 +118,7 @@ public class FacultyServlet {
         }
         
         try {
-            if (fctCtrl.getFacultyById(id) == null) {
+            if (fctDao.getFacultyById(id) == null) {
                 msg = "Given id does not exist.";
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
@@ -125,7 +126,7 @@ public class FacultyServlet {
         
         
         try {
-            String updFactId = fctCtrl.update(name, state, id);
+            String updFactId = fctDao.update(name, state, id);
             if (!Helpers.isInt(updFactId)) {
                 return Response.status(Response.Status.CONFLICT).entity(Helpers.parseSqlError(updFactId)).type(MediaType.TEXT_PLAIN).build();
             }
@@ -152,17 +153,17 @@ public class FacultyServlet {
     public Response delete (@PathParam("id") String id) {
         
         String msg = "";
-        fctCtrl = new FacultyController();
+        fctDao = new FacultyController();
         
         try {
-            if (fctCtrl.getFacultyById(id) == null) {
+            if (fctDao.getFacultyById(id) == null) {
                 msg = "Given id does not exist.";
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
         } catch (Exception e) {}
         
         try {
-            String outputId = fctCtrl.delete(id);
+            String outputId = fctDao.delete(id);
             if (!Helpers.isInt(outputId)) {
                 return Response.status(Response.Status.CONFLICT).entity(Helpers.parseSqlError(outputId)).type(MediaType.TEXT_PLAIN).build();
             }
@@ -180,5 +181,5 @@ public class FacultyServlet {
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
         
-    }
+    }*/
 }

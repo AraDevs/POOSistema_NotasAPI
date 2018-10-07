@@ -57,7 +57,7 @@ public class RegisteredCourseDAO {
     @XmlElement  
     public List getRegisteredCourse() {   
         try {    
-            regCourses = getRegisteredCourseList(param);   
+            regCourses = getRegisteredCourseList(Integer.parseInt(param), false);   
         } 
         catch (Exception e) {        
             e.printStackTrace();   
@@ -69,18 +69,23 @@ public class RegisteredCourseDAO {
         this.regCourses = regCourses;     
     } 
     
-    public List<RegisteredCourse> getRegisteredCourseList(String param) throws Exception {
+    public List<RegisteredCourse> getRegisteredCourseList(int id, boolean active) throws Exception {
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
         Transaction tra = null;
         
         try {
+            String activeQuery = "";
+            if (active) {
+                activeQuery = " and rc.courseState = 'En curso'";
+            }
+            
             tra = ses.beginTransaction();
             String queryString = "SELECT DISTINCT rc FROM RegisteredCourse rc join fetch rc.grades g "
                     + "join fetch g.evaluation e join fetch rc.courseTeacher ct join fetch ct.course c "
-                    + "join fetch rc.student s where rc.student.id = :id";
+                    + "join fetch rc.student s where rc.student.id = :id" + activeQuery;
             Query query = ses.createQuery(queryString, RegisteredCourse.class);
-            query.setParameter("id", Integer.parseInt(param));
+            query.setParameter("id", id);
             regCourses = query.list();
             
             for (RegisteredCourse rc : regCourses) {
@@ -118,15 +123,20 @@ public class RegisteredCourseDAO {
         
     }
     
-    public List<RegisteredCourse> getRegisteredCourseWithCourse(int id) throws Exception {
+    public List<RegisteredCourse> getRegisteredCourseWithCourse(int id, boolean active) throws Exception {
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
         Transaction tra = null;
         
         try {
+            String activeQuery = "";
+            if (active) {
+                activeQuery = " and rc.courseState = 'En curso'";
+            }
+            
             tra = ses.beginTransaction();
             String queryString = "SELECT DISTINCT rc FROM RegisteredCourse rc join fetch rc.courseTeacher ct "
-                    + "join fetch ct.course c join fetch rc.student s where rc.student.id = :id";
+                    + "join fetch ct.course c join fetch rc.student s where rc.student.id = :id" + activeQuery;
             Query query = ses.createQuery(queryString, RegisteredCourse.class);
             query.setParameter("id", id);
             regCourses = query.list();

@@ -14,6 +14,7 @@ import servlets.CourseServlet;
 import servlets.CourseTeacherServlet;
 import servlets.EmployeeServlet;
 import servlets.EvaluationServlet;
+import servlets.FacultyServlet;
 import servlets.GradeServlet;
 import servlets.PersonServlet;
 import servlets.RegisteredCourseServlet;
@@ -36,6 +37,7 @@ public class PersonService extends Application {
         set.add(EvaluationServlet.class);
         set.add(EmployeeServlet.class);
         set.add(CourseTeacherServlet.class);
+        set.add(FacultyServlet.class);
         return set;
     }
 }

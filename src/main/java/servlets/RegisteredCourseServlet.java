@@ -34,13 +34,38 @@ public class RegisteredCourseServlet {
         return regCrsDAO;
     }
     
+    @GET
+    @Path("/byStudent/{student_id}/full/active")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<RegisteredCourse> getActiveRegisteredCourses(@PathParam("student_id") String studentId) {
+        try {
+            return new RegisteredCourseDAO().getRegisteredCourseList(Integer.parseInt(studentId), true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
     
     @GET
     @Path("/byStudent/{student_id}/courses")
     @Produces({MediaType.APPLICATION_JSON})
     public List<RegisteredCourse> getRegisteredCoursesWithCourses(@PathParam("student_id") String studentId) {
         try {
-            return new RegisteredCourseDAO().getRegisteredCourseWithCourse(Integer.parseInt(studentId));
+            return new RegisteredCourseDAO().getRegisteredCourseWithCourse(Integer.parseInt(studentId), false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    
+    @GET
+    @Path("/byStudent/{student_id}/courses/active")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<RegisteredCourse> getActiveRegisteredCoursesWithCourses(@PathParam("student_id") String studentId) {
+        try {
+            return new RegisteredCourseDAO().getRegisteredCourseWithCourse(Integer.parseInt(studentId), true);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
