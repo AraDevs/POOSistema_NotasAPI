@@ -17,6 +17,7 @@ import javax.persistence.Tuple;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
+import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.query.Query;
 import org.hibernate.Session;
@@ -94,6 +95,8 @@ public class PersonDao {
                     + "FROM Person p join fetch p.users";
             Query query = ses.createQuery(queryString, Person.class);
             people = query.list();
+            
+            
             
             
             /*for (Person p : result) {

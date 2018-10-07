@@ -2,6 +2,7 @@ package hibernate;
 // Generated 10-06-2018 09:26:51 AM by Hibernate Tools 4.3.1
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -26,6 +27,7 @@ public class Unattendance  implements java.io.Serializable {
 
 
      private Integer id;
+     @JsonManagedReference
      private RegisteredCourse registeredCourse;
      private Date unattendanceDate;
      private Boolean state;

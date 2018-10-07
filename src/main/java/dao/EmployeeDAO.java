@@ -1,0 +1,128 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package dao;
+
+import hibernate.Employee;
+import hibernate.HibernateUtil;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+
+/**
+ *
+ * @author kevin
+ */
+@XmlRootElement ( name = "employeeDao") 
+@XmlSeeAlso( {Employee.class} )
+public class EmployeeDAO {
+    private List<Employee> employees;
+    String param;
+    
+    public EmployeeDAO() {
+        employees = new CopyOnWriteArrayList<Employee>();        
+        param = null;
+    }
+    
+    public EmployeeDAO(String name) {        
+        employees = new CopyOnWriteArrayList<Employee>();        
+        param = name;        
+    }
+    
+    public EmployeeDAO(boolean charge) {        
+        if (charge == false) {
+            //don't load data   
+        } else {            
+            employees = new CopyOnWriteArrayList<Employee>();
+            param = null;            
+        }
+    }
+    
+    @XmlElement    
+    public List getEmployees() {        
+        try {            
+            employees = getEmployeeList(param);            
+        } catch (Exception e) {            
+            e.printStackTrace();            
+        }        
+        return this.employees;        
+    }
+    
+    public void setEmployees(List<Employee> employees) {        
+        this.employees = employees;        
+    }
+    
+    public List<Employee> getEmployeeList(String param) {
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM Employee";
+            Query query = ses.createQuery(queryString, Employee.class);
+            employees = query.list();
+            
+            for (Employee rc : employees) {
+                
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return employees;
+    }
+    
+    public List<Employee> getEmployeeByStudent(int studentId) {
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "SELECT DISTINCT e FROM Employee e join fetch e.user u join fetch u.person p "
+                    + "join fetch e.courseTeachers ct join fetch ct.registeredCourses rc "
+                    + "join fetch rc.student s where s.id = :studentId and rc.courseState = 'En curso'";
+            Query query = ses.createQuery(queryString, Employee.class);
+            query.setParameter("studentId", studentId);
+            employees = query.list();
+            
+            for (Employee e : employees) {
+                e.setRole(null);
+                e.setCourseTeachers(null);
+                e.getUser().setStudents(null);
+                e.getUser().setPass(null);
+                e.getUser().setEmployees(null);
+                e.getUser().getPerson().setUsers(null);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return employees;
+    }
+}

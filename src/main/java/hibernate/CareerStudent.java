@@ -2,6 +2,7 @@ package hibernate;
 // Generated 10-06-2018 09:26:51 AM by Hibernate Tools 4.3.1
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -23,7 +24,9 @@ public class CareerStudent  implements java.io.Serializable {
 
 
      private Integer id;
+     @JsonManagedReference
      private Career career;
+     @JsonManagedReference
      private Student student;
      private int incomeYear;
      private Boolean state;

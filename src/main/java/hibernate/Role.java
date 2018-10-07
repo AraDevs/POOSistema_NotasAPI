@@ -2,6 +2,7 @@ package hibernate;
 // Generated 10-06-2018 09:26:51 AM by Hibernate Tools 4.3.1
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.Column;
@@ -38,6 +39,7 @@ public class Role  implements java.io.Serializable {
      private Boolean manageEvaluations;
      private Boolean manageRoles;
      private Boolean state;
+     @JsonBackReference
      private Set employees = new HashSet(0);
 
     public Role() {

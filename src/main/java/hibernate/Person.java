@@ -2,6 +2,7 @@ package hibernate;
 // Generated 10-06-2018 09:26:51 AM by Hibernate Tools 4.3.1
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.Column;
@@ -35,6 +36,7 @@ public class Person  implements java.io.Serializable {
      private String dui;
      private String address;
      private Boolean state;
+     @JsonBackReference
      private Set users = new HashSet(0);
 
     public Person() {

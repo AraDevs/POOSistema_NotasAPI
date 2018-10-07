@@ -2,6 +2,8 @@ package hibernate;
 // Generated 10-06-2018 09:26:51 AM by Hibernate Tools 4.3.1
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.Column;
@@ -28,11 +30,15 @@ public class RegisteredCourse  implements java.io.Serializable {
 
 
      private Integer id;
+     @JsonManagedReference
      private CourseTeacher courseTeacher;
+     @JsonManagedReference
      private Student student;
      private String courseState;
      private Boolean state;
+     @JsonBackReference
      private Set grades = new HashSet(0);
+     @JsonBackReference
      private Set unattendances = new HashSet(0);
 
     public RegisteredCourse() {

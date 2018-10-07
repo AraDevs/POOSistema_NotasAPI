@@ -25,7 +25,7 @@ import org.hibernate.query.Query;
  * @author kevin
  */
 @XmlRootElement ( name = "courseDao") 
-@XmlSeeAlso( { Course.class})
+@XmlSeeAlso( { Course.class, Grade.class})
 public class CourseDAO {
     private List<Course> courses;
     String param;

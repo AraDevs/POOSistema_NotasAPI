@@ -5,34 +5,31 @@
  */
 package servlets;
 
-import dao.EvaluationDAO;
-import hibernate.Evaluation;
-import hibernate.Grade;
+import dao.EmployeeDAO;
+import hibernate.Employee;
 import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.xml.bind.annotation.XmlSeeAlso;
 
 /**
  *
  * @author kevin
  */
-@Path("/evaluations")
-public class EvaluationServlet {
-    private static EvaluationDAO evalDao;
-    
-    public EvaluationServlet() {
+@Path("/employees")
+public class EmployeeServlet {
+
+    public EmployeeServlet() {
     }
     
     @GET
-    @Path("/byRegisteredCourse/{regCourseId}/grades")
+    @Path("/byStudent/{studentId}/users/people")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Evaluation> getEvaluationsByRegisteredCourse(@PathParam("regCourseId") String regCourseId) {
+    public List<Employee> getEmployeeByStudent(@PathParam("studentId") String studentId) {
         try {
-            return new EvaluationDAO().getEvaluationsByRegCourseWithGrade(Integer.parseInt(regCourseId));
+            return new EmployeeDAO().getEmployeeByStudent(Integer.parseInt(studentId));
         } catch (Exception e) {
             e.printStackTrace();
             return null;
