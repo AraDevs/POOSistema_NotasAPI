@@ -51,7 +51,7 @@ public class EmployeeDAO {
     @XmlElement    
     public List getEmployees() {        
         try {            
-            employees = getEmployeeList(param);            
+            //employees = getEmployeeList(param);            
         } catch (Exception e) {            
             e.printStackTrace();            
         }        
@@ -62,20 +62,31 @@ public class EmployeeDAO {
         this.employees = employees;        
     }
     
-    public List<Employee> getEmployeeList(String param) {
+    public List<Employee> getEmployeeList(String param, boolean active) {
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
         Transaction tra = null;
         
         try {
+            
+            String activeQuery = "";
+            if (active) {
+                activeQuery = " where e.state = true and u.state = true and p.state = true";
+            }
+            
             tra = ses.beginTransaction();
-            String queryString = "FROM Employee";
+            String queryString = "FROM Employee e join fetch e.user u join fetch u.person p "
+                    + "join fetch e.role r" + activeQuery;
             Query query = ses.createQuery(queryString, Employee.class);
             employees = query.list();
             
-            for (Employee rc : employees) {
-                
+            for (Employee e : employees) {
+                e.setCourseTeachers(null);
+                e.getRole().setEmployees(null);
+                e.getUser().setEmployees(null);
+                e.getUser().setStudents(null);
+                e.getUser().getPerson().setUsers(null);
             }
             
         } catch (Exception e) {
@@ -150,6 +161,41 @@ public class EmployeeDAO {
             employee.getUser().setStudents(null);
             employee.getUser().setPass(null);
             employee.getUser().setEmployees(null);
+            employee.getUser().getPerson().setUsers(null);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return employee;
+    }
+    
+    public Employee getEmployee(int id) {
+        
+        Employee employee = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM Employee e join fetch e.user u join fetch u.person p "
+                    + "join fetch e.role r where e.id = :id";
+            Query query = ses.createQuery(queryString, Employee.class);
+            query.setParameter("id", id);
+            employee = (Employee) query.uniqueResult();
+            
+            employee.setCourseTeachers(null);
+            employee.getRole().setEmployees(null);
+            employee.getUser().setEmployees(null);
+            employee.getUser().setStudents(null);
             employee.getUser().getPerson().setUsers(null);
             
         } catch (Exception e) {

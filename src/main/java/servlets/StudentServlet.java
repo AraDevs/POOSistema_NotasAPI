@@ -12,6 +12,7 @@ import dao.StudentDAO;
 import dao.UserDAO;
 import helpers.Helpers;
 import java.util.Calendar;
+import java.util.List;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -35,11 +36,39 @@ public class StudentServlet {
     }
     
     @GET
-    @Path("/")
+    @Path("/users/people")
     @Produces({MediaType.APPLICATION_JSON})
-    public StudentDAO getJson() {
-        stdDAO = new StudentDAO();
-        return stdDAO;
+    public List<Student> getStudentList () {
+        try {
+            return new StudentDAO().getStudentList("", false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
+    @Path("/users/people/active")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<Student> getActiveStudentList () {
+        try {
+            return new StudentDAO().getStudentList("", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
+    @Path("byCourseTeacher/{courseTeacherId}/users/people")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<Student> getActiveStudentList (@PathParam("courseTeacherId") String courseTeacherId) {
+        try {
+            return new StudentDAO().getStudentsByCourseTeacher(Integer.parseInt(courseTeacherId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     @GET

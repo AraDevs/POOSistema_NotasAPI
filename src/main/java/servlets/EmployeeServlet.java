@@ -29,11 +29,48 @@ public class EmployeeServlet {
     }
     
     @GET
+    @Path("/users/people/roles")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<Employee> getEmployees() {
+        try {
+            return new EmployeeDAO().getEmployeeList("", false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    
+    @GET
+    @Path("/users/people/roles/active")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<Employee> getActiveEmployees() {
+        try {
+            return new EmployeeDAO().getEmployeeList("", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
     @Path("/byStudent/{studentId}/users/people")
     @Produces({MediaType.APPLICATION_JSON})
     public List<Employee> getEmployeeByStudent(@PathParam("studentId") String studentId) {
         try {
             return new EmployeeDAO().getEmployeeByStudent(Integer.parseInt(studentId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
+    @Path("/{employeeId}/users/people/roles")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Employee getEmployee(@PathParam("employeeId") String employeeId) {
+        try {
+            return new EmployeeDAO().getEmployee(Integer.parseInt(employeeId));
         } catch (Exception e) {
             e.printStackTrace();
             return null;

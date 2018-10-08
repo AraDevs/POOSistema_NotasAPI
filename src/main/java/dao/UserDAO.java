@@ -7,6 +7,7 @@ package dao;
 
 import hibernate.HibernateUtil;
 import hibernate.User;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.xml.bind.annotation.XmlElement;
@@ -62,6 +63,118 @@ public class UserDAO {
     public void setUser(List<User> users) {   
         this.users = users;     
     } 
+    
+    public List<User> getUserList(String param, boolean active) {
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            String activeQuery = "";
+            if (active) {
+                activeQuery = " where u.state = true and p.state = true";
+            }
+            
+            tra = ses.beginTransaction();
+            String queryString = "FROM User u join fetch u.person p" + activeQuery;
+            Query query = ses.createQuery(queryString, User.class);
+            users = query.list();
+            
+            for (User u : users) {
+                u.setEmployees(null);
+                u.setStudents(null);
+                
+                u.getPerson().setUsers(null);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return users;
+    }
+    
+    //Obtiene la lista de usuarios que no tienen registro de estudiante/empleado
+    public List<User> getDetachedUsers() {
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            String queryString = "FROM User u join fetch u.person";
+            Query query = ses.createQuery(queryString, User.class);
+            users = query.list();
+            
+            List<User> detachedUsers = new ArrayList<User>();
+            
+            //Obteniendo solamente los usuarios 'sueltos'
+            for (User u : users) {
+                if (u.getEmployees().isEmpty() && u.getStudents().isEmpty()) {
+                    u.setEmployees(null);
+                    u.setStudents(null);
+
+                    u.getPerson().setUsers(null);
+                    
+                    detachedUsers.add(u);
+                }
+            }
+            
+            users = detachedUsers;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return users;
+    }
+    
+    public User getUser (int id) {
+        User user = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            String queryString = "FROM User u join fetch u.person where u.id = :id";
+            Query query = ses.createQuery(queryString, User.class);
+            query.setParameter("id", id);
+            user = (User) query.uniqueResult();
+            
+            user.setEmployees(null);
+            user.setStudents(null);
+
+            user.getPerson().setUsers(null);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return user;
+    }
     
     /**
      * 

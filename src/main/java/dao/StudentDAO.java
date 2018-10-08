@@ -61,7 +61,7 @@ public class StudentDAO {
     @XmlElement  
     public List getStudent() {   
         try {    
-            students = getStudentList(param);   
+            //students = getStudentList(param);   
         } 
         catch (Exception e) {        
             e.printStackTrace();   
@@ -73,15 +73,56 @@ public class StudentDAO {
         this.students = students;     
     }
     
-    public List<Student> getStudentList (String param) {
+    public List<Student> getStudentList (String param, boolean active) {
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            String activeQuery = "";
+            if (active) {
+                activeQuery = " where s.state = true and u.state = true and p.state = true";
+            }
+            
+            tra = ses.beginTransaction();
+            String queryString = "FROM Student s join fetch s.user u join fetch u.person p" + activeQuery;
+            Query query = ses.createQuery(queryString, Student.class);
+            students = query.list();
+            
+            for (Student s : students) {
+                s.setCareerStudents(null);
+                s.setRegisteredCourses(null);
+                s.getUser().setEmployees(null);
+                s.getUser().setStudents(null);
+                s.getUser().getPerson().setUsers(null);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return students;
+    }
+    
+    public List<Student> getStudentsByCourseTeacher (int courseTeacherId) {
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
         Transaction tra = null;
         
         try {
             tra = ses.beginTransaction();
-            String queryString = "FROM Student s join fetch s.user u join fetch u.person";
+            String queryString = "FROM Student s join fetch s.user u join fetch u.person p "
+                    + "join fetch s.registeredCourses rc join fetch rc.courseTeacher ct "
+                    + "where rc.courseState = 'En curso' and ct.id = :courseTeacherId";
             Query query = ses.createQuery(queryString, Student.class);
+            query.setParameter("courseTeacherId", courseTeacherId);
             students = query.list();
             
             for (Student s : students) {
