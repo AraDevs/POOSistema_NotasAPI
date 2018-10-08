@@ -175,4 +175,48 @@ public class EvaluationDAO {
         
         return evaluations;
     }
+    
+    public Evaluation getEvaluationWithGrade(int regCourseId, int evaluationId) {
+        Evaluation evaluation = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM Evaluation where id = :evaluationId and state = true"; //el manejo de estado es por las evaluaciones de periodos pasados
+            Query query = ses.createQuery(queryString, Evaluation.class);
+            query.setParameter("evaluationId", evaluationId);
+            evaluation = (Evaluation) query.uniqueResult();
+            
+            evaluation.setCourse(null);
+
+            //Obteniendo notas
+            Grade grade = new GradeDAO().getGrade(regCourseId, evaluation.getId());
+            HashSet<Grade> grades = new HashSet<Grade>();
+            if (grade != null) {
+                grades.add(grade);
+            }
+            else { //Si no ha sido evaluado, se añadirá una nota de 0
+                grade = new Grade();
+                grade.setGrade(0);
+                grade.setState(false);
+                grades.add(grade);
+            }
+            evaluation.setGrades(grades);
+            
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return evaluation;
+    }
 }

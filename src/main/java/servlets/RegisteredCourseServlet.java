@@ -27,6 +27,30 @@ public class RegisteredCourseServlet {
     }
     
     @GET
+    @Path("/byCourseTeacher/{courseTeacherId}/students/users/people")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<RegisteredCourse> getRegisteredCoursesByCourseTeacher(@PathParam("courseTeacherId") String courseTeacherId) {
+        try {
+            return new RegisteredCourseDAO().getRegisteredCourseByCourseTeacher(Integer.parseInt(courseTeacherId), false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
+    @Path("/{registeredCourseId}/courses/teachers")
+    @Produces({MediaType.APPLICATION_JSON})
+    public RegisteredCourse getRegisteredCourse(@PathParam("registeredCourseId") String registeredCourseId) {
+        try {
+            return new RegisteredCourseDAO().getRegisteredCourse(Integer.parseInt(registeredCourseId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
     @Path("/byStudent/{student_id}/full")
     @Produces({MediaType.APPLICATION_JSON})
     public List<RegisteredCourse> getRegisteredCourses(@PathParam("student_id") String studentId) {
@@ -57,6 +81,18 @@ public class RegisteredCourseServlet {
     public List<RegisteredCourse> getRegisteredCoursesWithCourses(@PathParam("student_id") String studentId) {
         try {
             return new RegisteredCourseDAO().getRegisteredCourseWithCourse(Integer.parseInt(studentId), false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
+    @Path("/byStudent/{student_id}/courses/teachers")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<RegisteredCourse> getRegisteredCoursesWithCoursesAndTeachers(@PathParam("student_id") String studentId) {
+        try {
+            return new RegisteredCourseDAO().getRegisteredCourseWithCourseAndTeacher(Integer.parseInt(studentId), false);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

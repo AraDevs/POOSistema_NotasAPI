@@ -57,7 +57,7 @@ public class RegisteredCourseDAO {
     @XmlElement  
     public List getRegisteredCourse() {   
         try {    
-            regCourses = getRegisteredCourseListWithGrades(Integer.parseInt(param), false);   
+            //regCourses = getRegisteredCourseListWithGrades(Integer.parseInt(param), false);   
         } 
         catch (Exception e) {        
             e.printStackTrace();   
@@ -215,6 +215,157 @@ public class RegisteredCourseDAO {
         }
         
         return regCourses;
+        
+    }
+    
+    public List<RegisteredCourse> getRegisteredCourseWithCourseAndTeacher(int studentId, boolean active) throws Exception {
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            String activeQuery = "";
+            if (active) {
+                activeQuery = " and rc.courseState = 'En curso'";
+            }
+            
+            tra = ses.beginTransaction();
+            String queryString = "SELECT DISTINCT rc FROM RegisteredCourse rc join fetch rc.courseTeacher ct "
+                    + "join fetch ct.course c join fetch rc.student s join fetch ct.employee e "
+                    + "join fetch e.user u join fetch u.person p where rc.student.id = :studentId" + activeQuery;
+            Query query = ses.createQuery(queryString, RegisteredCourse.class);
+            query.setParameter("studentId", studentId);
+            regCourses = query.list();
+            
+            for (RegisteredCourse rc : regCourses) {
+                rc.setStudent(null);
+                rc.setUnattendances(null);
+                rc.setGrades(null);
+                
+                rc.getCourseTeacher().setRegisteredCourses(null);
+                
+                rc.getCourseTeacher().getEmployee().setRole(null);
+                rc.getCourseTeacher().getEmployee().setCourseTeachers(null);
+                rc.getCourseTeacher().getEmployee().getUser().setEmployees(null);
+                rc.getCourseTeacher().getEmployee().getUser().setStudents(null);
+                rc.getCourseTeacher().getEmployee().getUser().getPerson().setUsers(null);
+                
+                rc.getCourseTeacher().getCourse().setCareerCourses(null);
+                rc.getCourseTeacher().getCourse().setCourse(null);
+                rc.getCourseTeacher().getCourse().setCourses(null);
+                rc.getCourseTeacher().getCourse().setCourseTeachers(null);
+                rc.getCourseTeacher().getCourse().setEvaluations(null);
+                rc.getCourseTeacher().getCourse().setFaculty(null);
+            }
+            
+        } catch (HibernateException e) {
+            e.printStackTrace();
+            if(tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return regCourses;
+        
+    }
+    
+    public List<RegisteredCourse> getRegisteredCourseByCourseTeacher(int courseTeacherId, boolean active) throws Exception {
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            String activeQuery = "";
+            if (active) {
+                activeQuery = " and rc.courseState = 'En curso'";
+            }
+            
+            tra = ses.beginTransaction();
+            String queryString = "SELECT DISTINCT rc FROM RegisteredCourse rc join fetch rc.student s "
+                    + "join fetch s.user u join fetch u.person where rc.courseTeacher.id = :courseTeacherId" + activeQuery;
+            Query query = ses.createQuery(queryString, RegisteredCourse.class);
+            query.setParameter("courseTeacherId", courseTeacherId);
+            regCourses = query.list();
+            
+            for (RegisteredCourse rc : regCourses) {
+                rc.setUnattendances(null);
+                rc.setGrades(null);
+                
+                rc.getCourseTeacher().setEmployee(null);
+                rc.getCourseTeacher().setRegisteredCourses(null);
+                rc.getCourseTeacher().setCourse(null);
+                
+                rc.getStudent().setCareerStudents(null);
+                rc.getStudent().setRegisteredCourses(null);
+                rc.getStudent().getUser().setEmployees(null);
+                rc.getStudent().getUser().setStudents(null);
+                rc.getStudent().getUser().getPerson().setUsers(null);
+            }
+            
+        } catch (HibernateException e) {
+            e.printStackTrace();
+            if(tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return regCourses;
+        
+    }
+    
+    public RegisteredCourse getRegisteredCourse(int id) throws Exception {
+        RegisteredCourse regCourse = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM RegisteredCourse rc join fetch rc.courseTeacher ct "
+                    + "join fetch ct.course c join fetch ct.employee e "
+                    + "join fetch e.user u join fetch u.person p where rc.id = :id";
+            Query query = ses.createQuery(queryString, RegisteredCourse.class);
+            query.setParameter("id", id);
+            regCourse = (RegisteredCourse) query.uniqueResult();
+            
+            regCourse.setStudent(null);
+            regCourse.setUnattendances(null);
+            regCourse.setGrades(null);
+
+            regCourse.getCourseTeacher().setRegisteredCourses(null);
+
+            regCourse.getCourseTeacher().getEmployee().setRole(null);
+            regCourse.getCourseTeacher().getEmployee().setCourseTeachers(null);
+            regCourse.getCourseTeacher().getEmployee().getUser().setEmployees(null);
+            regCourse.getCourseTeacher().getEmployee().getUser().setStudents(null);
+            regCourse.getCourseTeacher().getEmployee().getUser().getPerson().setUsers(null);
+
+            regCourse.getCourseTeacher().getCourse().setCareerCourses(null);
+            regCourse.getCourseTeacher().getCourse().setCourse(null);
+            regCourse.getCourseTeacher().getCourse().setCourses(null);
+            regCourse.getCourseTeacher().getCourse().setCourseTeachers(null);
+            regCourse.getCourseTeacher().getCourse().setEvaluations(null);
+            regCourse.getCourseTeacher().getCourse().setFaculty(null);
+            
+            
+        } catch (HibernateException e) {
+            e.printStackTrace();
+            if(tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return regCourse;
         
     }
 }

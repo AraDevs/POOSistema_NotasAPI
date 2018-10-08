@@ -5,6 +5,8 @@
  */
 package helpers;
 
+import java.util.Calendar;
+
 /**
  *
  * @author kevin
@@ -32,5 +34,39 @@ public class Helpers {
             default:
                 return "SQL Unhandled Error: " + param;
         }
+    }
+    
+    public static int getCurrentYear() {
+        return Calendar.getInstance().get(Calendar.YEAR);
+    }
+    
+    public static String getCurrentSemester() {
+        int month = Calendar.getInstance().get(Calendar.MONTH);
+        String semester = "";
+        
+        switch(month) {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+                semester = "1";
+                break;
+            case 5:
+            case 6:
+                semester = "Interciclo";
+                break;
+            case 7:
+            case 8:
+            case 9:
+            case 10:
+                semester = "2";
+                break;
+            case 11:
+                semester = "Ninguno";
+                break;
+        }
+        
+        return semester;
     }
 }

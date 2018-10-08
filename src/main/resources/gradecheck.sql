@@ -260,9 +260,9 @@ INSERT INTO employee VALUES(null, 2, 2, 1);
 INSERT INTO employee VALUES(null, 6, 2, 1);
 
 INSERT INTO course_teacher VALUES(null, 1, 2, 2017, '1', 30, 1);
-INSERT INTO course_teacher VALUES(null, 1, 2, 2018, '1', 30, 1);
-INSERT INTO course_teacher VALUES(null, 2, 2, 2018, '1', 30, 1);
-INSERT INTO course_teacher VALUES(null, 4, 3, 2018, '1', 30, 1);
+INSERT INTO course_teacher VALUES(null, 1, 2, 2018, '2', 30, 1);
+INSERT INTO course_teacher VALUES(null, 2, 2, 2018, '2', 30, 1);
+INSERT INTO course_teacher VALUES(null, 4, 3, 2018, '2', 30, 1);
 
 INSERT INTO registered_course VALUES(null, 1, 2, 'En curso', 1);
 INSERT INTO registered_course VALUES(null, 1, 4, 'En curso', 1);

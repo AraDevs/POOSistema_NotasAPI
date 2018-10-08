@@ -64,6 +64,19 @@ public class EvaluationServlet {
     }
     
     @GET
+    @Path("/{evaluationId}/byRegisteredCourse/{registeredCourseId}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Evaluation getEvaluationWithGrade(@PathParam("evaluationId") String evaluationId, 
+                                             @PathParam("registeredCourseId") String registeredCourseId) {
+        try {
+            return new EvaluationDAO().getEvaluationWithGrade(Integer.parseInt(evaluationId), Integer.parseInt(registeredCourseId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
     @Path("/byRegisteredCourse/{regCourseId}/grades")
     @Produces({MediaType.APPLICATION_JSON})
     public List<Evaluation> getEvaluationsByRegisteredCourse(@PathParam("regCourseId") String regCourseId) {
