@@ -57,7 +57,7 @@ public class RegisteredCourseDAO {
     @XmlElement  
     public List getRegisteredCourse() {   
         try {    
-            regCourses = getRegisteredCourseList(Integer.parseInt(param), false);   
+            regCourses = getRegisteredCourseListWithGrades(Integer.parseInt(param), false);   
         } 
         catch (Exception e) {        
             e.printStackTrace();   
@@ -69,7 +69,54 @@ public class RegisteredCourseDAO {
         this.regCourses = regCourses;     
     } 
     
-    public List<RegisteredCourse> getRegisteredCourseList(int id, boolean active) throws Exception {
+    public List<RegisteredCourse> getRegisteredCourseList(int studentId, boolean active)  {
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            /*String activeQuery = "";
+            if (active) {
+                activeQuery = " and rc.courseState = 'En curso'";
+            }*/
+            
+            tra = ses.beginTransaction();
+            String queryString = "FROM RegisteredCourse rc join fetch rc.courseTeacher ct "
+                    + "join fetch ct.course c where rc.student.id = :studentId" /*+ activeQuery*/;
+            Query query = ses.createQuery(queryString, RegisteredCourse.class);
+            query.setParameter("studentId", studentId);
+            regCourses = query.list();
+            
+            for (RegisteredCourse rc : regCourses) {
+                rc.setStudent(null);
+                rc.setUnattendances(null);
+                rc.setGrades(null);
+                rc.getCourseTeacher().setEmployee(null);
+                rc.getCourseTeacher().setRegisteredCourses(null);
+                
+                rc.getCourseTeacher().getCourse().setCareerCourses(null);
+                rc.getCourseTeacher().getCourse().setCourse(null);
+                rc.getCourseTeacher().getCourse().setCourses(null);
+                rc.getCourseTeacher().getCourse().setCourseTeachers(null);
+                rc.getCourseTeacher().getCourse().setEvaluations(null);
+                rc.getCourseTeacher().getCourse().setFaculty(null);
+            }
+            
+        } catch (HibernateException e) {
+            e.printStackTrace();
+            if(tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return regCourses;
+        
+    }
+    
+    public List<RegisteredCourse> getRegisteredCourseListWithGrades(int id, boolean active) throws Exception {
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
         Transaction tra = null;

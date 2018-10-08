@@ -31,7 +31,7 @@ public class RegisteredCourseServlet {
     @Produces({MediaType.APPLICATION_JSON})
     public List<RegisteredCourse> getRegisteredCourses(@PathParam("student_id") String studentId) {
         try {
-            return new RegisteredCourseDAO().getRegisteredCourseList(Integer.parseInt(studentId), false);
+            return new RegisteredCourseDAO().getRegisteredCourseListWithGrades(Integer.parseInt(studentId), false);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -43,7 +43,7 @@ public class RegisteredCourseServlet {
     @Produces({MediaType.APPLICATION_JSON})
     public List<RegisteredCourse> getActiveRegisteredCourses(@PathParam("student_id") String studentId) {
         try {
-            return new RegisteredCourseDAO().getRegisteredCourseList(Integer.parseInt(studentId), true);
+            return new RegisteredCourseDAO().getRegisteredCourseListWithGrades(Integer.parseInt(studentId), true);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

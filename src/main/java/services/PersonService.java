@@ -6,12 +6,13 @@
 package services;
 
 import helpers.JAXBContextResolver;
-import helpers.ObjectMapperContextResolver;
 import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
+import servlets.CareerCourseServlet;
 import servlets.CareerServlet;
+import servlets.CareerStudentServlet;
 import servlets.CareerTypeServlet;
 import servlets.CourseServlet;
 import servlets.CourseTeacherServlet;
@@ -45,6 +46,8 @@ public class PersonService extends Application {
         set.add(CareerTypeServlet.class);
         set.add(CareerServlet.class);
         set.add(UserServlet.class);
+        set.add(CareerStudentServlet.class);
+        set.add(CareerCourseServlet.class);
         return set;
     }
 }
