@@ -31,7 +31,7 @@ import org.hibernate.exception.ConstraintViolationException;
  */
 @XmlRootElement ( name = "personDao") 
 @XmlSeeAlso( { Person.class, User.class})
-public class PersonDao {
+public class PersonDao extends DAO {
     private List<Person> people;
     String param;
     
@@ -71,7 +71,7 @@ public class PersonDao {
     }
     
     
-    public List<Person> getPeopleList(String param, boolean active) {
+    public List<Person> getPeopleList(String param, boolean active) throws Exception {
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
         Transaction tra = null;
@@ -106,7 +106,7 @@ public class PersonDao {
         return people;
     }
     
-    public Person getPerson (int id) {
+    public Person getPerson (int id) throws Exception {
         Person person = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -136,37 +136,99 @@ public class PersonDao {
         return person;
     }
     
-    public int add(Person person) {
-        int response;
+    public Person getPersonByEmail (String email, int userId) throws Exception {
+        //si el id es 0, esta operación se usa para verificar al guardar
+        //si no, se usa para verificar al modificar
+        Person person = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
         Transaction tra = null;
         
         try {
-            tra = ses.beginTransaction();
-            ses.save(person);
-            ses.getTransaction().commit();
-            response = DaoStatus.OK;
-        }
-        catch (ConstraintViolationException e) {
-            response = DaoStatus.CONSTRAINT_VIOLATION;
+            String idQuery = "";
+            if (userId != 0) {
+                idQuery = " and u.id != :userId";
+            }
+                                                             //|
+            tra = ses.beginTransaction();         //right join V porque también se usa para obtener a la persona recien agregada y crear su usuario
+            String queryString = "SELECT p FROM User u right join u.person p where p.email = :email" + idQuery;
+            Query query = ses.createQuery(queryString, Person.class);
+            query.setParameter("email", email);
+            if (userId != 0) query.setParameter("userId", userId);
+            person = (Person) query.uniqueResult();
+            
+        } catch (Exception e) {
             e.printStackTrace();
-            if(tra != null) {
+            if (tra != null) {
                 tra.rollback();
             }
-        }
-        catch (Exception e) {
-            response = DaoStatus.ERROR;
-            e.printStackTrace();
-            if(tra != null) {
-                tra.rollback();
-            }
-        }
-        finally {
-            //ses.flush(); //Ver porqué esto se chingaba
+        } finally {
+            //ses.flush();
             ses.close();
         }
-        return response;
+        
+        return person;
     }
+    
+    public Person getPersonByDui (String dui, int userId) throws Exception {
+        //si el id es 0, esta operación se usa para verificar al guardar
+        //si no, se usa para verificar al modificar
+        Person person = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            String idQuery = "";
+            if (userId != 0) {
+                idQuery = " and u.id != :userId";
+            }
+            
+            tra = ses.beginTransaction();
+            String queryString = "SELECT p FROM User u join u.person p where p.dui = :dui" + idQuery;
+            Query query = ses.createQuery(queryString, Person.class);
+            query.setParameter("dui", dui);
+            if (userId != 0) query.setParameter("userId", userId);
+            person = (Person) query.uniqueResult();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return person;
+    }
+    
+    public Person get(int id) throws Exception {
+        Person person = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            person = (Person) ses.get(Person.class, id);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            ses.flush();
+            ses.close();
+        }
+        
+        return person;
+    }
+    
 }

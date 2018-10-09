@@ -137,8 +137,13 @@ public class EvaluationServlet {
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
         }
         
-        if (Date.valueOf(startDate).after(Date.valueOf(endDate))) {
-            msg = "La fecha de inicio y finalización no concuerdan.";
+        try {
+            if (Date.valueOf(startDate).after(Date.valueOf(endDate))) {
+                msg = "La fecha de inicio y finalización no concuerdan.";
+                return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            msg = "El formato de fecha enviado no es válido.";
             return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
         }
         
@@ -259,8 +264,13 @@ public class EvaluationServlet {
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
         }
         
-        if (Date.valueOf(startDate).after(Date.valueOf(endDate))) {
-            msg = "La fecha de inicio y finalización no concuerdan.";
+        try {
+            if (Date.valueOf(startDate).after(Date.valueOf(endDate))) {
+                msg = "La fecha de inicio y finalización no concuerdan.";
+                return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            msg = "El formato de fecha enviado no es válido.";
             return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
         }
         

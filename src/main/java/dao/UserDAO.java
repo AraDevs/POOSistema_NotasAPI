@@ -8,6 +8,7 @@ package dao;
 import hibernate.HibernateUtil;
 import hibernate.User;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.xml.bind.annotation.XmlElement;
@@ -24,7 +25,7 @@ import org.hibernate.query.Query;
  */
 @XmlRootElement ( name = "userDao") 
 @XmlSeeAlso( { User.class})
-public class UserDAO {
+public class UserDAO extends DAO {
     
     private List<User> users;
     String param;
@@ -64,7 +65,7 @@ public class UserDAO {
         this.users = users;     
     } 
     
-    public List<User> getUserList(String param, boolean active) {
+    public List<User> getUserList(String param, boolean active) throws Exception {
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
         Transaction tra = null;
@@ -84,6 +85,7 @@ public class UserDAO {
             for (User u : users) {
                 u.setEmployees(null);
                 u.setStudents(null);
+                u.setPass(null);
                 
                 u.getPerson().setUsers(null);
             }
@@ -102,7 +104,7 @@ public class UserDAO {
     }
     
     //Obtiene la lista de usuarios que no tienen registro de estudiante/empleado
-    public List<User> getDetachedUsers() {
+    public List<User> getDetachedUsers() throws Exception {
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
         Transaction tra = null;
@@ -121,6 +123,7 @@ public class UserDAO {
                 if (u.getEmployees().isEmpty() && u.getStudents().isEmpty()) {
                     u.setEmployees(null);
                     u.setStudents(null);
+                    u.setPass(null);
 
                     u.getPerson().setUsers(null);
                     
@@ -143,7 +146,7 @@ public class UserDAO {
         return users;
     }
     
-    public User getUser (int id) {
+    public User getUser (int id) throws Exception {
         User user = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -160,6 +163,7 @@ public class UserDAO {
             
             user.setEmployees(null);
             user.setStudents(null);
+            user.setPass(null);
 
             user.getPerson().setUsers(null);
             
@@ -182,7 +186,7 @@ public class UserDAO {
      * @param pass
      * @return El id del usuario logeado si la autenticacion es exitosa, 0 si la autenticacion falla
      */
-    public int login(String username, String pass) {  
+    public int login(String username, String pass) throws Exception {  
         int response = 0;
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
@@ -206,5 +210,66 @@ public class UserDAO {
         }
         
         return response;
+    }
+    
+    public int getYearIndex() throws Exception {
+        int id = 0;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            //Obteniendo máximo id de este año
+            String queryString = "SELECT MAX(id) FROM User u where username like concat('%',:year,'%')";
+            Query query = ses.createQuery(queryString, Integer.class);
+            query.setParameter("year", Calendar.getInstance().get(Calendar.YEAR));
+            Integer registerId = (Integer) query.uniqueResult();
+            
+            //Obteniendo número de username del id obtenido
+            queryString = "SELECT username FROM User u where id = :id";
+            query = ses.createQuery(queryString, String.class);
+            query.setParameter("id", registerId);
+            String username = (String) query.uniqueResult();
+            
+            id = Integer.parseInt(username.substring(6, 10));
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return id;
+    }
+    
+    public User get(int id) throws Exception {
+        User user = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            user = (User) ses.get(User.class, id);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            ses.flush();
+            ses.close();
+        }
+        
+        return user;
     }
 }
