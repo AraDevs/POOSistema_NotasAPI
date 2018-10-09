@@ -22,6 +22,7 @@ import servlets.FacultyServlet;
 import servlets.GradeServlet;
 import servlets.PersonServlet;
 import servlets.RegisteredCourseServlet;
+import servlets.RoleServlet;
 import servlets.StudentServlet;
 import servlets.UserServlet;
 
@@ -48,6 +49,7 @@ public class PersonService extends Application {
         set.add(UserServlet.class);
         set.add(CareerStudentServlet.class);
         set.add(CareerCourseServlet.class);
+        set.add(RoleServlet.class);
         return set;
     }
 }

@@ -10,6 +10,7 @@ import dao.UserDAO;
 import helpers.DaoStatus;
 import hibernate.Person;
 import hibernate.User;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -53,6 +54,56 @@ public class UserServlet {
     public List<User> getActiveUsers () {
         try {
             return new UserDAO().getUserList("", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
+    @Path("/people/noStudent")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<User> getUsersWithNoStudent () {
+        try {
+            List <User> users = new UserDAO().getUsersNiceWay("", true);
+            List <User> usersWithNoStudent = new ArrayList<User>();
+            for (User u : users) {
+                if (u.getStudents().isEmpty()) {
+                    u.setEmployees(null);
+                    u.setStudents(null);
+                    u.setPass(null);
+
+                    u.getPerson().setUsers(null);
+                    
+                    usersWithNoStudent.add(u);
+                }
+            }
+            return usersWithNoStudent;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
+    @Path("/people/noEmployee")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<User> getUsersWithNoEmployee () {
+        try {
+            List <User> users = new UserDAO().getUsersNiceWay("", true);
+            List <User> usersWithNoEmployee = new ArrayList<User>();
+            for (User u : users) {
+                if (u.getEmployees().isEmpty()) {
+                    u.setEmployees(null);
+                    u.setStudents(null);
+                    u.setPass(null);
+
+                    u.getPerson().setUsers(null);
+                    
+                    usersWithNoEmployee.add(u);
+                }
+            }
+            return usersWithNoEmployee;
         } catch (Exception e) {
             e.printStackTrace();
             return null;

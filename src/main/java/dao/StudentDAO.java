@@ -27,7 +27,7 @@ import org.hibernate.query.Query;
  */
 @XmlRootElement ( name = "studentDao") 
 @XmlSeeAlso( { Student.class, User.class, Person.class})
-public class StudentDAO {
+public class StudentDAO extends DAO {
     
     private List<Student> students;
     String param;
@@ -73,7 +73,7 @@ public class StudentDAO {
         this.students = students;     
     }
     
-    public List<Student> getStudentList (String param, boolean active) {
+    public List<Student> getStudentList (String param, boolean active) throws Exception {
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
         Transaction tra = null;
@@ -111,7 +111,7 @@ public class StudentDAO {
         return students;
     }
     
-    public List<Student> getStudentsByCourseTeacher (int courseTeacherId) {
+    public List<Student> getStudentsByCourseTeacher (int courseTeacherId) throws Exception {
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
         Transaction tra = null;
@@ -146,7 +146,7 @@ public class StudentDAO {
         return students;
     }
     
-    public Student getStudent(int id) {
+    public Student getStudent(int id) throws Exception {
         Student student = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -179,7 +179,7 @@ public class StudentDAO {
         return student;
     }
     
-    public Student getStudentByUser(int id, int...fetchOptions) {  
+    public Student getStudentByUser(int id, int...fetchOptions) throws Exception {  
         Student student = null;
         
         //Convirtiendo fetchOptions en una lista
@@ -231,6 +231,31 @@ public class StudentDAO {
             }
         } finally {
             //ses.flush();
+            ses.close();
+        }
+        
+        return student;
+    }
+    
+    public Student get(int id) throws Exception {
+        Student student = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            student = (Student) ses.get(Student.class, id);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            ses.flush();
             ses.close();
         }
         

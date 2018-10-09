@@ -14,6 +14,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -103,6 +104,41 @@ public class UserDAO extends DAO {
         return users;
     }
     
+    public List<User> getUsersNiceWay(String param, boolean active) throws Exception {
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            String activeQuery = "";
+            if (active) {
+                activeQuery = " where u.state = true and p.state = true";
+            }
+            
+            tra = ses.beginTransaction();
+            String queryString = "FROM User u join fetch u.person p" + activeQuery;
+            Query query = ses.createQuery(queryString, User.class);
+            users = query.list();
+            
+            for (User u : users) {
+                Hibernate.initialize(u.getStudents());
+                Hibernate.initialize(u.getEmployees());
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return users;
+    }
+    
     //Obtiene la lista de usuarios que no tienen registro de estudiante/empleado
     public List<User> getDetachedUsers() throws Exception {
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -128,6 +164,9 @@ public class UserDAO extends DAO {
                     u.getPerson().setUsers(null);
                     
                     detachedUsers.add(u);
+                }
+                else {
+                    
                 }
             }
             
