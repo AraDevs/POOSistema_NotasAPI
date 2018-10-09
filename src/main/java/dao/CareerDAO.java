@@ -23,7 +23,7 @@ import org.hibernate.query.Query;
  */
 @XmlRootElement ( name = "careerDao") 
 @XmlSeeAlso( {Career.class} )
-public class CareerDAO {
+public class CareerDAO extends DAO {
     private List<Career> careers;
     String param;
     
@@ -60,7 +60,32 @@ public class CareerDAO {
         this.careers = careers;        
     }
     
-    public List<Career> getCareerList(String param, boolean active) {
+    public Career get(int id) throws Exception {
+        Career career = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            career = (Career) ses.get(Career.class, id);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            ses.flush();
+            ses.close();
+        }
+        
+        return career;
+    }
+    
+    public List<Career> getCareerList(String param, boolean active) throws Exception {
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
@@ -100,7 +125,7 @@ public class CareerDAO {
         return careers;
     }
     
-    public Career getCareer(int id) {
+    public Career getCareer(int id) throws Exception {
         Career career = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
