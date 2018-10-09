@@ -26,7 +26,7 @@ import org.hibernate.query.Query;
  */
 @XmlRootElement ( name = "evaluationDao") 
 @XmlSeeAlso( {Evaluation.class, Grade.class} )
-public class EvaluationDAO {
+public class EvaluationDAO extends DAO {
     private List<Evaluation> evaluations;
     String param;
     
@@ -63,7 +63,7 @@ public class EvaluationDAO {
         this.evaluations = evaluations;        
     }
     
-    public Evaluation getEvaluation(int id) {
+    public Evaluation getEvaluation(int id) throws Exception {
         Evaluation evaluation = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -93,7 +93,7 @@ public class EvaluationDAO {
         return evaluation;
     }
     
-    public List<Evaluation> getEvaluationByCourse(int courseId, boolean active) {
+    public List<Evaluation> getEvaluationByCourse(int courseId, boolean active) throws Exception {
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
@@ -130,7 +130,7 @@ public class EvaluationDAO {
         return evaluations;
     }
     
-    public List<Evaluation> getEvaluationsByRegCourseWithGrade(int regCourseId) {
+    public List<Evaluation> getEvaluationsByRegCourseWithGrade(int regCourseId) throws Exception {
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
         Transaction tra = null;
@@ -176,7 +176,7 @@ public class EvaluationDAO {
         return evaluations;
     }
     
-    public Evaluation getEvaluationWithGrade(int regCourseId, int evaluationId) {
+    public Evaluation getEvaluationWithGrade(int regCourseId, int evaluationId) throws Exception {
         Evaluation evaluation = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -214,6 +214,74 @@ public class EvaluationDAO {
             }
         } finally {
             //ses.flush();
+            ses.close();
+        }
+        
+        return evaluation;
+    }
+    
+    public Boolean isPercentageConsistent(Evaluation evaluation) throws Exception {
+        
+        Boolean response = true;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            //Si es modificación, no se debe tomar en cuenta su porcentaje anterior
+            String minusQuery = "";
+            if (evaluation.getId() != null) {
+                minusQuery = " and id != :id";
+            }
+            
+            tra = ses.beginTransaction();
+            String queryString = "SELECT SUM(percentage) + :percentage FROM Evaluation where state = true and course.id = :courseId "
+                    + "and period = :period and laboratory = :laboratory" + minusQuery;
+            Query query = ses.createQuery(queryString, Long.class);
+            query.setParameter("percentage", new Long(evaluation.getPercentage()));
+            query.setParameter("courseId", evaluation.getCourse().getId());
+            query.setParameter("period", evaluation.getPeriod());
+            query.setParameter("laboratory", evaluation.getLaboratory());
+            if (evaluation.getId() != null) {
+                query.setParameter("id", evaluation.getId());
+            }
+            Long percentageTotal = (Long) query.uniqueResult();
+            
+            if (percentageTotal > 100) response = false;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return response;
+    }
+    
+    public Evaluation get(int id) throws Exception {
+        Evaluation evaluation = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            evaluation = (Evaluation) ses.get(Evaluation.class, id);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            ses.flush();
             ses.close();
         }
         
