@@ -23,7 +23,7 @@ import org.hibernate.query.Query;
  */
 @XmlRootElement ( name = "careerTypeDao") 
 @XmlSeeAlso( {CareerType.class} )
-public class CareerTypeDAO {
+public class CareerTypeDAO extends DAO {
     private List<CareerType> careerTypes;
     String param;
     
@@ -60,7 +60,7 @@ public class CareerTypeDAO {
         this.careerTypes = careerTypes;        
     }
     
-    public List<CareerType> getCareerTypeList(String param, boolean active) {
+    public List<CareerType> getCareerTypeList(String param, boolean active) throws Exception {
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
@@ -95,7 +95,7 @@ public class CareerTypeDAO {
         return careerTypes;
     }
     
-    public CareerType getCareerType (int id) {
+    public CareerType getCareerType (int id) throws Exception {
         CareerType careerType = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -119,6 +119,31 @@ public class CareerTypeDAO {
             }
         } finally {
             //ses.flush();
+            ses.close();
+        }
+        
+        return careerType;
+    }
+    
+    public CareerType get(int id) throws Exception {
+        CareerType careerType = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            careerType = (CareerType) ses.get(CareerType.class, id);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            ses.flush();
             ses.close();
         }
         

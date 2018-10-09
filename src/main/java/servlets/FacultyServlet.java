@@ -8,6 +8,7 @@ package servlets;
 import hibernate.Faculty;
 import controllers.FacultyController;
 import dao.FacultyDAO;
+import helpers.DaoStatus;
 import helpers.Helpers;
 import java.util.List;
 import javax.ws.rs.DELETE;
@@ -76,95 +77,109 @@ public class FacultyServlet {
             return null;
         }
     }
-    /*
+    
+    
     @POST
-    @Path("/create")
+    @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
     public Response create (@FormParam("name") String name) {
         
-        fctDao = new FacultyController(false);
+        fctDao = new FacultyDAO(false);
         
         String msg = "";
         if (name == null || name.equals("")) {
-            msg = "Must specify faculty name";
+            msg = "Ingrese el nombre de la facultad.";
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
         }
         
         try {
-            String outputId = fctDao.add(name);
-            if (!Helpers.isInt(outputId)) {
-                return Response.status(Response.Status.CONFLICT).entity(Helpers.parseSqlError(outputId)).type(MediaType.TEXT_PLAIN).build();
-            }
-            if (Integer.parseInt(outputId) <= 0) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error ocurred").type(MediaType.TEXT_PLAIN).build();
-            }
+            Faculty faculty = new Faculty(name);
+            faculty.setState(true);
+            int status = fctDao.add(faculty);
             
-            msg = "Faculty created with id " + outputId;
-            return Response.ok(msg, "text/plain").build();
+            if (status == DaoStatus.OK) {
+                msg = "Facultad ingresada.";
+                return Response.ok(msg, "text/plain").build();
+            }
+            if (status == DaoStatus.CONSTRAINT_VIOLATION) {
+                return Response.status(Response.Status.CONFLICT).entity("El nombre de la facultad ya está en uso.").type(MediaType.TEXT_PLAIN).build();
+            }
+            else {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error.").type(MediaType.TEXT_PLAIN).build();
+            }
             
         }
         catch (Exception e) {
             e.printStackTrace();
         }
         
-        msg = "Could not insert the faculty";
+        msg = "No se pudo ingresar la facultad.";
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
     }
     
     @PUT
-    @Path("/update")
+    @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
     public Response update (@FormParam("name") String name, @FormParam("state") String state, @FormParam("id") String id) {
         
-        fctDao = new FacultyController(false);
+        fctDao = new FacultyDAO(false);
         
         String msg = "";
         if (name == null || name.equals("")) {
-            msg += " name";
+            msg += " Nombre de facultad\n";
         }
         if (state == null || state.equals("")) {
-            msg += " state";
+            msg += " Estado\n";
         }
         if (id == null || id.equals("")) {
-            msg += " id";
+            msg += " ID";
         }
         
         if (!msg.equals("")) {
-            msg = "Must specify following parameters:" + msg + ".";
+            msg = "Por favor ingrese todos los valores:\n" + msg + ".";
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
         }
         
+        Faculty faculty = null;
+        
         try {
-            if (fctDao.getFacultyById(id) == null) {
-                msg = "Given id does not exist.";
+            faculty = fctDao.get(Integer.parseInt(id));
+            if (faculty == null) {
+                msg = "La facultad a modificar no existe.";
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
         } catch (Exception e) {}
         
         
         try {
-            String updFactId = fctDao.update(name, state, id);
-            if (!Helpers.isInt(updFactId)) {
-                return Response.status(Response.Status.CONFLICT).entity(Helpers.parseSqlError(updFactId)).type(MediaType.TEXT_PLAIN).build();
-            }
-            if (Integer.parseInt(updFactId) <= 0) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error ocurred").type(MediaType.TEXT_PLAIN).build();
-            }
+            faculty.setName(name);
+            faculty.setState(Boolean.valueOf(state));
             
-            msg = "Faculty updated with id " + updFactId;
-            return Response.ok(msg, "text/plain").build();
+            int status = fctDao.update(faculty);
+            
+            if (status == DaoStatus.OK) {
+                msg = "Facultad modificada.";
+                return Response.ok(msg, "text/plain").build();
+            }
+            if (status == DaoStatus.CONSTRAINT_VIOLATION) {
+                return Response.status(Response.Status.CONFLICT).entity("El nombre de la facultad ya está en uso.").type(MediaType.TEXT_PLAIN).build();
+            }
+            else {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error.").type(MediaType.TEXT_PLAIN).build();
+            }
             
         }
         catch (Exception e) {
             e.printStackTrace();
         }
         
-        msg = "Could not update the faculty";
+        msg = "No se pudo modificar la facultad.";
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
     }
     
+    /*
     @DELETE
     @Path("/delete/{id: \\d+}")
     @Produces({MediaType.TEXT_PLAIN})

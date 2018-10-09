@@ -5,6 +5,7 @@
  */
 package dao;
 
+import helpers.DaoStatus;
 import hibernate.Faculty;
 import hibernate.HibernateUtil;
 import java.util.List;
@@ -15,6 +16,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.query.Query;
 
 /**
@@ -23,7 +25,7 @@ import org.hibernate.query.Query;
  */
 @XmlRootElement ( name = "facultyDao") 
 @XmlSeeAlso( {Faculty.class} )
-public class FacultyDAO {
+public class FacultyDAO extends DAO {
     
     private List<Faculty> faculties;
     String param;
@@ -61,7 +63,7 @@ public class FacultyDAO {
         this.faculties = faculties;        
     }
     
-    public List<Faculty> getFacultyList(String param, boolean active) {
+    public List<Faculty> getFacultyList(String param, boolean active) throws Exception {
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
@@ -97,7 +99,32 @@ public class FacultyDAO {
         return faculties;
     }
     
-    public Faculty getFaculty(int id) {
+    public Faculty get(int id) throws Exception {
+        Faculty faculty = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            faculty = (Faculty) ses.get(Faculty.class, id);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            ses.flush();
+            ses.close();
+        }
+        
+        return faculty;
+    }
+    
+    public Faculty getFaculty(int id) throws Exception {
         Faculty faculty = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
