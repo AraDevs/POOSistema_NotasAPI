@@ -92,4 +92,29 @@ public class RoleDAO {
         
         return roles;
     }
+    
+    public Role get(int id) throws Exception {
+        Role role = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            role = (Role) ses.get(Role.class, id);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            ses.flush();
+            ses.close();
+        }
+        
+        return role;
+    }
 }

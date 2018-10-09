@@ -103,7 +103,7 @@ public class CareerServlet {
                 msg = "La facultad especificada no está disponible.";
                 return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {e.printStackTrace();}
         
         try {
             careerType = new CareerTypeDAO().get(Integer.parseInt(careerTypeId));
@@ -115,7 +115,7 @@ public class CareerServlet {
                 msg = "El tipo de carrera especificado no está disponible.";
                 return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {e.printStackTrace();}
         
         
         try {
@@ -192,7 +192,7 @@ public class CareerServlet {
                 msg = "La facultad especificada no está disponible.";
                 return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {e.printStackTrace();}
         
         try {
             careerType = new CareerTypeDAO().get(Integer.parseInt(careerTypeId));
@@ -204,7 +204,7 @@ public class CareerServlet {
                 msg = "El tipo de carrera especificado no está disponible.";
                 return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {e.printStackTrace();}
         
         Career career = null;
         
@@ -214,7 +214,7 @@ public class CareerServlet {
                 msg = "La carrera a modificar no existe.";
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {e.printStackTrace();}
         
         try {
             career.setName(name);

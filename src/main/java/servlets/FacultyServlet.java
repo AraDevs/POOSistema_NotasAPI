@@ -149,7 +149,7 @@ public class FacultyServlet {
                 msg = "La facultad a modificar no existe.";
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {e.printStackTrace();}
         
         
         try {

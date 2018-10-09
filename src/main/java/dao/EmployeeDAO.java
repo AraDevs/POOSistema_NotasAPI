@@ -25,7 +25,7 @@ import org.hibernate.query.Query;
  */
 @XmlRootElement ( name = "employeeDao") 
 @XmlSeeAlso( {Employee.class} )
-public class EmployeeDAO {
+public class EmployeeDAO extends DAO {
     private List<Employee> employees;
     String param;
     
@@ -62,7 +62,7 @@ public class EmployeeDAO {
         this.employees = employees;        
     }
     
-    public List<Employee> getEmployeeList(String param, boolean active) {
+    public List<Employee> getEmployeeList(String param, boolean active) throws Exception {
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
@@ -102,7 +102,7 @@ public class EmployeeDAO {
         return employees;
     }
     
-    public List<Employee> getEmployeeByStudent(int studentId) {
+    public List<Employee> getEmployeeByStudent(int studentId) throws Exception {
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
@@ -139,7 +139,7 @@ public class EmployeeDAO {
         return employees;
     }
     
-    public Employee getEmployeeByUser(int userId) {
+    public Employee getEmployeeByUser(int userId) throws Exception {
         Employee employee = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -175,7 +175,7 @@ public class EmployeeDAO {
         return employee;
     }
     
-    public Employee getEmployeeByRegisteredCourse(int regCourseId) {
+    public Employee getEmployeeByRegisteredCourse(int regCourseId) throws Exception {
         
         Employee employee = null;
         
@@ -212,7 +212,7 @@ public class EmployeeDAO {
         return employee;
     }
     
-    public Employee getEmployee(int id) {
+    public Employee getEmployee(int id) throws Exception {
         
         Employee employee = null;
         
@@ -247,7 +247,7 @@ public class EmployeeDAO {
         return employee;
     }
     
-    public Employee getTeacher(int employeeId) {
+    public Employee getTeacher(int employeeId) throws Exception {
         Employee employee = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -288,6 +288,31 @@ public class EmployeeDAO {
             //ses.flush();
             ses.close();
         }
+        return employee;
+    }
+    
+    public Employee get(int id) throws Exception {
+        Employee employee = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            employee = (Employee) ses.get(Employee.class, id);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            ses.flush();
+            ses.close();
+        }
+        
         return employee;
     }
 }

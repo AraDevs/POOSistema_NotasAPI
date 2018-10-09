@@ -169,7 +169,7 @@ public class EvaluationServlet {
                 msg = "La materia especificada no está disponible.";
                 return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
-        } catch (Exception e) {}
+        } catch (Exception e) { e.printStackTrace(); }
         
         if (Boolean.valueOf(laboratory) && !(course.getLaboratory())) {
             msg = "Se especificó la evaluación como parte de laboratorio, pero la materia seleccionada no posee laboratorio.";
@@ -222,8 +222,7 @@ public class EvaluationServlet {
     public Response update (@FormParam("name") String name, @FormParam("description") String description, 
             @FormParam("percentage") String percentage, @FormParam("period") String period, 
             @FormParam("laboratory") String laboratory, @FormParam("startDate") String startDate, 
-            @FormParam("endDate") String endDate, @FormParam("courseId") String courseId, 
-            @FormParam("state") String state, @FormParam("id") String id) {
+            @FormParam("endDate") String endDate, @FormParam("state") String state, @FormParam("id") String id) {
         
         evalDao = new EvaluationDAO(false);
         
@@ -248,9 +247,6 @@ public class EvaluationServlet {
         }
         if (endDate == null || endDate.equals("")) {
             msg += " Fecha de finalización\n";
-        }
-        if (courseId == null || courseId.equals("")) {
-            msg += " Materia\n";
         }
         if (state == null || state.equals("")) {
             msg += " Estado\n";
@@ -284,34 +280,19 @@ public class EvaluationServlet {
             return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
         }
         
-        Course course = null;
-        
-        try {
-            course = new CourseDAO().get(Integer.parseInt(courseId));
-            if (course == null) {
-                msg = "La materia especificada no existe.";
-                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
-            }
-            else if (!course.getState()) {
-                msg = "La materia especificada no está disponible.";
-                return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
-            }
-        } catch (Exception e) {}
-        
-        if (Boolean.valueOf(laboratory) && !(course.getLaboratory())) {
-            msg = "Se especificó la evaluación como parte de laboratorio, pero la materia seleccionada no posee laboratorio.";
-            return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
-        }
-        
         Evaluation evaluation = null;
         
         try {
-            evaluation = new EvaluationDAO().get(Integer.parseInt(id));
-            if (course == null) {
+            evaluation = new EvaluationDAO().getEvaluationWithCourse(Integer.parseInt(id));
+            if (evaluation == null) {
                 msg = "La evaluación a modificar no existe.";
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
-        } catch (Exception e) {}
+            if (Boolean.valueOf(laboratory) && !(evaluation.getCourse().getLaboratory())) {
+                msg = "Se especificó la evaluación como parte de laboratorio, pero la materia seleccionada no posee laboratorio.";
+                return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) { e.printStackTrace(); }
         
         try {
             evaluation.setName(name);
@@ -321,7 +302,6 @@ public class EvaluationServlet {
             evaluation.setLaboratory(Boolean.valueOf(laboratory));
             evaluation.setStartDate(Date.valueOf(startDate));
             evaluation.setEndDate(Date.valueOf(endDate));
-            evaluation.setCourse(course);
             evaluation.setState(Boolean.valueOf(state));
             
             if (!(evalDao.isPercentageConsistent(evaluation))) {

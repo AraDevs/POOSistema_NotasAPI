@@ -6,14 +6,19 @@
 package servlets;
 
 import dao.EmployeeDAO;
+import dao.RoleDAO;
 import dao.UserDAO;
+import helpers.DaoStatus;
 import hibernate.Course;
 import hibernate.CourseTeacher;
 import hibernate.Employee;
+import hibernate.Role;
+import hibernate.User;
 import java.util.List;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -149,6 +154,163 @@ public class EmployeeServlet {
         }
         
         msg = "No se pudo hacer login.";
+        
+        return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+    }
+    
+    @POST
+    @Path("/")
+    @Produces({MediaType.TEXT_PLAIN})
+    public Response create (@FormParam("userId") String userId, @FormParam("roleId") String roleId) {
+        
+        EmployeeDAO empDao = new EmployeeDAO(false);
+        
+        String msg = "";
+        if (userId == null || userId.equals("")) {
+            msg += " Usuario\n";
+        }
+        if (roleId == null || roleId.equals("")) {
+            msg += " Rol";
+        }
+        
+        if (!msg.equals("")) {
+            msg = "Por favor ingrese todos los valores:\n" + msg + ".";
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        User user = null;
+        try {
+            user = new UserDAO().getUserNiceWay(Integer.parseInt(userId));
+            if (user == null) {
+                msg = "El usuario especificado no existe.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            else if (!user.getState()) {
+                msg = "El usuario especificado no está disponible.";
+                return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            
+            if (!user.getEmployees().isEmpty()) {
+                msg = "El usuario especificado ya tiene un registro de empleado.";
+                return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            
+        } catch (Exception e) {e.printStackTrace();}
+        
+        Role role = null;
+        try {
+            role = new RoleDAO().get(Integer.parseInt(roleId));
+            if (role == null) {
+                msg = "El rol especificado no existe.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            else if (!role.getState()) {
+                msg = "El rol especificado no está disponible.";
+                return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            
+        } catch (Exception e) {e.printStackTrace();}
+        
+        try {
+            Employee employee = new Employee();
+            employee.setUser(user);
+            employee.setRole(role);
+            employee.setState(true);
+            
+            int status = empDao.add(employee);
+            
+            if (status == DaoStatus.OK) {
+                msg = "Empleado agregado.";
+                return Response.ok(msg, "text/plain").build();
+            }
+            if (status == DaoStatus.CONSTRAINT_VIOLATION) {
+                return Response.status(Response.Status.CONFLICT).entity("Ocurrió un error de constraint desconocido.").type(MediaType.TEXT_PLAIN).build();
+            }
+            else {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error.").type(MediaType.TEXT_PLAIN).build();
+            }
+            
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        msg = "No se pudo guardar el empleado.";
+        
+        return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+    }
+    
+    @PUT
+    @Path("/")
+    @Produces({MediaType.TEXT_PLAIN})
+    public Response update (@FormParam("roleId") String roleId, @FormParam("state") String state, @FormParam("id") String id) {
+        
+        EmployeeDAO empDao = new EmployeeDAO(false);;
+        
+        String msg = "";
+        if (roleId == null || roleId.equals("")) {
+            msg += " Rol\n";
+        }
+        if (state == null || state.equals("")) {
+            msg += " Estado\n";
+        }
+        if (id == null || id.equals("")) {
+            msg += " ID";
+        }
+        
+        if (!msg.equals("")) {
+            msg = "Por favor ingrese todos los valores:\n" + msg + ".";
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        Role role = null;
+        try {
+            role = new RoleDAO().get(Integer.parseInt(roleId));
+            if (role == null) {
+                msg = "El rol especificado no existe.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            else if (!role.getState()) {
+                msg = "El rol especificado no está disponible.";
+                return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            
+        } catch (Exception e) {e.printStackTrace();}
+        
+        Employee employee = null;
+        
+        try {
+            employee = new EmployeeDAO().get(Integer.parseInt(id));
+            if (employee == null) {
+                msg = "El empleado especificado no existe.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            
+        } catch (Exception e) {e.printStackTrace();}
+        
+        try {
+            employee.setRole(role);
+            employee.setState(Boolean.valueOf(state));
+            
+            int status = empDao.update(employee);
+            
+            if (status == DaoStatus.OK) {
+                msg = "Empleado modificado.";
+                return Response.ok(msg, "text/plain").build();
+            }
+            if (status == DaoStatus.CONSTRAINT_VIOLATION) {
+                return Response.status(Response.Status.CONFLICT).entity("Ocurrió un error de constraint desconocido.").type(MediaType.TEXT_PLAIN).build();
+            }
+            else {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error.").type(MediaType.TEXT_PLAIN).build();
+            }
+            
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        msg = "No se pudo modificar el empleado.";
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
     }

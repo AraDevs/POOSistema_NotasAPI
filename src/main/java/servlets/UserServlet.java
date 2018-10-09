@@ -369,7 +369,7 @@ public class UserServlet {
                 msg = "El usuario a modificar no existe.";
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {e.printStackTrace();}
         
         try {
             Person person = user.getPerson();

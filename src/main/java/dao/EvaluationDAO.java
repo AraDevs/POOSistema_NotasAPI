@@ -93,6 +93,41 @@ public class EvaluationDAO extends DAO {
         return evaluation;
     }
     
+    public Evaluation getEvaluationWithCourse(int id) throws Exception {
+        Evaluation evaluation = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM Evaluation e join fetch e.course where e.id = :id";
+            Query query = ses.createQuery(queryString, Evaluation.class);
+            query.setParameter("id", id);
+            evaluation = (Evaluation) query.uniqueResult();
+            
+            evaluation.getCourse().setCareerCourses(null);
+            evaluation.getCourse().setCourse(null);
+            evaluation.getCourse().setCourseTeachers(null);
+            evaluation.getCourse().setCourses(null);
+            evaluation.getCourse().setEvaluations(null);
+            evaluation.getCourse().setFaculty(null);
+            evaluation.setGrades(null);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return evaluation;
+    }
+    
     public List<Evaluation> getEvaluationByCourse(int courseId, boolean active) throws Exception {
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();

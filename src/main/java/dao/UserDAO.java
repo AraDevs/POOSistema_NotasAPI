@@ -219,6 +219,38 @@ public class UserDAO extends DAO {
         return user;
     }
     
+    public User getUserNiceWay (int id) throws Exception {
+        User user = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            String queryString = "FROM User u join fetch u.person where u.id = :id";
+            Query query = ses.createQuery(queryString, User.class);
+            query.setParameter("id", id);
+            user = (User) query.uniqueResult();
+            
+            Hibernate.initialize(user.getEmployees());
+            Hibernate.initialize(user.getStudents());
+
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return user;
+    }
+    
     /**
      * 
      * @param username

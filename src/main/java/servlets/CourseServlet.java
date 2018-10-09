@@ -243,7 +243,7 @@ public class CourseServlet {
                 msg = "La facultad especificada no está disponible.";
                 return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {e.printStackTrace();}
         
         try {
             //Si es 0, no hay prerrequisito
@@ -258,7 +258,7 @@ public class CourseServlet {
                     return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
                 }
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {e.printStackTrace();}
         
         //VALIDACIONES PENDIENTES
         //Prerrequisito en la misma facultad que la materia (???)
@@ -365,7 +365,7 @@ public class CourseServlet {
                 msg = "La facultad especificada no está disponible.";
                 return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {e.printStackTrace();}
         
         try {
             //Si es 0, no hay prerrequisito
@@ -380,7 +380,7 @@ public class CourseServlet {
                     return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
                 }
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {e.printStackTrace();}
         
         Course course = null;
         
@@ -390,7 +390,7 @@ public class CourseServlet {
                 msg = "La materia a modificar no existe.";
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {e.printStackTrace();}
         
         //VALIDACIONES PENDIENTES
         //Prerrequisito en la misma facultad que la materia (???)
