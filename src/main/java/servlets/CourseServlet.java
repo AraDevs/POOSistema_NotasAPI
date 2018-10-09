@@ -8,18 +8,26 @@ package servlets;
 import dao.CareerCourseDAO;
 import dao.CareerStudentDAO;
 import dao.CourseDAO;
+import dao.FacultyDAO;
 import dao.RegisteredCourseDAO;
+import helpers.DaoStatus;
 import hibernate.CareerCourse;
 import hibernate.CareerStudent;
 import hibernate.Course;
+import hibernate.Faculty;
 import hibernate.RegisteredCourse;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  *
@@ -166,5 +174,257 @@ public class CourseServlet {
             e.printStackTrace();
             return new ArrayList<Course>();
         }
+    }
+       
+    @POST
+    @Path("/")
+    @Produces({MediaType.TEXT_PLAIN})
+    public Response create (@FormParam("name") String name, @FormParam("semester") String semester, 
+            @FormParam("inter") String inter, @FormParam("laboratory") String laboratory, @FormParam("uv") String uv,
+            @FormParam("prerrequisiteId") String prerrequisiteId, @FormParam("facultyId") String facultyId) {
+        
+        courseDao = new CourseDAO(false);
+        
+        String msg = "";
+        if (name == null || name.equals("")) {
+            msg += " Nombre de materia\n";
+        }
+        if (semester == null || semester.equals("")) {
+            msg += " Ciclos en los que está disponible\n";
+        }
+        if (inter == null || inter.equals("")) {
+            msg += " Disponible en interciclo\n";
+        }
+        if (laboratory == null || laboratory.equals("")) {
+            msg += " Posee laboratorio\n";
+        }
+        if (uv == null || uv.equals("")) {
+            msg += " Unidades valorativas\n";
+        }
+        if (prerrequisiteId == null || prerrequisiteId.equals("")) {
+            msg += " Prerrequisito\n";
+        }
+        if (facultyId == null || facultyId.equals("")) {
+            msg += " Facultad";
+        }
+        
+        if (!msg.equals("")) {
+            msg = "Por favor ingrese todos los valores:\n" + msg + ".";
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        //Generando coursecode
+        Random r = new Random();
+        String nameWithoutSpaces = name.replace(" ", "").toUpperCase();
+        String courseCode = nameWithoutSpaces.substring(0, 3) + 
+                            nameWithoutSpaces.substring(nameWithoutSpaces.length() - 2) + 
+                            String.valueOf(r.nextInt()).substring(1,6);
+        
+        if (!(semester.equals("1") || semester.equals("2") || semester.equals("12"))) {
+            msg = "El valor pasado para el campo Ciclo no es válido.";
+            return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        if (Integer.parseInt(uv) < 2 || Integer.parseInt(uv) > 6) {
+            msg = "Las unidades valorativas deben estar en el rango 2 a 6.";
+            return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        Course prerrequisite = null;
+        Faculty faculty = null;
+        
+        try {
+            faculty = new FacultyDAO().get(Integer.parseInt(facultyId));
+            if (faculty == null) {
+                msg = "La facultad especificada no existe.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            else if (!faculty.getState()) {
+                msg = "La facultad especificada no está disponible.";
+                return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {}
+        
+        try {
+            //Si es 0, no hay prerrequisito
+            if (!prerrequisiteId.equals("0")) {
+                prerrequisite = new CourseDAO().get(Integer.parseInt(prerrequisiteId));
+                if (prerrequisite == null) {
+                    msg = "El prerrequisito especificado no existe.";
+                    return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+                }
+                else if (!prerrequisite.getState()) {
+                    msg = "El prerrequisito especificado no está disponible.";
+                    return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+                }
+            }
+        } catch (Exception e) {}
+        
+        //VALIDACIONES PENDIENTES
+        //Prerrequisito en la misma facultad que la materia (???)
+        
+        try {
+            Course course = new Course();
+            course.setName(name);
+            course.setCourseCode(courseCode);
+            course.setSemester(semester);
+            course.setInter(Boolean.valueOf(inter));
+            course.setLaboratory(Boolean.valueOf(laboratory));
+            course.setUv(Integer.parseInt(uv));
+            if (Integer.parseInt(prerrequisiteId) != 0) course.setCourse(prerrequisite);
+            course.setFaculty(faculty);
+            course.setState(true);
+            
+            int status = courseDao.add(course);
+            
+            if (status == DaoStatus.OK) {
+                msg = "Materia agregada.";
+                return Response.ok(msg, "text/plain").build();
+            }
+            if (status == DaoStatus.CONSTRAINT_VIOLATION) {
+                return Response.status(Response.Status.CONFLICT).entity("El nombre de la materia ya está en uso.").type(MediaType.TEXT_PLAIN).build();
+            }
+            else {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error.").type(MediaType.TEXT_PLAIN).build();
+            }
+            
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        msg = "No se pudo guardar la materia.";
+        
+        return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+    }
+    
+    @PUT
+    @Path("/")
+    @Produces({MediaType.TEXT_PLAIN})
+    public Response update (@FormParam("name") String name, @FormParam("semester") String semester, 
+            @FormParam("inter") String inter, @FormParam("laboratory") String laboratory, @FormParam("uv") String uv,
+            @FormParam("prerrequisiteId") String prerrequisiteId, @FormParam("facultyId") String facultyId,
+            @FormParam("state") String state, @FormParam("id") String id) {
+        
+        courseDao = new CourseDAO(false);
+        
+        String msg = "";
+        if (name == null || name.equals("")) {
+            msg += " Nombre de materia\n";
+        }
+        if (semester == null || semester.equals("")) {
+            msg += " Ciclos en los que está disponible\n";
+        }
+        if (inter == null || inter.equals("")) {
+            msg += " Disponible en interciclo\n";
+        }
+        if (laboratory == null || laboratory.equals("")) {
+            msg += " Posee laboratorio\n";
+        }
+        if (uv == null || uv.equals("")) {
+            msg += " Unidades valorativas\n";
+        }
+        if (prerrequisiteId == null || prerrequisiteId.equals("")) {
+            msg += " Prerrequisito\n";
+        }
+        if (facultyId == null || facultyId.equals("")) {
+            msg += " Facultad\n";
+        }
+        if (state == null || state.equals("")) {
+            msg += " Estado\n";
+        }
+        if (id == null || id.equals("")) {
+            msg += " ID";
+        }
+        
+        if (!msg.equals("")) {
+            msg = "Por favor ingrese todos los valores:\n" + msg + ".";
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        if (!(semester.equals("1") || semester.equals("2") || semester.equals("12"))) {
+            msg = "El valor pasado para el campo Ciclo no es válido.";
+            return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        if (Integer.parseInt(uv) < 2 || Integer.parseInt(uv) > 6) {
+            msg = "Las unidades valorativas deben estar en el rango 2 a 6.";
+            return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        Course prerrequisite = null;
+        Faculty faculty = null;
+        
+        try {
+            faculty = new FacultyDAO().get(Integer.parseInt(facultyId));
+            if (faculty == null) {
+                msg = "La facultad especificada no existe.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            else if (!faculty.getState()) {
+                msg = "La facultad especificada no está disponible.";
+                return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {}
+        
+        try {
+            //Si es 0, no hay prerrequisito
+            if (!prerrequisiteId.equals("0")) {
+                prerrequisite = new CourseDAO().get(Integer.parseInt(prerrequisiteId));
+                if (prerrequisite == null) {
+                    msg = "El prerrequisito especificado no existe.";
+                    return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+                }
+                else if (!prerrequisite.getState()) {
+                    msg = "El prerrequisito especificado no está disponible.";
+                    return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+                }
+            }
+        } catch (Exception e) {}
+        
+        Course course = null;
+        
+        try {
+            course = new CourseDAO().get(Integer.parseInt(id));
+            if (course == null) {
+                msg = "La materia a modificar no existe.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {}
+        
+        //VALIDACIONES PENDIENTES
+        //Prerrequisito en la misma facultad que la materia (???)
+        
+        try {
+            course.setName(name);
+            course.setSemester(semester);
+            course.setInter(Boolean.valueOf(inter));
+            course.setLaboratory(Boolean.valueOf(laboratory));
+            course.setUv(Integer.parseInt(uv));
+            if (Integer.parseInt(prerrequisiteId) != 0) course.setCourse(prerrequisite);
+            course.setFaculty(faculty);
+            course.setState(Boolean.valueOf(state));
+            
+            int status = courseDao.update(course);
+            
+            if (status == DaoStatus.OK) {
+                msg = "Materia modificada.";
+                return Response.ok(msg, "text/plain").build();
+            }
+            if (status == DaoStatus.CONSTRAINT_VIOLATION) {
+                return Response.status(Response.Status.CONFLICT).entity("Ocurrió un error de constraint desconocido.").type(MediaType.TEXT_PLAIN).build();
+            }
+            else {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error.").type(MediaType.TEXT_PLAIN).build();
+            }
+            
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        msg = "No se pudo modificar la materia.";
+        
+        return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
     }
 }

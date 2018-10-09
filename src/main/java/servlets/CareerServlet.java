@@ -132,7 +132,7 @@ public class CareerServlet {
                 return Response.ok(msg, "text/plain").build();
             }
             if (status == DaoStatus.CONSTRAINT_VIOLATION) {
-                return Response.status(Response.Status.CONFLICT).entity("El nombre de la carrera ya está en uso.").type(MediaType.TEXT_PLAIN).build();
+                return Response.status(Response.Status.CONFLICT).entity("Ocurrió un error increíblemente improbable al generar el código de la materia. Intente de nuevo.").type(MediaType.TEXT_PLAIN).build();
             }
             else {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error.").type(MediaType.TEXT_PLAIN).build();

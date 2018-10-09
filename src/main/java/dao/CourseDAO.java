@@ -26,7 +26,7 @@ import org.hibernate.query.Query;
  */
 @XmlRootElement ( name = "courseDao") 
 @XmlSeeAlso( { Course.class, Grade.class})
-public class CourseDAO {
+public class CourseDAO extends DAO {
     private List<Course> courses;
     String param;
     
@@ -119,7 +119,7 @@ public class CourseDAO {
         
     }
     
-    public Course getCourse(int courseId) {
+    public Course getCourse(int courseId) throws Exception {
         Course course = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -167,7 +167,7 @@ public class CourseDAO {
         return course;
     }
     
-    public Course getCourseByRegisteredCourse(int regCourseId) {
+    public Course getCourseByRegisteredCourse(int regCourseId) throws Exception {
         Course course = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -196,6 +196,31 @@ public class CourseDAO {
             }
         } finally {
             //ses.flush();
+            ses.close();
+        }
+        
+        return course;
+    }
+    
+    public Course get(int id) throws Exception {
+        Course course = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            course = (Course) ses.get(Course.class, id);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            ses.flush();
             ses.close();
         }
         
