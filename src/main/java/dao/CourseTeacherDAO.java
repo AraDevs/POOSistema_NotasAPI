@@ -220,6 +220,36 @@ public class CourseTeacherDAO extends DAO {
         return courseTeacher;
     }
     
+    public CourseTeacher getCourseTeacherWithParentsNiceWay(int id) throws Exception {
+        CourseTeacher courseTeacher = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM CourseTeacher ct join fetch ct.course "
+                    + " join fetch ct.employee e join fetch e.user u join fetch u.person "
+                    + "where ct.id = :id";
+            Query query = ses.createQuery(queryString, CourseTeacher.class);
+            query.setParameter("id", id);
+            courseTeacher = (CourseTeacher) query.uniqueResult();
+            
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return courseTeacher;
+    }
+    
     public CourseTeacher getCourseTeacherByRegCrs (int regCourseId) throws Exception {
         CourseTeacher crsTchr = null;
         

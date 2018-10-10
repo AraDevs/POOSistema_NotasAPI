@@ -30,7 +30,7 @@ import org.hibernate.query.Query;
  */
 @XmlRootElement ( name = "registeredCourseDao") 
 @XmlSeeAlso( { RegisteredCourse.class, Grade.class, Evaluation.class, CourseTeacher.class, Course.class})
-public class RegisteredCourseDAO {
+public class RegisteredCourseDAO extends DAO {
     private List<RegisteredCourse> regCourses;
     String param;
     
@@ -69,7 +69,7 @@ public class RegisteredCourseDAO {
         this.regCourses = regCourses;     
     } 
     
-    public List<RegisteredCourse> getRegisteredCourseList(int studentId, boolean approved)  {
+    public List<RegisteredCourse> getRegisteredCourseList(int studentId, boolean approved) throws Exception  {
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
         Transaction tra = null;
@@ -367,5 +367,60 @@ public class RegisteredCourseDAO {
         
         return regCourse;
         
+    }
+    
+    public RegisteredCourse getRegisteredCourseNiceWay(int id) throws Exception {
+        RegisteredCourse regCourse = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM RegisteredCourse rc join fetch rc.courseTeacher ct "
+                    + "join fetch ct.course c join fetch ct.employee e "
+                    + "join fetch e.user u join fetch u.person p join fetch rc.student s where rc.id = :id";
+            Query query = ses.createQuery(queryString, RegisteredCourse.class);
+            query.setParameter("id", id);
+            regCourse = (RegisteredCourse) query.uniqueResult();
+            
+        } catch (HibernateException e) {
+            e.printStackTrace();
+            if(tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return regCourse;
+        
+    }
+    
+    public RegisteredCourse get(int id) throws Exception {
+        RegisteredCourse registeredCourse = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            registeredCourse = (RegisteredCourse) ses.get(RegisteredCourse.class, id);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            ses.flush();
+            ses.close();
+        }
+        
+        return registeredCourse;
     }
 }
