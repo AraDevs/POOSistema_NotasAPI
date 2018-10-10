@@ -69,20 +69,20 @@ public class RegisteredCourseDAO {
         this.regCourses = regCourses;     
     } 
     
-    public List<RegisteredCourse> getRegisteredCourseList(int studentId, boolean active)  {
+    public List<RegisteredCourse> getRegisteredCourseList(int studentId, boolean approved)  {
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
         Transaction tra = null;
         
         try {
-            /*String activeQuery = "";
-            if (active) {
-                activeQuery = " and rc.courseState = 'En curso'";
-            }*/
+            String approvedQuery = "";
+            if (approved) {
+                approvedQuery = " and rc.courseState = 'Aprobada'";
+            }
             
             tra = ses.beginTransaction();
             String queryString = "FROM RegisteredCourse rc join fetch rc.courseTeacher ct "
-                    + "join fetch ct.course c where rc.student.id = :studentId" /*+ activeQuery*/;
+                    + "join fetch ct.course c where rc.student.id = :studentId" + approvedQuery;
             Query query = ses.createQuery(queryString, RegisteredCourse.class);
             query.setParameter("studentId", studentId);
             regCourses = query.list();

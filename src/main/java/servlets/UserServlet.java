@@ -127,7 +127,7 @@ public class UserServlet {
     @Produces({MediaType.APPLICATION_JSON})
     public User getUser (@PathParam("userId") String userId) {
         try {
-            return new UserDAO().getUser(Integer.parseInt(userId));
+            return new UserDAO().getUser(Integer.parseInt(userId), false);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -364,7 +364,7 @@ public class UserServlet {
         User user = null;
         
         try {
-            user = userDao.getUser(Integer.parseInt(id));
+            user = userDao.getUser(Integer.parseInt(id), true);
             if (user == null) {
                 msg = "El usuario a modificar no existe.";
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();

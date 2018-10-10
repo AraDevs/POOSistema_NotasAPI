@@ -133,6 +133,43 @@ public class CareerStudentDAO extends DAO {
         return careerStudent;
     }
     
+    public CareerStudent getCareerStudentWithParents(int id) throws Exception {
+        CareerStudent careerStudent = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM CareerStudent cs join fetch cs.student s "
+                    + "join fetch cs.career c where cs.id = :id";
+            Query query = ses.createQuery(queryString, CareerStudent.class);
+            query.setParameter("id", id);
+            careerStudent = (CareerStudent) query.uniqueResult();
+            
+            careerStudent.getStudent().setCareerStudents(null);
+            careerStudent.getStudent().setRegisteredCourses(null);
+            careerStudent.getStudent().setUser(null);
+
+            careerStudent.getCareer().setCareerCourses(null);
+            careerStudent.getCareer().setCareerStudents(null);
+            careerStudent.getCareer().setFaculty(null);
+            careerStudent.getCareer().setCareerType(null);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return careerStudent;
+    }
+    
     public CareerStudent getCurrentCareerStudentByStudent(int studentId) throws Exception {
         CareerStudent careerStudent = null;
         

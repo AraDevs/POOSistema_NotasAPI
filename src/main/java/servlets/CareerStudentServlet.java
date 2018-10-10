@@ -5,13 +5,19 @@
  */
 package servlets;
 
+import dao.CareerCourseDAO;
 import dao.CareerDAO;
 import dao.CareerStudentDAO;
+import dao.RegisteredCourseDAO;
 import dao.StudentDAO;
 import helpers.DaoStatus;
 import hibernate.Career;
+import hibernate.CareerCourse;
 import hibernate.CareerStudent;
+import hibernate.Course;
+import hibernate.RegisteredCourse;
 import hibernate.Student;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import javax.ws.rs.FormParam;
@@ -139,21 +145,17 @@ public class CareerStudentServlet {
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
     }
-    /*
+    
     @PUT
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response update (@FormParam("careerState") String careerState, @FormParam("state") String state, 
-                            @FormParam("id") String id) {
+    public Response update (@FormParam("careerState") String careerState, @FormParam("id") String id) {
         
         CareerStudentDAO carStdDao = new CareerStudentDAO(false);
         
         String msg = "";
         if (careerState == null || careerState.equals("")) {
             msg += " Estado de carrera\n";
-        }
-        if (state == null || state.equals("")) {
-            msg += " Estado\n";
         }
         if (id == null || id.equals("")) {
             msg += " ID";
@@ -169,57 +171,79 @@ public class CareerStudentServlet {
             return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
         }
         
-        Faculty faculty = null;
-        CareerType careerType = null;
+        CareerStudent careerStudent = null;
         
         try {
-            faculty = new FacultyDAO().get(Integer.parseInt(facultyId));
-            if (faculty == null) {
-                msg = "La facultad especificada no existe.";
+            careerStudent = carStdDao.getCareerStudentWithParents(Integer.parseInt(id));
+            if (careerStudent == null) {
+                msg = "El registro de carrera especificado no existe.";
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
-            else if (!faculty.getState()) {
-                msg = "La facultad especificada no está disponible.";
-                return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
-            }
-        } catch (Exception e) {e.printStackTrace();}
-        
-        try {
-            careerType = new CareerTypeDAO().get(Integer.parseInt(careerTypeId));
-            if (careerType == null) {
-                msg = "El tipo de carrera especificado no existe.";
-                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
-            }
-            else if (!careerType.getState()) {
-                msg = "El tipo de carrera especificado no está disponible.";
-                return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
-            }
-        } catch (Exception e) {e.printStackTrace();}
-        
-        Career career = null;
-        
-        try {
-            career = carDao.get(Integer.parseInt(id));
-            if (career == null) {
-                msg = "La carrera a modificar no existe.";
-                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
-            }
-        } catch (Exception e) {e.printStackTrace();}
-        
-        try {
-            career.setName(name);
-            career.setFaculty(faculty);
-            career.setCareerType(careerType);
-            career.setState(Boolean.valueOf(state));
             
-            int status = carDao.add(career);
+            if (careerState.equals("En curso")) {
+                //Verificando si no hay otra carrera en curso
+                for (CareerStudent cs : carStdDao.getCareerStudentList(careerStudent.getStudent().getId())) {
+                    if (cs.getCareerState().equals("En curso") && cs.getId() != Integer.parseInt(id)) {
+                        msg = "El estudiante especificado ya tiene una carrera en curso.";
+                        return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();                    
+                    }
+                }
+            }
+            //Si se ha definido la carrera como "Egresada" o "Abandonada", es necesario comprobarlo
+            else {
+                //Lista de materias aprobadas por el estudiante
+                List<RegisteredCourse> approvedCourses = new RegisteredCourseDAO().getRegisteredCourseList(careerStudent.getStudent().getId(), true);
+                //Lista de codigos de las materias aprobadas
+                List<String> approvedCourseCodes = new ArrayList<String>();
+                for (RegisteredCourse rc : approvedCourses) {
+                    approvedCourseCodes.add(rc.getCourseTeacher().getCourse().getCourseCode());
+                }
+                
+                CareerCourseDAO carCrsDao = new CareerCourseDAO();
+                int plan = carCrsDao.getPlan(careerStudent);
+                //Lista de materias que deben ser aprobadas para egresar
+                List<CareerCourse> pensum = carCrsDao.getCareerCourseByCareerPlan(careerStudent.getCareer().getId(), plan);
+                
+                int approvedCourseCount = 0;
+                //Verificando si cada materia ha sido aprobada
+                for (CareerCourse cc : pensum) {
+                    if (approvedCourseCodes.contains(cc.getCourse().getCourseCode())) {
+                        approvedCourseCount++;
+                    }
+                }
+                
+                Boolean complete = false;
+                
+                //Si todas fueron aprobadas
+                if (approvedCourseCount == pensum.size()) {
+                    complete = true;
+                }
+                
+                //Si se definió como egresado pero no ha pasado todas las materias
+                if (careerState.equals("Egresado") && !complete) {
+                    msg = "El estudiante no puede ser egresado, porque aún tiene materias pendientes de aprobar en esta carrera.";
+                    return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();  
+                }
+                
+                //Si se definió como abandonado pero pasó todas las materias
+                if (careerState.equals("Abandonado") && complete) {
+                    msg = "El estudiante no puede haber abandonado, porque ya ha aprobado todas las materias de esta carrera.";
+                    return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();  
+                }
+            }
+        } catch (Exception e) {e.printStackTrace();}
+        
+        try {
+            careerStudent.setCareerState(careerState);
+            
+            int status = carStdDao.update(careerStudent);
             
             if (status == DaoStatus.OK) {
-                msg = "Carrera modificada.";
+                msg = "Registro de carrera modificado.";
                 return Response.ok(msg, "text/plain").build();
             }
             if (status == DaoStatus.CONSTRAINT_VIOLATION) {
-                return Response.status(Response.Status.CONFLICT).entity("El nombre de la carrera ya está en uso.").type(MediaType.TEXT_PLAIN).build();
+                return Response.status(Response.Status.CONFLICT).entity("Ocurrió un error de constraint desconocido.").type(MediaType.TEXT_PLAIN).build();
             }
             else {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error.").type(MediaType.TEXT_PLAIN).build();
@@ -230,8 +254,8 @@ public class CareerStudentServlet {
             e.printStackTrace();
         }
         
-        msg = "No se pudo modificar la carrera.";
+        msg = "No se pudo modificar el registro de carrera.";
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
-    }*/
+    }
 }

@@ -185,7 +185,7 @@ public class UserDAO extends DAO {
         return users;
     }
     
-    public User getUser (int id) throws Exception {
+    public User getUser (int id, boolean withPass) throws Exception {
         User user = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -202,7 +202,8 @@ public class UserDAO extends DAO {
             
             user.setEmployees(null);
             user.setStudents(null);
-            user.setPass(null);
+            
+            if (!withPass) user.setPass(null);
 
             user.getPerson().setUsers(null);
             
