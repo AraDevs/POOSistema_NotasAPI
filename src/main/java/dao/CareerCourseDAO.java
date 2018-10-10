@@ -23,7 +23,7 @@ import org.hibernate.query.Query;
  * @author kevin
  */
 @XmlRootElement (name = "careerCourseDao")
-public class CareerCourseDAO {
+public class CareerCourseDAO extends DAO {
     private List<CareerCourse> careerCourses;
     String param;
     
@@ -60,7 +60,7 @@ public class CareerCourseDAO {
         this.careerCourses = careerCourses;        
     }
     
-    public List<CareerCourse> getCareerCourseList(int careerId, boolean active) {
+    public List<CareerCourse> getCareerCourseList(int careerId, boolean active) throws Exception {
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
@@ -116,7 +116,7 @@ public class CareerCourseDAO {
         return careerCourses;
     }
     
-    public CareerCourse getCareerCourse(int id) {
+    public CareerCourse getCareerCourse(int id) throws Exception {
         CareerCourse careerCourse = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -154,7 +154,7 @@ public class CareerCourseDAO {
         return careerCourse;
     }
     
-    public List<CareerCourse> getCareerCourseByCareerPlan(int careerId, int plan) {
+    public List<CareerCourse> getCareerCourseByCareerPlan(int careerId, int plan) throws Exception {
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
@@ -205,7 +205,7 @@ public class CareerCourseDAO {
         return careerCourses;
     }
     
-    public int getPlan(CareerStudent careerStudent) {
+    public int getPlan(CareerStudent careerStudent) throws Exception {
         int plan = 0;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -234,5 +234,30 @@ public class CareerCourseDAO {
         }
         
         return plan;
+    }
+    
+    public CareerCourse get(int id) throws Exception {
+        CareerCourse careerCourse = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            careerCourse = (CareerCourse) ses.get(CareerCourse.class, id);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            ses.flush();
+            ses.close();
+        }
+        
+        return careerCourse;
     }
 }
