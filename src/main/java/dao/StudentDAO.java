@@ -5,6 +5,7 @@
  */
 package dao;
 
+import hibernate.CareerStudent;
 import hibernate.HibernateUtil;
 import hibernate.Person;
 import hibernate.Student;
@@ -165,6 +166,41 @@ public class StudentDAO extends DAO {
             student.getUser().setEmployees(null);
             student.getUser().setStudents(null);
             student.getUser().getPerson().setUsers(null);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return student;
+    }
+    
+    public Student getStudentWithCareerStudent(int id) throws Exception {
+        Student student = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM Student s left join fetch s.careerStudents where s.id = :id";
+            Query query = ses.createQuery(queryString, Student.class);
+            query.setParameter("id", id);
+            student = (Student) query.uniqueResult();
+            
+            student.setRegisteredCourses(null);
+            student.setUser(null);
+            
+            for (Object cs : student.getCareerStudents()) {
+                ((CareerStudent) cs).setCareer(null);
+                ((CareerStudent) cs).setStudent(null);
+            }
             
         } catch (Exception e) {
             e.printStackTrace();

@@ -22,7 +22,7 @@ import org.hibernate.query.Query;
  * @author kevin
  */
 @XmlRootElement ( name = "careerStudentDao") 
-public class CareerStudentDAO {
+public class CareerStudentDAO extends DAO {
     private List<CareerStudent> careerStudents;
     String param;
     
@@ -59,7 +59,7 @@ public class CareerStudentDAO {
         this.careerStudents = careerStudents;        
     }
     
-    public List<CareerStudent> getCareerStudentList(int studentId) {
+    public List<CareerStudent> getCareerStudentList(int studentId) throws Exception {
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
@@ -98,7 +98,7 @@ public class CareerStudentDAO {
         return careerStudents;
     }
     
-    public CareerStudent getCareerStudent(int id) {
+    public CareerStudent getCareerStudent(int id) throws Exception {
         CareerStudent careerStudent = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -133,7 +133,7 @@ public class CareerStudentDAO {
         return careerStudent;
     }
     
-    public CareerStudent getCurrentCareerStudentByStudent(int studentId) {
+    public CareerStudent getCurrentCareerStudentByStudent(int studentId) throws Exception {
         CareerStudent careerStudent = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -165,5 +165,30 @@ public class CareerStudentDAO {
         }
         
         return careerStudent;
+    }
+    
+    public CareerStudent get(int id) throws Exception {
+        CareerStudent careerStudents = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            careerStudents = (CareerStudent) ses.get(CareerStudent.class, id);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            ses.flush();
+            ses.close();
+        }
+        
+        return careerStudents;
     }
 }

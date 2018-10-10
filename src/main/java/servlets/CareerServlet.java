@@ -222,7 +222,7 @@ public class CareerServlet {
             career.setCareerType(careerType);
             career.setState(Boolean.valueOf(state));
             
-            int status = carDao.add(career);
+            int status = carDao.update(career);
             
             if (status == DaoStatus.OK) {
                 msg = "Carrera modificada.";
