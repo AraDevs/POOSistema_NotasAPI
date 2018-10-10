@@ -10,6 +10,7 @@ import dao.CourseTeacherDAO;
 import dao.EmployeeDAO;
 import dao.RegisteredCourseDAO;
 import helpers.DaoStatus;
+import helpers.Helpers;
 import hibernate.Course;
 import hibernate.CourseTeacher;
 import hibernate.Employee;
@@ -201,6 +202,13 @@ public class CourseTeacherServlet {
             }
         }
         
+        //El estado se calculará en función de si el courseTeacher está en el ciclo actual o no
+        Boolean state = false;
+        
+        if (Integer.parseInt(courseYear) == Helpers.getCurrentYear() && semester.equals(Helpers.getCurrentSemester())) {
+            state = true;
+        }
+        
         
         try {
             CourseTeacher courseTeacher = new CourseTeacher();
@@ -209,7 +217,7 @@ public class CourseTeacherServlet {
             courseTeacher.setCourseYear(Integer.parseInt(courseYear));
             courseTeacher.setClassCount(Integer.parseInt(classCount));
             courseTeacher.setSemester(semester);
-            courseTeacher.setState(true);
+            courseTeacher.setState(state);
             
             int status = crsTchDao.add(courseTeacher);
             
@@ -238,8 +246,7 @@ public class CourseTeacherServlet {
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
     public Response update (@FormParam("courseYear") String courseYear, @FormParam("semester") String semester, 
-            @FormParam("classCount") String classCount, @FormParam("state") String state, 
-            @FormParam("id") String id) {
+            @FormParam("classCount") String classCount, @FormParam("id") String id) {
         
         CourseTeacherDAO crsTchDao = new CourseTeacherDAO(false);
         
@@ -252,9 +259,6 @@ public class CourseTeacherServlet {
         }
         if (classCount == null || classCount.equals("")) {
             msg += " Cantidad de sesiones\n";
-        }
-        if (state == null || state.equals("")) {
-            msg += " Estado\n";
         }
         if (id == null || id.equals("")) {
             msg += " ID";
@@ -301,7 +305,7 @@ public class CourseTeacherServlet {
         try {
             registeredCourses = new RegisteredCourseDAO().getRegisteredCourseByCourseTeacher(Integer.parseInt(id), false);
         
-            //Las operaciones con semester y courseYear son válidas solo para registros sin hijos
+            //La modificación es válida solo para registros sin hijos
             if (registeredCourses.isEmpty()) {
             
                 if (!(semester.equals("1") || semester.equals("2") || semester.equals("Interciclo"))) {
@@ -327,6 +331,18 @@ public class CourseTeacherServlet {
                         return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
                     }
                 }
+                
+                //El estado se calculará en función de si el courseTeacher está en el ciclo actual o no
+                Boolean state = false;
+
+                if (Integer.parseInt(courseYear) == Helpers.getCurrentYear() && semester.equals(Helpers.getCurrentSemester())) {
+                    state = true;
+                }
+                courseTeacher.setState(Boolean.valueOf(state));
+            }
+            else {
+                msg = "Esta clase ya está en uso, asi que no puede ser modificada.";
+                return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -335,7 +351,7 @@ public class CourseTeacherServlet {
         
         try {
             courseTeacher.setCourseYear(Integer.parseInt(courseYear));
-            courseTeacher.setState(Boolean.valueOf(state));
+            //El setter de state se mudó unas lineas más arribita
             
             if (registeredCourses.isEmpty()) {
                 courseTeacher.setClassCount(Integer.parseInt(classCount));

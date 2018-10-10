@@ -100,6 +100,7 @@ public class CourseDAO extends DAO {
                             c.getCourse().getSemester(), 
                             c.getCourse().getUv()
                     );
+                    prerrequisite.setId(c.getCourse().getId());
                     
                     c.setCourse(prerrequisite);
                 }
@@ -150,6 +151,7 @@ public class CourseDAO extends DAO {
                         course.getCourse().getSemester(), 
                         course.getCourse().getUv()
                 );
+                prerrequisite.setId(course.getCourse().getId());
 
                 course.setCourse(prerrequisite);
             }
