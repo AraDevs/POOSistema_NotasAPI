@@ -212,6 +212,42 @@ public class EmployeeDAO extends DAO {
         return employee;
     }
     
+    public Employee getEmployeeByCourseTeacher(int courseTeacherId) throws Exception {
+        
+        Employee employee = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM Employee e join fetch e.user u join fetch u.person p "
+                    + "join fetch e.courseTeachers ct where ct.id = :courseTeacherId";
+            Query query = ses.createQuery(queryString, Employee.class);
+            query.setParameter("courseTeacherId", courseTeacherId);
+            employee = (Employee) query.uniqueResult();
+            
+            employee.setRole(null);
+            employee.setCourseTeachers(null);
+            employee.getUser().setStudents(null);
+            employee.getUser().setPass(null);
+            employee.getUser().setEmployees(null);
+            employee.getUser().getPerson().setUsers(null);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return employee;
+    }
+    
     public Employee getEmployee(int id) throws Exception {
         
         Employee employee = null;

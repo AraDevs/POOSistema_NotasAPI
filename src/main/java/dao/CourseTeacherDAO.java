@@ -24,7 +24,7 @@ import org.hibernate.query.Query;
  */
 @XmlRootElement ( name = "courseTeacherDao") 
 @XmlSeeAlso( { CourseTeacher.class})
-public class CourseTeacherDAO {
+public class CourseTeacherDAO extends DAO {
     private List<CourseTeacher> courseTeachers;
     String param;
     
@@ -61,7 +61,7 @@ public class CourseTeacherDAO {
         this.courseTeachers = courseTeachers;        
     }
     
-    public List<CourseTeacher> getCourseTeacherList(int employeeId, boolean active) {
+    public List<CourseTeacher> getCourseTeacherList(int employeeId, boolean active) throws Exception {
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
@@ -111,7 +111,7 @@ public class CourseTeacherDAO {
         return courseTeachers;
     }
     
-    public List<CourseTeacher> getCourseTeacherByCourse(int courseId) {
+    public List<CourseTeacher> getCourseTeacherByCourse(int courseId) throws Exception {
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
@@ -153,7 +153,7 @@ public class CourseTeacherDAO {
         return courseTeachers;
     }
     
-    public CourseTeacher getCourseTeacher(int id) {
+    public CourseTeacher getCourseTeacher(int id) throws Exception {
         CourseTeacher courseTeacher = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -191,7 +191,36 @@ public class CourseTeacherDAO {
         return courseTeacher;
     }
     
-    public CourseTeacher getCourseTeacherByRegCrs (int regCourseId) {
+    public CourseTeacher getCourseTeacherNiceWay(int id) throws Exception {
+        CourseTeacher courseTeacher = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM CourseTeacher ct join fetch ct.course "
+                    + "where ct.id = :id";
+            Query query = ses.createQuery(queryString, CourseTeacher.class);
+            query.setParameter("id", id);
+            courseTeacher = (CourseTeacher) query.uniqueResult();
+            
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return courseTeacher;
+    }
+    
+    public CourseTeacher getCourseTeacherByRegCrs (int regCourseId) throws Exception {
         CourseTeacher crsTchr = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -219,7 +248,7 @@ public class CourseTeacherDAO {
         return crsTchr;
     }
     
-    public String getCourseTeacherTendency (int regCourseId) {
+    public String getCourseTeacherTendency (int regCourseId) throws Exception {
         
         String response = "";
         
@@ -269,5 +298,30 @@ public class CourseTeacherDAO {
         }
         
         return response;
+    }
+    
+    public CourseTeacher get(int id) throws Exception {
+        CourseTeacher courseTeacher = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            courseTeacher = (CourseTeacher) ses.get(CourseTeacher.class, id);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            ses.flush();
+            ses.close();
+        }
+        
+        return courseTeacher;
     }
 }
