@@ -270,47 +270,46 @@ public class StudentServlet {
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
     }
     
-    /*
     @DELETE
-    @Path("/delete/{userId: \\d+}")
+    @Path("/{id: \\d+}")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response delete (@PathParam("userId") String userId) {
+    public Response delete(@PathParam("id") String id) {
         
         String msg = "";
+        StudentDAO studentDao = new StudentDAO();
+        
+        Student student = null;
         
         try {
-            if (new UserController().getUserById(Integer.parseInt(userId)) == null) {
-                msg = "Given userId does not exist.";
+            student = studentDao.get(Integer.parseInt(id));
+            
+            if (student == null) {
+                msg = "El estudiante a eliminar no existe.";
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
-        } catch (Exception e) {}
-        
-        try {
-            String dltUserId = new StudentController().delete(userId);
-            if (!Helpers.isInt(dltUserId)) {
-                return Response.status(Response.Status.CONFLICT).entity(Helpers.parseSqlError(dltUserId)).type(MediaType.TEXT_PLAIN).build();
-            }
-            if (Integer.parseInt(dltUserId) <= 0) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error ocurred").type(MediaType.TEXT_PLAIN).build();
-            }
-            
-            dltUserId = new UserController().delete(userId);
-            if (!Helpers.isInt(dltUserId)) {
-                return Response.status(Response.Status.CONFLICT).entity(Helpers.parseSqlError(dltUserId)).type(MediaType.TEXT_PLAIN).build();
-            }
-            if (Integer.parseInt(dltUserId) <= 0) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error ocurred").type(MediaType.TEXT_PLAIN).build();
-            }
-            
-            msg = "Student with user id " + dltUserId + " deleted";
-            return Response.ok(msg, "text/plain").build();
         } catch (Exception e) {
             e.printStackTrace();
         }
         
-        msg = "Could not delete the student";
+        try {
+            int status = studentDao.delete(student);
+            
+            if (status == DaoStatus.OK) {
+                msg = "Estudiante eliminado.";
+                return Response.ok(msg, "text/plain").build();
+            }
+            if (status == DaoStatus.CONSTRAINT_VIOLATION) {
+                return Response.status(Response.Status.CONFLICT).entity("El estudiante no se puede eliminar, porque ya está en uso.").type(MediaType.TEXT_PLAIN).build();
+            } else {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error.").type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        msg = "No se pudo eliminar el estudiante.";
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
         
-    }*/
+    }
 }

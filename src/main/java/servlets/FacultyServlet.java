@@ -179,40 +179,48 @@ public class FacultyServlet {
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
     }
     
-    /*
+    
     @DELETE
-    @Path("/delete/{id: \\d+}")
+    @Path("/{id: \\d+}")
     @Produces({MediaType.TEXT_PLAIN})
     public Response delete (@PathParam("id") String id) {
         
         String msg = "";
-        fctDao = new FacultyController();
+        FacultyDAO facultyDao = new FacultyDAO();
+        
+        Faculty faculty = null;
         
         try {
-            if (fctDao.getFacultyById(id) == null) {
-                msg = "Given id does not exist.";
+            faculty = facultyDao.get(Integer.parseInt(id));
+            
+            if (faculty == null) {
+                msg = "La facultad a eliminar no existe.";
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
-        } catch (Exception e) {}
-        
-        try {
-            String outputId = fctDao.delete(id);
-            if (!Helpers.isInt(outputId)) {
-                return Response.status(Response.Status.CONFLICT).entity(Helpers.parseSqlError(outputId)).type(MediaType.TEXT_PLAIN).build();
-            }
-            if (Integer.parseInt(outputId) <= 0) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error ocurred").type(MediaType.TEXT_PLAIN).build();
-            }
-            
-            msg = "Faculty with id " + outputId + " deleted";
-            return Response.ok(msg, "text/plain").build();
         } catch (Exception e) {
             e.printStackTrace();
         }
         
-        msg = "Could not delete the faculty";
+        try {
+            int status = facultyDao.delete(faculty);
+            
+            if (status == DaoStatus.OK) {
+                msg = "Facultad eliminada.";
+                return Response.ok(msg, "text/plain").build();
+            }
+            if (status == DaoStatus.CONSTRAINT_VIOLATION) {
+                return Response.status(Response.Status.CONFLICT).entity("La facultad no se puede eliminar, porque ya está en uso.").type(MediaType.TEXT_PLAIN).build();
+            }
+            else {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error.").type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        msg = "No se pudo eliminar la facultad.";
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
         
-    }*/
+    }
 }

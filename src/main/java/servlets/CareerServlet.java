@@ -13,6 +13,7 @@ import hibernate.Career;
 import hibernate.CareerType;
 import hibernate.Faculty;
 import java.util.List;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -243,5 +244,48 @@ public class CareerServlet {
         msg = "No se pudo modificar la carrera.";
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+    }
+    
+    @DELETE
+    @Path("/{id: \\d+}")
+    @Produces({MediaType.TEXT_PLAIN})
+    public Response delete(@PathParam("id") String id) {
+        
+        String msg = "";
+        CareerDAO careerDao = new CareerDAO();
+        
+        Career career = null;
+        
+        try {
+            career = careerDao.get(Integer.parseInt(id));
+            
+            if (career == null) {
+                msg = "La carrera a eliminar no existe.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        try {
+            int status = careerDao.delete(career);
+            
+            if (status == DaoStatus.OK) {
+                msg = "Carrera eliminada.";
+                return Response.ok(msg, "text/plain").build();
+            }
+            if (status == DaoStatus.CONSTRAINT_VIOLATION) {
+                return Response.status(Response.Status.CONFLICT).entity("La carrera no se puede eliminar, porque ya está en uso.").type(MediaType.TEXT_PLAIN).build();
+            } else {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error.").type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        msg = "No se pudo eliminar la carrera.";
+        
+        return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        
     }
 }

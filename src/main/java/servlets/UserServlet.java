@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.regex.Pattern;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -419,5 +420,62 @@ public class UserServlet {
         msg = "No se pudo modificar al usuario.";
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+    }
+    
+    @DELETE
+    @Path("/{id: \\d+}")
+    @Produces({MediaType.TEXT_PLAIN})
+    public Response delete(@PathParam("id") String id) {
+        
+        String msg = "";
+        UserDAO userDao = new UserDAO();
+        
+        User user = null;
+        
+        try {
+            user = userDao.getUserNiceWay(Integer.parseInt(id));
+            
+            if (user == null) {
+                msg = "El usuario a eliminar no existe.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        try {
+            Person person = user.getPerson();
+            
+            int status = userDao.delete(user);
+            
+            if (status == DaoStatus.OK) {
+                
+                status = new PersonDao().delete(person);
+            
+                if (status == DaoStatus.OK) {
+                    msg = "Usuario eliminado.";
+                    return Response.ok(msg, "text/plain").build();
+                }
+                if (status == DaoStatus.CONSTRAINT_VIOLATION) {
+                    return Response.status(Response.Status.CONFLICT).entity("Error de contraint desconocido al eliminar a la persona.").type(MediaType.TEXT_PLAIN).build();
+                } else {
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error al eliminar a la persona.").type(MediaType.TEXT_PLAIN).build();
+                }
+            }
+            if (status == DaoStatus.CONSTRAINT_VIOLATION) {
+                return Response.status(Response.Status.CONFLICT).entity("El usuario no se puede eliminar, porque ya está en uso.").type(MediaType.TEXT_PLAIN).build();
+            } else {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error al eliminar al usuario.").type(MediaType.TEXT_PLAIN).build();
+            }
+            
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        msg = "No se pudo eliminar el usuario.";
+        
+        return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        
     }
 }

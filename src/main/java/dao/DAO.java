@@ -90,4 +90,46 @@ public class DAO {
         }
         return response;
     }
+    
+    public int delete(Object entity) {
+        int response;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            ses.delete(entity);
+            ses.getTransaction().commit();
+            response = DaoStatus.OK;
+        } catch (ConstraintViolationException e) {
+            response = DaoStatus.CONSTRAINT_VIOLATION;
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } catch (Exception e) {
+            //Verificando si la excepción fue originada por una constraintviolation
+            Throwable t = e.getCause();
+            while ((t != null) && !(t instanceof ConstraintViolationException)) {
+                t = t.getCause();
+            }
+            if (t instanceof ConstraintViolationException) {
+                response = DaoStatus.CONSTRAINT_VIOLATION;
+            }
+            else {
+                response = DaoStatus.ERROR;
+            }
+            
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush(); //Ver porqué esto se chingaba
+            ses.close();
+        }
+        return response;
+    }
 }

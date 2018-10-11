@@ -14,6 +14,7 @@ import hibernate.CourseTeacher;
 import hibernate.RegisteredCourse;
 import hibernate.Student;
 import java.util.List;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -294,5 +295,48 @@ public class RegisteredCourseServlet {
         msg = "No se pudo modificar el estado de la materia.";
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+    }
+    
+    @DELETE
+    @Path("/{id: \\d+}")
+    @Produces({MediaType.TEXT_PLAIN})
+    public Response delete(@PathParam("id") String id) {
+        
+        String msg = "";
+        RegisteredCourseDAO registeredCourseDao = new RegisteredCourseDAO();
+        
+        RegisteredCourse registeredCourse = null;
+        
+        try {
+            registeredCourse = registeredCourseDao.get(Integer.parseInt(id));
+            
+            if (registeredCourse == null) {
+                msg = "El registro de materia a eliminar no existe.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        try {
+            int status = registeredCourseDao.delete(registeredCourse);
+            
+            if (status == DaoStatus.OK) {
+                msg = "Registro de materia eliminado.";
+                return Response.ok(msg, "text/plain").build();
+            }
+            if (status == DaoStatus.CONSTRAINT_VIOLATION) {
+                return Response.status(Response.Status.CONFLICT).entity("El registro de materia no se puede eliminar, porque ya está en uso.").type(MediaType.TEXT_PLAIN).build();
+            } else {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error.").type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        msg = "No se pudo eliminar el registro de materia.";
+        
+        return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        
     }
 }

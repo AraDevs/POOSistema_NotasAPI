@@ -9,6 +9,7 @@ import dao.CareerTypeDAO;
 import helpers.DaoStatus;
 import hibernate.CareerType;
 import java.util.List;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -161,5 +162,48 @@ public class CareerTypeServlet {
         msg = "No se pudo modificar el tipo de carrera.";
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+    }
+    
+    @DELETE
+    @Path("/{id: \\d+}")
+    @Produces({MediaType.TEXT_PLAIN})
+    public Response delete(@PathParam("id") String id) {
+        
+        String msg = "";
+        CareerTypeDAO careerTypeDao = new CareerTypeDAO();
+        
+        CareerType careerType = null;
+        
+        try {
+            careerType = careerTypeDao.get(Integer.parseInt(id));
+            
+            if (careerType == null) {
+                msg = "El tipo de carrera a eliminar no existe.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        try {
+            int status = careerTypeDao.delete(careerType);
+            
+            if (status == DaoStatus.OK) {
+                msg = "Tipo de carrera eliminado.";
+                return Response.ok(msg, "text/plain").build();
+            }
+            if (status == DaoStatus.CONSTRAINT_VIOLATION) {
+                return Response.status(Response.Status.CONFLICT).entity("El tipo de carrera no se puede eliminar, porque ya está en uso.").type(MediaType.TEXT_PLAIN).build();
+            } else {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error.").type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        msg = "No se pudo eliminar el tipo de carrera.";
+        
+        return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        
     }
 }

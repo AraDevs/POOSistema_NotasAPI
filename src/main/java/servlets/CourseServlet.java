@@ -19,6 +19,7 @@ import hibernate.RegisteredCourse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -426,5 +427,48 @@ public class CourseServlet {
         msg = "No se pudo modificar la materia.";
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+    }
+    
+    @DELETE
+    @Path("/{id: \\d+}")
+    @Produces({MediaType.TEXT_PLAIN})
+    public Response delete(@PathParam("id") String id) {
+        
+        String msg = "";
+        CourseDAO courseDao = new CourseDAO();
+        
+        Course course = null;
+        
+        try {
+            course = courseDao.get(Integer.parseInt(id));
+            
+            if (course == null) {
+                msg = "La materia a eliminar no existe.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        try {
+            int status = courseDao.delete(course);
+            
+            if (status == DaoStatus.OK) {
+                msg = "Materia eliminada.";
+                return Response.ok(msg, "text/plain").build();
+            }
+            if (status == DaoStatus.CONSTRAINT_VIOLATION) {
+                return Response.status(Response.Status.CONFLICT).entity("La materia no se puede eliminar, porque ya está en uso.").type(MediaType.TEXT_PLAIN).build();
+            } else {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error.").type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        msg = "No se pudo eliminar la materia.";
+        
+        return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        
     }
 }

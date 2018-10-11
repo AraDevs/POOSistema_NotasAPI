@@ -15,6 +15,7 @@ import hibernate.Employee;
 import hibernate.Role;
 import hibernate.User;
 import java.util.List;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -313,5 +314,54 @@ public class EmployeeServlet {
         msg = "No se pudo modificar el empleado.";
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+    }
+    
+    @DELETE
+    @Path("/{id: \\d+}")
+    @Produces({MediaType.TEXT_PLAIN})
+    public Response delete(@PathParam("id") String id) {
+        
+        String msg = "";
+        EmployeeDAO employeeDao = new EmployeeDAO();
+        
+        Employee employee = null;
+        
+        try {
+            employee = employeeDao.get(Integer.parseInt(id));
+            
+            if (employee == null) {
+                msg = "El empleado a eliminar no existe.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            
+            if (employee.getId() == 1) {
+                msg = "No se puede eliminar al primer usuario.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        try {
+            int status = employeeDao.delete(employee);
+            
+            if (status == DaoStatus.OK) {
+                msg = "Empleado eliminado.";
+                return Response.ok(msg, "text/plain").build();
+            }
+            if (status == DaoStatus.CONSTRAINT_VIOLATION) {
+                return Response.status(Response.Status.CONFLICT).entity("El empleado no se puede eliminar, porque ya está en uso.").type(MediaType.TEXT_PLAIN).build();
+            } else {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error.").type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        msg = "No se pudo eliminar el empleado.";
+        
+        return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        
     }
 }
