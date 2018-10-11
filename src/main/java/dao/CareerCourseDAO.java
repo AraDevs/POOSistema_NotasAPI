@@ -154,6 +154,35 @@ public class CareerCourseDAO extends DAO {
         return careerCourse;
     }
     
+    public CareerCourse getCareerCourseNiceWay(int id) throws Exception {
+        CareerCourse careerCourse = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            String queryString = "FROM CareerCourse cc join fetch cc.course join fetch cc.career where cc.id = :id";
+            Query query = ses.createQuery(queryString, CareerCourse.class);
+            query.setParameter("id", id);
+            careerCourse = (CareerCourse) query.uniqueResult();
+                
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return careerCourse;
+    }
+    
     public List<CareerCourse> getCareerCourseByCareerPlan(int careerId, int plan) throws Exception {
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();

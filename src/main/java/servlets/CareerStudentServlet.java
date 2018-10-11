@@ -20,6 +20,7 @@ import hibernate.Student;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -257,5 +258,71 @@ public class CareerStudentServlet {
         msg = "No se pudo modificar el registro de carrera.";
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+    }
+    
+    @DELETE
+    @Path("/{id: \\d+}")
+    @Produces({MediaType.TEXT_PLAIN})
+    public Response delete(@PathParam("id") String id) {
+        
+        String msg = "";
+        CareerStudentDAO careerStudentDao = new CareerStudentDAO();
+        
+        CareerStudent careerStudent = null;
+        
+        try {
+            careerStudent = careerStudentDao.getCareerStudentWithParents(Integer.parseInt(id));
+            
+            if (careerStudent == null) {
+                msg = "La carrera registrada a desvicular no existe.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            
+            CareerCourseDAO carCrsDao = new CareerCourseDAO();
+            
+            int plan = carCrsDao.getPlan(careerStudent);
+            //Materias de la carrera
+            List<CareerCourse> careerCourses = carCrsDao.getCareerCourseByCareerPlan(careerStudent.getCareer().getId(), plan);
+            //Materias cursadas por el estudiante
+            List<RegisteredCourse> registeredCourses = new RegisteredCourseDAO().getRegisteredCourseList(careerStudent.getStudent().getId(), false);
+            
+            //Lista de códigos de materias cursadas por el estudiante
+            ArrayList<String> courseCodes = new ArrayList<String>();
+            for (RegisteredCourse rc : registeredCourses) {
+                courseCodes.add(rc.getCourseTeacher().getCourse().getCourseCode());
+            }
+            
+            //Verificando si alguna de las materias del pensum ha sido cursada por el estudiante
+            //Si es así, se denega la operación
+            for (CareerCourse cc : careerCourses) {
+                if (courseCodes.contains(cc.getCourse().getCourseCode())) {
+                    return Response.status(Response.Status.CONFLICT).entity("La carrera registrada no se puede eliminar, porque ya está en uso.").type(MediaType.TEXT_PLAIN).build();
+                }
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        try {
+            int status = careerStudentDao.delete(careerStudent);
+            
+            if (status == DaoStatus.OK) {
+                msg = "Carrera desvinculada.";
+                return Response.ok(msg, "text/plain").build();
+            }
+            if (status == DaoStatus.CONSTRAINT_VIOLATION) {
+                return Response.status(Response.Status.CONFLICT).entity("Ocurrió un error de constraint desconocido.").type(MediaType.TEXT_PLAIN).build();
+            } else {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error.").type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        msg = "No se pudo desvincular la carrera registrada.";
+        
+        return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        
     }
 }

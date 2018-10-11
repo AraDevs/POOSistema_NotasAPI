@@ -282,23 +282,29 @@ INSERT INTO grade VALUES(null, 10, null, 4, 4, 1);
 INSERT INTO grade VALUES(null, 10, null, 4, 5, 1);
 
 
+
+DROP EVENT IF EXISTS `updateCourseTeacherStates`;
+
+DELIMITER $$
 CREATE EVENT `updateCourseTeacherStates` ON SCHEDULE
-        EVERY 1 DAY
-    ON COMPLETION NOT PRESERVE
-    ENABLE
-    COMMENT ''
-    DO BEGIN
-'Habilitando todas las clases de este ciclo'
-UPDATE course_teacher SET state = 1 WHERE course_year = YEAR(CURDATE()) 
-AND semester = IF(MONTH(CURDATE()) < 6, '1', IF(MONTH(CURDATE()) > 7, '2', 'Interciclo')) AND state = 0
+  EVERY 1 DAY
+ON COMPLETION NOT PRESERVE
+ENABLE
+COMMENT ''
+DO BEGIN
+	-- Habilitando todas las clases de este ciclo
+	UPDATE course_teacher SET state = 1 WHERE course_year = YEAR(CURDATE()) 
+	AND semester = IF(MONTH(CURDATE()) < 6, '1', IF(MONTH(CURDATE()) > 7, '2', 'Interciclo')) AND state = 0;
+	
+	-- Inhabilitando todas las clases que no son de este ciclo
+	UPDATE course_teacher SET state = 0 WHERE (course_year <> YEAR(CURDATE()) 
+	OR (course_year = YEAR(CURDATE()) AND semester <> IF(MONTH(CURDATE()) < 6, '1', IF(MONTH(CURDATE()) > 7, '2', 'Interciclo'))) ) 
+	AND state = 1;
+	
+	-- Retirando materias pendientes de clases inhabilitadas
+	UPDATE registered_course rc INNER JOIN course_teacher ct ON rc.course_teacher_id = ct.id SET rc.course_state = 'Retirada' 
+	WHERE rc.course_state = 'En curso' AND  ct.state = false;
 
-'Inhabilitando todas las clases que no son de este ciclo'
-UPDATE course_teacher SET state = 0 WHERE (course_year <> YEAR(CURDATE()) 
-OR (course_year = YEAR(CURDATE()) AND semester <> IF(MONTH(CURDATE()) < 6, '1', IF(MONTH(CURDATE()) > 7, '2', 'Interciclo'))) )
-AND state = 1
+END$$
 
-'Retirando materias pendientes de clases inhabilitadas'
-UPDATE registered_course rc INNER JOIN course_teacher ct ON rc.course_teacher_id = ct.id SET rc.course_state = 'Retirada'
-WHERE rc.course_state = 'En curso' AND  ct.state = false
-
-END
+DELIMITER ;

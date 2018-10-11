@@ -9,11 +9,13 @@ import dao.CareerCourseDAO;
 import dao.CareerDAO;
 import dao.CourseDAO;
 import helpers.DaoStatus;
+import helpers.Helpers;
 import hibernate.Career;
 import hibernate.CareerCourse;
 import hibernate.Course;
 import java.util.Calendar;
 import java.util.List;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -231,5 +233,68 @@ public class CareerCourseServlet {
         msg = "No se pudo agregar la materia al plan.";
         
         return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+    }
+    
+    @DELETE
+    @Path("/{id: \\d+}")
+    @Produces({MediaType.TEXT_PLAIN})
+    public Response delete(@PathParam("id") String id) {
+        
+        String msg = "";
+        CareerCourseDAO careerCourseDao = new CareerCourseDAO();
+        
+        CareerCourse careerCourse = null;
+        
+        try {
+            careerCourse = careerCourseDao.getCareerCourseNiceWay(Integer.parseInt(id));
+            
+            if (careerCourse == null) {
+                msg = "La materia registrada a desvincular no existe.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            
+            if (careerCourse.getPlan() <= Helpers.getCurrentYear()) {
+                msg = "Sólo se pueden modificar planes futuros.";
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            
+            //Lista de materias de la carrera
+            List<CareerCourse> careerCourseList = careerCourseDao.getCareerCourseByCareerPlan(careerCourse.getCareer().getId(), careerCourse.getPlan()); 
+            
+            //Verificando si la materia que se quiere desvincular es el prerrequisito de otra que está
+            //presente en el plan
+            for (CareerCourse cc : careerCourseList) {
+                if (cc.getCourse().getCourse() != null) {
+                    if (cc.getCourse().getCourse().getCourseCode().equals(careerCourse.getCourse().getCourseCode())) {
+                        msg = "No puede desvincular esta materia porque es prerrequisito de otra materia en este plan.";
+                        return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+                    }
+                }
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        try {
+            int status = careerCourseDao.delete(careerCourse);
+            
+            if (status == DaoStatus.OK) {
+                msg = "Materia desvinculada.";
+                return Response.ok(msg, "text/plain").build();
+            }
+            if (status == DaoStatus.CONSTRAINT_VIOLATION) {
+                return Response.status(Response.Status.CONFLICT).entity("Ocurrió un error de constraint desconocido.").type(MediaType.TEXT_PLAIN).build();
+            } else {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ocurrió un error.").type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        msg = "No se pudo desvincular la materia registrada.";
+        
+        return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        
     }
 }

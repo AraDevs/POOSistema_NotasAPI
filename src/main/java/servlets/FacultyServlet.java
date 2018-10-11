@@ -6,7 +6,6 @@
 package servlets;
 
 import hibernate.Faculty;
-import controllers.FacultyController;
 import dao.FacultyDAO;
 import helpers.DaoStatus;
 import helpers.Helpers;
