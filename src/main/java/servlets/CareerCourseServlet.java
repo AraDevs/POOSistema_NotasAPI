@@ -8,6 +8,7 @@ package servlets;
 import dao.CareerCourseDAO;
 import dao.CareerDAO;
 import dao.CourseDAO;
+import dto.Plan;
 import helpers.DaoStatus;
 import helpers.Helpers;
 import hibernate.Career;
@@ -63,6 +64,18 @@ public class CareerCourseServlet {
     public CareerCourse getCareerCourse (@PathParam("careerCourseId") String careerCourseId) {
         try {
             return new CareerCourseDAO().getCareerCourse(Integer.parseInt(careerCourseId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
+    @Path("/planByCareer/{careerId}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<Plan> getPlansByCareer (@PathParam("careerId") String careerId) {
+        try {
+            return new CareerCourseDAO().getPlansByCareer(Integer.parseInt(careerId));
         } catch (Exception e) {
             e.printStackTrace();
             return null;

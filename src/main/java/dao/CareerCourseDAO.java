@@ -5,10 +5,12 @@
  */
 package dao;
 
+import dto.Plan;
 import hibernate.CareerCourse;
 import hibernate.CareerStudent;
 import hibernate.Course;
 import hibernate.HibernateUtil;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.xml.bind.annotation.XmlElement;
@@ -263,6 +265,42 @@ public class CareerCourseDAO extends DAO {
         }
         
         return plan;
+    }
+    
+    public List<Plan> getPlansByCareer(int careerId) throws Exception {
+        List<Plan> planList = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "SELECT DISTINCT cc.plan FROM CareerCourse cc "
+                    + "join cc.career c where c.id = :careerId";
+            Query query = ses.createQuery(queryString, Integer.class);
+            query.setParameter("careerId", careerId);
+            List<Integer> plans = query.list();
+            
+            if (!plans.isEmpty()) {
+                planList = new ArrayList<Plan>();
+                for (Integer year : plans) {
+                    planList.add(new Plan(year));
+                }
+            }
+            
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return planList;
     }
     
     public CareerCourse get(int id) throws Exception {
