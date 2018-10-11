@@ -82,6 +82,18 @@ public class CareerCourseServlet {
         }
     }
     
+    @GET
+    @Path("/byCareer/{careerId: \\d+}/byPlan/{plan: \\d+}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<CareerCourse> getCareerCourseByCareerPlan (@PathParam("careerId") String careerId, @PathParam("plan") String plan) {
+        try {
+            return new CareerCourseDAO().getCareerCourseByCareerPlan(Integer.parseInt(careerId), Integer.parseInt(plan));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
     @POST
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
