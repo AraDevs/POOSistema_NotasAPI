@@ -89,7 +89,7 @@ public class EvaluationServlet {
     @Produces({MediaType.APPLICATION_JSON})
     public List<Evaluation> getEvaluationsByRegisteredCourse(@PathParam("regCourseId") String regCourseId) {
         try {
-            return new EvaluationDAO().getEvaluationsByRegCourseWithGrade(Integer.parseInt(regCourseId));
+            return new EvaluationDAO().getEvaluationsByRegCourseWithGrade(Integer.parseInt(regCourseId), false);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

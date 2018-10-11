@@ -23,7 +23,7 @@ import org.hibernate.query.Query;
  */
 @XmlRootElement ( name = "gradeDao") 
 @XmlSeeAlso( { Grade.class})
-public class GradeDAO {
+public class GradeDAO extends DAO {
     private List<Grade> grades;
     String param;
     
@@ -60,7 +60,7 @@ public class GradeDAO {
         this.grades = grades;        
     }
     
-    public List<Grade> getGradeList(String param) {
+    public List<Grade> getGradeList(String param) throws Exception {
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
@@ -89,7 +89,7 @@ public class GradeDAO {
         return grades;
     }
     
-    public Grade getGrade(int regCourseId, int evalId) {
+    public Grade getGrade(int regCourseId, int evalId) throws Exception {
         Grade grade = null;
         
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
@@ -118,6 +118,109 @@ public class GradeDAO {
             }
         } finally {
             //ses.flush();
+            ses.close();
+        }
+        
+        return grade;
+    }
+    
+    public Grade getGradeNiceWay(int regCourseId, int evalId) throws Exception {
+        Grade grade = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM Grade g where g.registeredCourse.id = :regCourseId "
+                    + "and g.evaluation.id = :evalId";
+            Query query = ses.createQuery(queryString, Grade.class);
+            query.setParameter("regCourseId", regCourseId);
+            query.setParameter("evalId", evalId);
+            grade = (Grade) query.uniqueResult();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return grade;
+    }
+    
+    public boolean hasAllGrades (int registeredCourseId, boolean laboratory) {
+        boolean response = false;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            String laboratoryQuery = " and e.laboratory = false";
+            if (laboratory) {
+                laboratoryQuery = " and e.laboratory = true";
+            }
+            
+            //Periodo 1
+            tra = ses.beginTransaction();
+            String queryString = "SELECT SUM(e.percentage) FROM Grade g join g.evaluation e "
+                    + "where e.period = '1' and g.registeredCourse.id = :regCourseId " + laboratoryQuery;
+            Query query = ses.createQuery(queryString, Long.class);
+            query.setParameter("regCourseId", registeredCourseId);
+            Long percentageTotal1 = (Long) query.uniqueResult();
+            
+            //Periodo 2
+            queryString = "SELECT SUM(e.percentage) FROM Grade g join g.evaluation e "
+                    + "where e.period = '2' and g.registeredCourse.id = :regCourseId " + laboratoryQuery;
+            query = ses.createQuery(queryString, Long.class);
+            query.setParameter("regCourseId", registeredCourseId);
+            Long percentageTotal2 = (Long) query.uniqueResult();
+            
+            //Periodo 3
+            queryString = "SELECT SUM(e.percentage) FROM Grade g join g.evaluation e "
+                    + "where e.period = '3' and g.registeredCourse.id = :regCourseId " + laboratoryQuery;
+            query = ses.createQuery(queryString, Long.class);
+            query.setParameter("regCourseId", registeredCourseId);
+            Long percentageTotal3 = (Long) query.uniqueResult();
+            
+            if (percentageTotal1 == 100 && percentageTotal2 == 100 && percentageTotal3 == 100) response = true;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        return response;
+    }
+    
+    public Grade get(int id) throws Exception {
+        Grade grade = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            grade = (Grade) ses.get(Grade.class, id);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            ses.flush();
             ses.close();
         }
         

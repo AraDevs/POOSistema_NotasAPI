@@ -165,17 +165,22 @@ public class EvaluationDAO extends DAO {
         return evaluations;
     }
     
-    public List<Evaluation> getEvaluationsByRegCourseWithGrade(int regCourseId) throws Exception {
+    public List<Evaluation> getEvaluationsByRegCourseWithGrade(int regCourseId, boolean laboratory) throws Exception {
         SessionFactory sesFact = HibernateUtil.getSessionFactory();
         Session ses = sesFact.openSession();
         Transaction tra = null;
         
         try {
+            String laboratoryQuery = " and e.laboratory = false";
+            if (laboratory) {
+                laboratoryQuery = " and e.laboratory = true";
+            }
+            
             //Obteniendo materia para obtener su id
             Course course =  new CourseDAO().getCourseByRegisteredCourse(regCourseId);
             
             tra = ses.beginTransaction();
-            String queryString = "FROM Evaluation e where e.course.id = :courseId and e.state = true"; //el manejo de estado es por las evaluaciones de periodos pasados
+            String queryString = "FROM Evaluation e where e.course.id = :courseId and e.state = true" + laboratoryQuery; //el manejo de estado es por las evaluaciones de periodos pasados
             Query query = ses.createQuery(queryString, Evaluation.class);
             query.setParameter("courseId", course.getId());
             evaluations = query.list();

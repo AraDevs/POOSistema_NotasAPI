@@ -259,7 +259,7 @@ INSERT INTO employee VALUES(null, 1, 1, 1);
 INSERT INTO employee VALUES(null, 2, 2, 1);
 INSERT INTO employee VALUES(null, 6, 2, 1);
 
-INSERT INTO course_teacher VALUES(null, 1, 2, 2017, '1', 30, 1);
+INSERT INTO course_teacher VALUES(null, 1, 2, 2017, '1', 30, 0);
 INSERT INTO course_teacher VALUES(null, 1, 2, 2018, '2', 30, 1);
 INSERT INTO course_teacher VALUES(null, 2, 2, 2018, '2', 30, 1);
 INSERT INTO course_teacher VALUES(null, 4, 3, 2018, '2', 30, 1);
@@ -280,3 +280,25 @@ INSERT INTO grade VALUES(null, 10, null, 3, 2, 1);
 INSERT INTO grade VALUES(null, 10, null, 3, 3, 1);
 INSERT INTO grade VALUES(null, 10, null, 4, 4, 1);
 INSERT INTO grade VALUES(null, 10, null, 4, 5, 1);
+
+
+CREATE EVENT `updateCourseTeacherStates` ON SCHEDULE
+        EVERY 1 DAY
+    ON COMPLETION NOT PRESERVE
+    ENABLE
+    COMMENT ''
+    DO BEGIN
+'Habilitando todas las clases de este ciclo'
+UPDATE course_teacher SET state = 1 WHERE course_year = YEAR(CURDATE()) 
+AND semester = IF(MONTH(CURDATE()) < 6, '1', IF(MONTH(CURDATE()) > 7, '2', 'Interciclo')) AND state = 0
+
+'Inhabilitando todas las clases que no son de este ciclo'
+UPDATE course_teacher SET state = 0 WHERE (course_year <> YEAR(CURDATE()) 
+OR (course_year = YEAR(CURDATE()) AND semester <> IF(MONTH(CURDATE()) < 6, '1', IF(MONTH(CURDATE()) > 7, '2', 'Interciclo'))) )
+AND state = 1
+
+'Retirando materias pendientes de clases inhabilitadas'
+UPDATE registered_course rc INNER JOIN course_teacher ct ON rc.course_teacher_id = ct.id SET rc.course_state = 'Retirada'
+WHERE rc.course_state = 'En curso' AND  ct.state = false
+
+END

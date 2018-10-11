@@ -159,8 +159,8 @@ public class CourseTeacherServlet {
         } catch (Exception e) {e.printStackTrace();}
         
         try {
-            if (Integer.parseInt(courseYear) < Calendar.getInstance().get(Calendar.YEAR)) {
-                msg = "No puede hacerse una clase de un año pasado.";
+            if (Helpers.isPastSemester(Integer.parseInt(courseYear), semester)) {
+                msg = "No puede hacerse una clase de un ciclo pasado.";
                 return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
         } catch (Exception e) {
@@ -291,8 +291,8 @@ public class CourseTeacherServlet {
         }
         
         try {
-            if (Integer.parseInt(courseYear) < Calendar.getInstance().get(Calendar.YEAR)) {
-                msg = "No puede hacerse una clase de un año pasado.";
+            if (Helpers.isPastSemester(Integer.parseInt(courseYear), semester)) {
+                msg = "No puede hacerse una clase de un ciclo pasado.";
                 return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
         } catch (Exception e) {

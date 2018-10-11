@@ -69,4 +69,29 @@ public class Helpers {
         
         return semester;
     }
+    
+    public static final String SEMESTER1 = "1";
+    public static final String SEMESTER2 = "2";
+    public static final String SEMESTER_INTER = "Interciclo";
+    
+    public static Boolean isPastSemester (int courseYear, String courseSemester) {
+        
+        Boolean response = false;
+        
+        if (courseYear < Calendar.getInstance().get(Calendar.YEAR)) {
+            response = true;
+        }
+        else if (courseYear == Calendar.getInstance().get(Calendar.YEAR)) {
+            int month = Calendar.getInstance().get(Calendar.MONTH);
+            
+            if (month > 6 && (courseSemester.equals(SEMESTER1) || courseSemester.equals(SEMESTER_INTER))) {
+                response = true;
+            }
+            if (month > 4 && courseSemester.equals(SEMESTER1)) {
+                response = true;
+            }
+        }
+        
+        return response;
+    }
 }
