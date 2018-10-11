@@ -17,6 +17,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -199,6 +200,45 @@ public class StudentDAO extends DAO {
             
             for (Object cs : student.getCareerStudents()) {
                 ((CareerStudent) cs).setCareer(null);
+                ((CareerStudent) cs).setStudent(null);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return student;
+    }
+    
+    public Student getStudentWithCareers(int id) throws Exception {
+        Student student = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM Student s left join fetch s.careerStudents cs where s.id = :id";
+            Query query = ses.createQuery(queryString, Student.class);
+            query.setParameter("id", id);
+            student = (Student) query.uniqueResult();
+            
+            student.setRegisteredCourses(null);
+            student.setUser(null);
+            
+            for (Object cs : student.getCareerStudents()) {
+                Hibernate.initialize(((CareerStudent) cs).getCareer());
+                ((CareerStudent) cs).getCareer().setCareerCourses(null);
+                ((CareerStudent) cs).getCareer().setCareerStudents(null);
+                ((CareerStudent) cs).getCareer().setCareerType(null);
+                ((CareerStudent) cs).getCareer().setFaculty(null);
                 ((CareerStudent) cs).setStudent(null);
             }
             

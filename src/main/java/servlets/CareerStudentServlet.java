@@ -98,7 +98,7 @@ public class CareerStudentServlet {
         } catch (Exception e) {e.printStackTrace();}
         
         try {
-            student = new StudentDAO().getStudentWithCareerStudent(Integer.parseInt(studentId));
+            student = new StudentDAO().getStudentWithCareers(Integer.parseInt(studentId));
             if (student == null) {
                 msg = "El estudiante especificado no existe.";
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
@@ -112,6 +112,10 @@ public class CareerStudentServlet {
                     msg = "El estudiante especificado ya tiene una carrera en curso.";
                     return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
                 }
+                if (((CareerStudent) cs).getCareerState().equals("Egresado") && ((CareerStudent) cs).getCareer().getId() == Integer.parseInt(careerId)) {
+                    msg = "El estudiante ya ha egresado de esta carrera.";
+                    return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+                }
             }
         } catch (Exception e) {e.printStackTrace();}
         
@@ -123,6 +127,17 @@ public class CareerStudentServlet {
             careerStudent.setCareerState("En curso");
             careerStudent.setIncomeYear(Calendar.getInstance().get(Calendar.YEAR));
             careerStudent.setState(true);
+            
+            //Antes de guardar, se debe verificar que la carrera elegida tenga materias en el pensum
+            CareerCourseDAO carCrsDao = new CareerCourseDAO();
+            int plan = carCrsDao.getPlan(careerStudent);
+            //Lista de materias que deben ser aprobadas para egresar
+            List<CareerCourse> pensum = carCrsDao.getCareerCourseByCareerPlan(careerStudent.getCareer().getId(), plan);
+            
+            if (pensum.isEmpty()) {
+                msg = "La carrera especificada no tiene ninguna materia en su pensum.";
+                return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
             
             int status = carStdDao.add(careerStudent);
             
