@@ -61,7 +61,7 @@ public class EvaluationServlet {
     }
     
     @GET
-    @Path("/{evaluationId}")
+    @Path("/{evaluationId: \\d+}")
     @Produces({MediaType.APPLICATION_JSON})
     public Evaluation getEvaluation(@PathParam("evaluationId") String evaluationId) {
         try {

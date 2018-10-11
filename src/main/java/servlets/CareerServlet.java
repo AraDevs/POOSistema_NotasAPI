@@ -57,7 +57,7 @@ public class CareerServlet {
     }
     
     @GET
-    @Path("/{careerId}/full")
+    @Path("/{careerId: \\d+}/full")
     @Produces({MediaType.APPLICATION_JSON})
     public Career getCareer (@PathParam("careerId") String careerId) {
         try {

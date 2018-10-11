@@ -37,7 +37,7 @@ public class RegisteredCourseServlet {
     }
     
     @GET
-    @Path("/byCourseTeacher/{courseTeacherId}/students/users/people")
+    @Path("/byCourseTeacher/{courseTeacherId: \\d+}/students/users/people")
     @Produces({MediaType.APPLICATION_JSON})
     public List<RegisteredCourse> getRegisteredCoursesByCourseTeacher(@PathParam("courseTeacherId") String courseTeacherId) {
         try {
@@ -49,7 +49,7 @@ public class RegisteredCourseServlet {
     }
     
     @GET
-    @Path("/{registeredCourseId}/courses/teachers")
+    @Path("/{registeredCourseId: \\d+}/courses/teachers")
     @Produces({MediaType.APPLICATION_JSON})
     public RegisteredCourse getRegisteredCourse(@PathParam("registeredCourseId") String registeredCourseId) {
         try {
@@ -61,7 +61,7 @@ public class RegisteredCourseServlet {
     }
     
     @GET
-    @Path("/byStudent/{student_id}/full")
+    @Path("/byStudent/{student_id: \\d+}/full")
     @Produces({MediaType.APPLICATION_JSON})
     public List<RegisteredCourse> getRegisteredCourses(@PathParam("student_id") String studentId) {
         try {
@@ -73,7 +73,7 @@ public class RegisteredCourseServlet {
     }
     
     @GET
-    @Path("/byStudent/{student_id}/full/active")
+    @Path("/byStudent/{student_id: \\d+}/full/active")
     @Produces({MediaType.APPLICATION_JSON})
     public List<RegisteredCourse> getActiveRegisteredCourses(@PathParam("student_id") String studentId) {
         try {
@@ -86,7 +86,7 @@ public class RegisteredCourseServlet {
     
     
     @GET
-    @Path("/byStudent/{student_id}/courses")
+    @Path("/byStudent/{student_id: \\d+}/courses")
     @Produces({MediaType.APPLICATION_JSON})
     public List<RegisteredCourse> getRegisteredCoursesWithCourses(@PathParam("student_id") String studentId) {
         try {
@@ -98,7 +98,7 @@ public class RegisteredCourseServlet {
     }
     
     @GET
-    @Path("/byStudent/{student_id}/courses/teachers")
+    @Path("/byStudent/{student_id: \\d+}/courses/teachers")
     @Produces({MediaType.APPLICATION_JSON})
     public List<RegisteredCourse> getRegisteredCoursesWithCoursesAndTeachers(@PathParam("student_id") String studentId) {
         try {
@@ -111,7 +111,7 @@ public class RegisteredCourseServlet {
     
     
     @GET
-    @Path("/byStudent/{student_id}/courses/active")
+    @Path("/byStudent/{student_id: \\d+}/courses/active")
     @Produces({MediaType.APPLICATION_JSON})
     public List<RegisteredCourse> getActiveRegisteredCoursesWithCourses(@PathParam("student_id") String studentId) {
         try {

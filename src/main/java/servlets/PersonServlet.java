@@ -57,7 +57,7 @@ public class PersonServlet {
     }
     
     @GET
-    @Path("/{personId}")
+    @Path("/{personId: \\d+}")
     @Produces({MediaType.APPLICATION_JSON})
     public Person getPerson(@PathParam("personId") String personId) {
         try {

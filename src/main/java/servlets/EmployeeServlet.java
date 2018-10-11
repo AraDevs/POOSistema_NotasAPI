@@ -63,7 +63,7 @@ public class EmployeeServlet {
     }
     
     @GET
-    @Path("/byStudent/{studentId}/users/people")
+    @Path("/byStudent/{studentId: \\d+}/users/people")
     @Produces({MediaType.APPLICATION_JSON})
     public List<Employee> getEmployeeByStudent(@PathParam("studentId") String studentId) {
         try {
@@ -75,7 +75,7 @@ public class EmployeeServlet {
     }
     
     @GET
-    @Path("/{employeeId}/users/people/roles")
+    @Path("/{employeeId: \\d+}/users/people/roles")
     @Produces({MediaType.APPLICATION_JSON})
     public Employee getEmployee(@PathParam("employeeId") String employeeId) {
         try {
@@ -87,7 +87,7 @@ public class EmployeeServlet {
     }
     
     @GET
-    @Path("/byRegisteredCourse/{regCourseId}/users/people")
+    @Path("/byRegisteredCourse/{regCourseId: \\d+}/users/people")
     @Produces({MediaType.APPLICATION_JSON})
     public Employee getEmployeeByRegisteredCourse(@PathParam("regCourseId") String regCourseId) {
         try {
@@ -100,7 +100,7 @@ public class EmployeeServlet {
     
     
     @GET
-    @Path("/{employeeId}/full")
+    @Path("/{employeeId: \\d+}/full")
     @Produces({MediaType.APPLICATION_JSON})
     public Employee getTeacher(@PathParam("employeeId") String employeeId) {
         try {

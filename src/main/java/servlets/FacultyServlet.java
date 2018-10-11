@@ -66,7 +66,7 @@ public class FacultyServlet {
     }
     */
     @GET
-    @Path("/{facultyId}")
+    @Path("/{facultyId: \\d+}")
     @Produces({MediaType.APPLICATION_JSON})
     public Faculty getFacultyById (@PathParam("facultyId") String facultyId) {
         try {

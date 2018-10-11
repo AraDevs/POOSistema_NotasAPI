@@ -124,7 +124,7 @@ public class UserServlet {
     }
     
     @GET
-    @Path("/{userId}/people")
+    @Path("/{userId: \\d+}/people")
     @Produces({MediaType.APPLICATION_JSON})
     public User getUser (@PathParam("userId") String userId) {
         try {

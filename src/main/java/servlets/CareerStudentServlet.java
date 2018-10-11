@@ -39,7 +39,7 @@ import javax.ws.rs.core.Response;
 public class CareerStudentServlet {
     
     @GET
-    @Path("/byStudent/{studentId}/full")
+    @Path("/byStudent/{studentId: \\d+}/full")
     @Produces({MediaType.APPLICATION_JSON})
     public List<CareerStudent> getCareerStudentByStudent (@PathParam("studentId") String studentId) {
         try {
@@ -51,7 +51,7 @@ public class CareerStudentServlet {
     }
     
     @GET
-    @Path("/{careerStudentId}/careers")
+    @Path("/{careerStudentId: \\d+}/careers")
     @Produces({MediaType.APPLICATION_JSON})
     public CareerStudent getCareerStudentt (@PathParam("careerStudentId") String careerStudentId) {
         try {

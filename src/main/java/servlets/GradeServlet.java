@@ -35,7 +35,7 @@ public class GradeServlet {
     }
     
     @GET
-    @Path("/byRegisteredCourse/{regCourseId}/byEvaluation/{evalId}")
+    @Path("/byRegisteredCourse/{regCourseId: \\d+}/byEvaluation/{evalId: \\d+}")
     @Produces({MediaType.APPLICATION_JSON})
     public Grade getGrade(@PathParam("regCourseId") String regCourseId,
                                                  @PathParam("evalId") String evalId) {

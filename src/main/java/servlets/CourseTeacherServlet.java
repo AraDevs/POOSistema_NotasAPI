@@ -39,7 +39,7 @@ public class CourseTeacherServlet {
     }
     
     @GET
-    @Path("/byEmployee/{employeeId}/courses")
+    @Path("/byEmployee/{employeeId: \\d+}/courses")
     @Produces({MediaType.APPLICATION_JSON})
     public List<CourseTeacher> getCoursesByEmployee(@PathParam("employeeId") String employeeId) {
         try {
@@ -51,7 +51,7 @@ public class CourseTeacherServlet {
     }
     
     @GET
-    @Path("/byEmployee/{employeeId}/courses/active")
+    @Path("/byEmployee/{employeeId: \\d+}/courses/active")
     @Produces({MediaType.APPLICATION_JSON})
     public List<CourseTeacher> getActiveCoursesByEmployee(@PathParam("employeeId") String employeeId) {
         try {
@@ -63,7 +63,7 @@ public class CourseTeacherServlet {
     }
     
     @GET
-    @Path("/byCourse/{courseId}/employees/users/people")
+    @Path("/byCourse/{courseId: \\d+}/employees/users/people")
     @Produces({MediaType.APPLICATION_JSON})
     public List<CourseTeacher> getTeachersByCourse(@PathParam("courseId") String courseId) {
         try {
@@ -75,7 +75,7 @@ public class CourseTeacherServlet {
     }
     
     @GET
-    @Path("/{courseTeacherId}/courses")
+    @Path("/{courseTeacherId: \\d+}/courses")
     @Produces({MediaType.APPLICATION_JSON})
     public CourseTeacher getCoursesTeacher(@PathParam("courseTeacherId") String courseTeacherId) {
         try {
@@ -87,7 +87,7 @@ public class CourseTeacherServlet {
     }
     
     @GET
-    @Path("/passCount/byRegisteredCourse/{regCourseId}")
+    @Path("/passCount/byRegisteredCourse/{regCourseId: \\d+}")
     @Produces({MediaType.APPLICATION_JSON})
     public String getCoursesByRegisteredCourse(@PathParam("regCourseId") String regCourseId) {
         try {

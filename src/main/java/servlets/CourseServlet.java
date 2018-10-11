@@ -66,7 +66,7 @@ public class CourseServlet {
     }
     
     @GET
-    @Path("{courseId}/faculties/prerrequisite")
+    @Path("{courseId: \\d+}/faculties/prerrequisite")
     @Produces({MediaType.APPLICATION_JSON})
     public Course getCourse(@PathParam("courseId") String courseId) {
         try {
@@ -78,7 +78,7 @@ public class CourseServlet {
     }
     
     @GET
-    @Path("/byRegisteredCourse/{regCourseId}")
+    @Path("/byRegisteredCourse/{regCourseId: \\d+}")
     @Produces({MediaType.APPLICATION_JSON})
     public Course getCoursesByRegisteredCourse(@PathParam("regCourseId") String regCourseId) {
         try {
@@ -90,7 +90,7 @@ public class CourseServlet {
     }
     
     @GET
-    @Path("/byStudent/{studentId}/available")
+    @Path("/byStudent/{studentId: \\d+}/available")
     @Produces({MediaType.APPLICATION_JSON})
     public List<Course> getAvailableCourses(@PathParam("studentId") String studentId) {
         try {

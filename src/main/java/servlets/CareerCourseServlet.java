@@ -35,7 +35,7 @@ import javax.ws.rs.core.Response;
 public class CareerCourseServlet {
     
     @GET
-    @Path("/byCareer/{careerId}/courses")
+    @Path("/byCareer/{careerId: \\d+}/courses")
     @Produces({MediaType.APPLICATION_JSON})
     public List<CareerCourse> getCareerCourseByCareer (@PathParam("careerId") String careerId) {
         try {
@@ -47,7 +47,7 @@ public class CareerCourseServlet {
     }
     
     @GET
-    @Path("/byCareer/{careerId}/courses/active")
+    @Path("/byCareer/{careerId: \\d+}/courses/active")
     @Produces({MediaType.APPLICATION_JSON})
     public List<CareerCourse> getActiveCareerCourseByCareer (@PathParam("careerId") String careerId) {
         try {
@@ -59,7 +59,7 @@ public class CareerCourseServlet {
     }
     
     @GET
-    @Path("/{careerCourseId}/courses")
+    @Path("/{careerCourseId: \\d+}/courses")
     @Produces({MediaType.APPLICATION_JSON})
     public CareerCourse getCareerCourse (@PathParam("careerCourseId") String careerCourseId) {
         try {
@@ -71,7 +71,7 @@ public class CareerCourseServlet {
     }
     
     @GET
-    @Path("/planByCareer/{careerId}")
+    @Path("/planByCareer/{careerId: \\d+}")
     @Produces({MediaType.APPLICATION_JSON})
     public List<Plan> getPlansByCareer (@PathParam("careerId") String careerId) {
         try {

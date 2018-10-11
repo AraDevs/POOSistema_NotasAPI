@@ -60,7 +60,7 @@ public class StudentServlet {
     }
     
     @GET
-    @Path("byCourseTeacher/{courseTeacherId}/users/people")
+    @Path("byCourseTeacher/{courseTeacherId: \\d+}/users/people")
     @Produces({MediaType.APPLICATION_JSON})
     public List<Student> getActiveStudentList (@PathParam("courseTeacherId") String courseTeacherId) {
         try {
@@ -80,7 +80,7 @@ public class StudentServlet {
     }
     
     @GET
-    @Path("/{studentId}/users/people")
+    @Path("/{studentId: \\d+}/users/people")
     @Produces({MediaType.APPLICATION_JSON})
     public hibernate.Student getStudent (@PathParam("studentId") String studentId) {
         try {
@@ -92,7 +92,7 @@ public class StudentServlet {
     }
     
     @GET
-    @Path("/users/{id}/people")
+    @Path("/users/{id: \\d+}/people")
     @Produces({MediaType.APPLICATION_JSON})
     public hibernate.Student getStudentByUserId (@PathParam("id") String userId) {
         try {
