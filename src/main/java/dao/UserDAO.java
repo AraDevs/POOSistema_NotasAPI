@@ -270,7 +270,9 @@ public class UserDAO extends DAO {
             Query query = ses.createQuery(queryString);
             query.setParameter("username", username);
             query.setParameter("pass", pass);
-            response = ((User) query.uniqueResult()).getId();
+            if (query.uniqueResult() != null) {
+                response = ((User) query.uniqueResult()).getId();
+            }
         } catch (Exception e) {
             e.printStackTrace();
             if (tra != null) {

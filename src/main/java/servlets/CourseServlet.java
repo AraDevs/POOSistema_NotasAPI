@@ -402,7 +402,12 @@ public class CourseServlet {
             course.setInter(Boolean.valueOf(inter));
             course.setLaboratory(Boolean.valueOf(laboratory));
             course.setUv(Integer.parseInt(uv));
-            if (Integer.parseInt(prerrequisiteId) != 0) course.setCourse(prerrequisite);
+            if (Integer.parseInt(prerrequisiteId) != 0) {
+                course.setCourse(prerrequisite);
+            }
+            else {
+                course.setCourse(null);
+            }
             course.setFaculty(faculty);
             course.setState(Boolean.valueOf(state));
             
