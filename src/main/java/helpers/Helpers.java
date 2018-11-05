@@ -6,6 +6,7 @@
 package helpers;
 
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  *
@@ -42,6 +43,38 @@ public class Helpers {
     
     public static String getCurrentSemester() {
         int month = Calendar.getInstance().get(Calendar.MONTH);
+        String semester = "";
+        
+        switch(month) {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+                semester = "1";
+                break;
+            case 5:
+            case 6:
+                semester = "Interciclo";
+                break;
+            case 7:
+            case 8:
+            case 9:
+            case 10:
+                semester = "2";
+                break;
+            case 11:
+                semester = "Ninguno";
+                break;
+        }
+        
+        return semester;
+    }
+    
+    public static String getDateSemester(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        int month = cal.get(Calendar.MONTH);
         String semester = "";
         
         switch(month) {
