@@ -167,6 +167,7 @@ public class StudentDAO extends DAO {
             student.getUser().setEmployees(null);
             student.getUser().setStudents(null);
             student.getUser().getPerson().setUsers(null);
+            student.getUser().setPass(null);
             
         } catch (Exception e) {
             e.printStackTrace();

@@ -9,6 +9,7 @@ import dao.EmployeeDAO;
 import dao.RoleDAO;
 import dao.UserDAO;
 import helpers.DaoStatus;
+import helpers.Helpers;
 import hibernate.Course;
 import hibernate.CourseTeacher;
 import hibernate.Employee;
@@ -79,7 +80,9 @@ public class EmployeeServlet {
     @Produces({MediaType.APPLICATION_JSON})
     public Employee getEmployee(@PathParam("employeeId") String employeeId) {
         try {
-            return new EmployeeDAO().getEmployee(Integer.parseInt(employeeId));
+            Employee employee = new EmployeeDAO().getEmployee(Integer.parseInt(employeeId));
+            employee.getUser().setImagePath(Helpers.downloadFileToString(employee.getUser().getImagePath()));
+            return employee;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -91,7 +94,9 @@ public class EmployeeServlet {
     @Produces({MediaType.APPLICATION_JSON})
     public Employee getEmployeeByRegisteredCourse(@PathParam("regCourseId") String regCourseId) {
         try {
-            return new EmployeeDAO().getEmployeeByRegisteredCourse(Integer.parseInt(regCourseId));
+            Employee employee = new EmployeeDAO().getEmployeeByRegisteredCourse(Integer.parseInt(regCourseId));
+            employee.getUser().setImagePath(Helpers.downloadFileToString(employee.getUser().getImagePath()));
+            return employee;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -104,7 +109,9 @@ public class EmployeeServlet {
     @Produces({MediaType.APPLICATION_JSON})
     public Employee getTeacher(@PathParam("employeeId") String employeeId) {
         try {
-            return new EmployeeDAO().getTeacher(Integer.parseInt(employeeId));
+            Employee employee = new EmployeeDAO().getTeacher(Integer.parseInt(employeeId));
+            employee.getUser().setImagePath(Helpers.downloadFileToString(employee.getUser().getImagePath()));
+            return employee;
         } catch (Exception e) {
             e.printStackTrace();
             return null;

@@ -5,14 +5,28 @@
  */
 package helpers;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.StreamingOutput;
 
 /**
  *
  * @author kevin
  */
 public class Helpers {
+    
+    public static final String SERVER_IMAGE_LOCATION = "X:\\Documentos\\NetBeansProjects\\gradecheckFiles\\profilePictures\\";
+    public static final String SERVER_CORRECTION_LOCATION = "X:\\Documentos\\NetBeansProjects\\gradecheckFiles\\corrections\\";
     
     //
     public static Boolean isInt (String param) {
@@ -126,5 +140,70 @@ public class Helpers {
         }
         
         return response;
+    }
+    
+    public static void saveFile(InputStream uploadedInputStream, String serverLocation) throws IOException {
+        
+        OutputStream outputStream = new FileOutputStream(new File(serverLocation));
+        int read = 0;
+        byte[] bytes = new byte[1024];
+
+        while ((read = uploadedInputStream.read(bytes)) != -1) {
+            outputStream.write(bytes, 0, read);
+        }
+
+        outputStream.flush();
+        outputStream.close();
+    }
+    
+    public static StreamingOutput downloadFile(final String pathString) {
+        StreamingOutput fileStream =  new StreamingOutput()
+        {
+            @Override
+            public void write(java.io.OutputStream output) throws IOException, WebApplicationException
+            {
+                try
+                {
+                    java.nio.file.Path path = Paths.get(pathString);
+                    //byte[] data = Files.readAllBytes(path);
+                    byte[] data = Base64.getEncoder().encode(Files.readAllBytes(path));
+                    output.write(data);
+                    output.flush();
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        };
+        return fileStream;
+    }
+    
+    public static String downloadFileToString(final String pathString) throws IOException {
+        StreamingOutput fileStream =  new StreamingOutput()
+        {
+            @Override
+            public void write(java.io.OutputStream output) throws IOException, WebApplicationException
+            {
+                try
+                {
+                    java.nio.file.Path path = Paths.get(pathString);
+                    //byte[] data = Files.readAllBytes(path);
+                    byte[] data = Base64.getEncoder().encode(Files.readAllBytes(path));
+                    output.write(data);
+                    output.flush();
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        };
+        
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        fileStream.write(output);
+        String string = new String(output.toByteArray(), "UTF-8");
+        
+        return string;
     }
 }

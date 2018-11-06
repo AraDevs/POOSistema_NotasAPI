@@ -84,7 +84,9 @@ public class StudentServlet {
     @Produces({MediaType.APPLICATION_JSON})
     public hibernate.Student getStudent (@PathParam("studentId") String studentId) {
         try {
-            return new StudentDAO().getStudent(Integer.parseInt(studentId));
+            Student student = new StudentDAO().getStudent(Integer.parseInt(studentId));
+            student.getUser().setImagePath(Helpers.downloadFileToString(student.getUser().getImagePath()));
+            return student;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -96,7 +98,9 @@ public class StudentServlet {
     @Produces({MediaType.APPLICATION_JSON})
     public hibernate.Student getStudentByUserId (@PathParam("id") String userId) {
         try {
-            return new StudentDAO().getStudentByUser(Integer.parseInt(userId), StudentDAO.PERSON);
+            Student student = new StudentDAO().getStudentByUser(Integer.parseInt(userId), StudentDAO.PERSON);
+            student.getUser().setImagePath(Helpers.downloadFileToString(student.getUser().getImagePath()));
+            return student;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
