@@ -7,6 +7,7 @@ package helpers;
 
 import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.api.json.JSONJAXBContext;
+import dto.CorrectionDTO;
 import dto.Plan;
 import hibernate.Career;
 import hibernate.CareerCourse;
@@ -56,7 +57,8 @@ public class JAXBContextResolver implements ContextResolver<JAXBContext> {
             Unattendance.class,
             User.class,
             
-            Plan.class
+            Plan.class,
+            CorrectionDTO.class
         };
 
 	public JAXBContextResolver() throws Exception {

@@ -12,6 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -213,6 +214,34 @@ public class GradeDAO extends DAO {
             
             tra = ses.beginTransaction();
             grade = (Grade) ses.get(Grade.class, id);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            ses.flush();
+            ses.close();
+        }
+        
+        return grade;
+    }
+    
+    public Grade getNiceWay(int id) throws Exception {
+        Grade grade = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            String queryString = "FROM Grade g join fetch g.registeredCourse where g.id = :gradeId ";
+            Query query = ses.createQuery(queryString, Grade.class);
+            query.setParameter("gradeId", id);
+            grade = (Grade) query.uniqueResult();
             
         } catch (Exception e) {
             e.printStackTrace();

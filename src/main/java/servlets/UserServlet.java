@@ -527,7 +527,7 @@ public class UserServlet {
                 if (status == DaoStatus.OK) {
                     //Eliminando foto de perfil del usuario
                     File file = new File(imagePath);
-                    if (file != null) {
+                    if (!file.getName().equals("")) {
                         file.delete();
                     }
                     
@@ -564,7 +564,7 @@ public class UserServlet {
         try {
             User user = new UserDAO().getUser(Integer.parseInt(userId), false);
         
-            StreamingOutput fileStream = Helpers.downloadFile(user.getImagePath());
+            StreamingOutput fileStream = Helpers.downloadFileToBase64(user.getImagePath());
             
             String[] fileNameParts = user.getImagePath().split("\\\\"); //Regex equivalente a "\"
             String fileName = fileNameParts[fileNameParts.length - 1];

@@ -165,6 +165,28 @@ public class Helpers {
                 try
                 {
                     java.nio.file.Path path = Paths.get(pathString);
+                    byte[] data = Files.readAllBytes(path);
+                    output.write(data);
+                    output.flush();
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        };
+        return fileStream;
+    }
+    
+    public static StreamingOutput downloadFileToBase64(final String pathString) {
+        StreamingOutput fileStream =  new StreamingOutput()
+        {
+            @Override
+            public void write(java.io.OutputStream output) throws IOException, WebApplicationException
+            {
+                try
+                {
+                    java.nio.file.Path path = Paths.get(pathString);
                     //byte[] data = Files.readAllBytes(path);
                     byte[] data = Base64.getEncoder().encode(Files.readAllBytes(path));
                     output.write(data);
