@@ -6,11 +6,13 @@
 package servlets;
 
 import dao.CourseTeacherDAO;
+import dao.EvaluationDAO;
 import dao.RegisteredCourseDAO;
 import dao.StudentDAO;
 import helpers.DaoStatus;
 import hibernate.Course;
 import hibernate.CourseTeacher;
+import hibernate.Evaluation;
 import hibernate.RegisteredCourse;
 import hibernate.Student;
 import java.util.List;
@@ -116,6 +118,28 @@ public class RegisteredCourseServlet {
     public List<RegisteredCourse> getActiveRegisteredCoursesWithCourses(@PathParam("student_id") String studentId) {
         try {
             return new RegisteredCourseDAO().getRegisteredCourseWithCourse(Integer.parseInt(studentId), true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @GET
+    @Path("/byCourseTeacher/{courseTeacherId: \\d+}/byEvaluation/{evaluationId: \\d+}/gradeTable")
+    @Produces({MediaType.APPLICATION_JSON})
+    public List<RegisteredCourse> getRegCrsByCrsTchrAndEvalWithGrades(@PathParam("courseTeacherId") String courseTeacherId, @PathParam("evaluationId") String evaluationId) {
+        try {
+            CourseTeacher crsTchr = new CourseTeacherDAO().getCourseTeacher(Integer.parseInt(courseTeacherId));
+            Evaluation evaluation = new EvaluationDAO().getEvaluationWithCourse(Integer.parseInt(evaluationId));
+            
+            //Si los parámetros son inválidos, ya sea que no existan, no estén activos o no pertenezcan a 
+            //la misma materia
+            if (crsTchr == null || evaluation == null || !crsTchr.getState() || !evaluation.getState() 
+                    || crsTchr.getCourse().getId() != evaluation.getCourse().getId()) {
+                return null;
+            }
+            
+            return new RegisteredCourseDAO().getRegCrsByCrsTchrAndEvalWithGrades(Integer.parseInt(courseTeacherId), Integer.parseInt(evaluationId));
         } catch (Exception e) {
             e.printStackTrace();
             return null;

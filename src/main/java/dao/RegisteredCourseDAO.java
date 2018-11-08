@@ -12,6 +12,7 @@ import hibernate.Grade;
 import hibernate.HibernateUtil;
 import hibernate.Person;
 import hibernate.RegisteredCourse;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -249,6 +250,7 @@ public class RegisteredCourseDAO extends DAO {
                 rc.getCourseTeacher().getEmployee().getUser().setEmployees(null);
                 rc.getCourseTeacher().getEmployee().getUser().setStudents(null);
                 rc.getCourseTeacher().getEmployee().getUser().getPerson().setUsers(null);
+                rc.getCourseTeacher().getEmployee().getUser().setPass(null);
                 
                 rc.getCourseTeacher().getCourse().setCareerCourses(null);
                 rc.getCourseTeacher().getCourse().setCourse(null);
@@ -303,6 +305,7 @@ public class RegisteredCourseDAO extends DAO {
                 rc.getStudent().getUser().setEmployees(null);
                 rc.getStudent().getUser().setStudents(null);
                 rc.getStudent().getUser().getPerson().setUsers(null);
+                rc.getStudent().getUser().setPass(null);
             }
             
         } catch (HibernateException e) {
@@ -318,6 +321,65 @@ public class RegisteredCourseDAO extends DAO {
         return regCourses;
         
     }
+    
+    public List<RegisteredCourse> getRegCrsByCrsTchrAndEvalWithGrades(int courseTeacherId, int evaluationId) throws Exception {
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            
+            tra = ses.beginTransaction();
+            String queryString = "SELECT DISTINCT rc FROM RegisteredCourse rc join fetch rc.student s "
+                    + "join fetch s.user u join fetch u.person where rc.courseState = 'En curso' and "
+                    + "rc.courseTeacher.id = :courseTeacherId";
+            Query query = ses.createQuery(queryString, RegisteredCourse.class);
+            query.setParameter("courseTeacherId", courseTeacherId);
+            regCourses = query.list();
+            
+            for (RegisteredCourse rc : regCourses) {
+                rc.setUnattendances(null);
+                
+                rc.getCourseTeacher().setEmployee(null);
+                rc.getCourseTeacher().setRegisteredCourses(null);
+                rc.getCourseTeacher().setCourse(null);
+                
+                rc.getStudent().setCareerStudents(null);
+                rc.getStudent().setRegisteredCourses(null);
+                rc.getStudent().getUser().setEmployees(null);
+                rc.getStudent().getUser().setStudents(null);
+                rc.getStudent().getUser().getPerson().setUsers(null);
+                rc.getStudent().getUser().setPass(null);
+                
+                //Obteniendo notas
+                Grade grade = new GradeDAO().getGrade(rc.getId(), evaluationId);
+                HashSet<Grade> grades = new HashSet<Grade>();
+                if (grade != null) {
+                    grades.add(grade);
+                }
+                else { //Si no ha sido evaluado, se añadirá una nota de 0
+                    grade = new Grade();
+                    grade.setGrade(0);
+                    grade.setState(false);
+                    grades.add(grade);
+                }
+                rc.setGrades(grades);
+            }
+            
+        } catch (HibernateException e) {
+            e.printStackTrace();
+            if(tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return regCourses;
+        
+    }
+    
     
     public RegisteredCourse getRegisteredCourse(int id) throws Exception {
         RegisteredCourse regCourse = null;
@@ -346,6 +408,7 @@ public class RegisteredCourseDAO extends DAO {
             regCourse.getCourseTeacher().getEmployee().getUser().setEmployees(null);
             regCourse.getCourseTeacher().getEmployee().getUser().setStudents(null);
             regCourse.getCourseTeacher().getEmployee().getUser().getPerson().setUsers(null);
+            regCourse.getCourseTeacher().getEmployee().getUser().setPass(null);
 
             regCourse.getCourseTeacher().getCourse().setCareerCourses(null);
             regCourse.getCourseTeacher().getCourse().setCourse(null);

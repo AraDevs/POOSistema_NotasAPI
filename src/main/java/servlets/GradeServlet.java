@@ -21,6 +21,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
 /**
  *
@@ -44,6 +47,46 @@ public class GradeServlet {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+    
+    @PUT
+    @Path("/byEvaluation")
+    @Produces({MediaType.TEXT_PLAIN})
+    public Response updateByEvaluation (@FormParam("array") String array) {
+        
+        Boolean everythingOk = true;
+        String msg = "";
+        
+        try {
+            JSONArray jsonArray = new JSONArray(array);
+            
+            //Iterando cada registro para actualizar la nota individualmente
+            for (int i = 0; i < jsonArray.length(); i++) {
+                String grade = jsonArray.getJSONObject(i).getString("grade");
+                String observations = jsonArray.getJSONObject(i).getString("observations");
+                String registeredCourseId = jsonArray.getJSONObject(i).getString("registeredCourseId");
+                String evaluationId = jsonArray.getJSONObject(i).getString("evaluationId");
+                
+                Response response = update(grade, observations, registeredCourseId, evaluationId);
+                
+                //Si retornó un error, será necesario notificar al cliente que alguna nota no fue guardada
+                if (response.getStatus() != 200) everythingOk = false;
+            }
+            
+        } catch (JSONException e) {
+            e.printStackTrace();
+            msg = "El JSONArray enviado no está bien formado.";
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        if (everythingOk) {
+            msg = "Notas guardadas.";
+            return Response.ok(msg, "text/plain").build();
+        }
+        else {
+            msg = "Datos enviados, pero al menos una de las notas no pudo ser guardada. Verifique los datos que envía.";
+            return Response.ok(msg, "text/plain").build();
         }
     }
     
