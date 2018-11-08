@@ -21,7 +21,7 @@ import org.hibernate.query.Query;
  * @author kevin
  */
 @XmlRootElement( name = "roleDao" )
-public class RoleDAO {
+public class RoleDAO extends DAO {
     private List<Role> roles;
     String param;
     
@@ -91,6 +91,36 @@ public class RoleDAO {
         }
         
         return roles;
+    }
+    
+    public Role getRole(int id) {
+        
+        Role role = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM Role where id = :id";
+            Query query = ses.createQuery(queryString, Role.class);
+            query.setParameter("id", id);
+            role = (Role)query.uniqueResult();
+            
+            role.setEmployees(null);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return role;
     }
     
     public Role get(int id) throws Exception {
