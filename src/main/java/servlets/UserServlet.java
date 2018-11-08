@@ -564,7 +564,7 @@ public class UserServlet {
         try {
             User user = new UserDAO().getUser(Integer.parseInt(userId), false);
         
-            StreamingOutput fileStream = Helpers.downloadFileToBase64(user.getImagePath());
+            StreamingOutput fileStream = Helpers.downloadFile(user.getImagePath());
             
             String[] fileNameParts = user.getImagePath().split("\\\\"); //Regex equivalente a "\"
             String fileName = fileNameParts[fileNameParts.length - 1];
