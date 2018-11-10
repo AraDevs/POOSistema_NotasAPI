@@ -11,6 +11,7 @@ import com.sun.jersey.multipart.FormDataParam;
 import dao.PersonDao;
 import dao.UserDAO;
 import helpers.DaoStatus;
+import helpers.FilterRequest;
 import helpers.Helpers;
 import hibernate.Person;
 import hibernate.User;
@@ -26,6 +27,7 @@ import java.util.Base64;
 import java.util.Calendar;
 import java.util.List;
 import java.util.regex.Pattern;
+import javax.annotation.security.DenyAll;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -36,6 +38,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -55,7 +59,8 @@ public class UserServlet {
     @GET
     @Path("/people")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<User> getUsers () {
+    public List<User> getUsers (@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.USER);
         try {
             return new UserDAO().getUserList("", false);
         } catch (Exception e) {
@@ -67,7 +72,8 @@ public class UserServlet {
     @GET
     @Path("/people/active")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<User> getActiveUsers () {
+    public List<User> getActiveUsers (@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.USER);
         try {
             return new UserDAO().getUserList("", true);
         } catch (Exception e) {
@@ -79,7 +85,8 @@ public class UserServlet {
     @GET
     @Path("/people/noStudent")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<User> getUsersWithNoStudent () {
+    public List<User> getUsersWithNoStudent (@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.USER, FilterRequest.STUDENT);
         try {
             List <User> users = new UserDAO().getUsersNiceWay("", true);
             List <User> usersWithNoStudent = new ArrayList<User>();
@@ -104,7 +111,8 @@ public class UserServlet {
     @GET
     @Path("/people/noEmployee")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<User> getUsersWithNoEmployee () {
+    public List<User> getUsersWithNoEmployee (@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.USER, FilterRequest.EMPLOYEE);
         try {
             List <User> users = new UserDAO().getUsersNiceWay("", true);
             List <User> usersWithNoEmployee = new ArrayList<User>();
@@ -129,7 +137,8 @@ public class UserServlet {
     @GET
     @Path("/people/detached")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<User> getDetacchedUsers () {
+    public List<User> getDetacchedUsers (@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.USER);
         try {
             return new UserDAO().getDetachedUsers();
         } catch (Exception e) {
@@ -141,7 +150,8 @@ public class UserServlet {
     @GET
     @Path("/{userId: \\d+}/people")
     @Produces({MediaType.APPLICATION_JSON})
-    public User getUser (@PathParam("userId") String userId) {
+    public User getUser (@PathParam("userId") String userId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.USER);
         try {
             User user = new UserDAO().getUser(Integer.parseInt(userId), false);
             user.setImagePath(Helpers.downloadFileToString(user.getImagePath()));
@@ -162,7 +172,8 @@ public class UserServlet {
             @FormDataParam("pass") String pass, @FormDataParam("passConfirm") String passConfirm,
             @FormDataParam("imagePath") InputStream fileInputStream,
             @FormDataParam("imagePath") FormDataContentDisposition contentDispositionHeader,
-            @FormDataParam("imagePath") FormDataBodyPart fileBody) {
+            @FormDataParam("imagePath") FormDataBodyPart fileBody, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.USER);
         
         userDao = new UserDAO(false);
         PersonDao persDao = new PersonDao(false);
@@ -331,7 +342,8 @@ public class UserServlet {
             @FormDataParam("state") String state, @FormDataParam("id") String id,
             @FormDataParam("imagePath") InputStream fileInputStream,
             @FormDataParam("imagePath") FormDataContentDisposition contentDispositionHeader,
-            @FormDataParam("imagePath") FormDataBodyPart fileBody) {
+            @FormDataParam("imagePath") FormDataBodyPart fileBody, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.USER);
         
         userDao = new UserDAO(false);
         PersonDao persDao = new PersonDao(false);
@@ -494,7 +506,8 @@ public class UserServlet {
     @DELETE
     @Path("/{id: \\d+}")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response delete(@PathParam("id") String id) {
+    public Response delete(@PathParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.USER);
         
         String msg = "";
         UserDAO userDao = new UserDAO();
@@ -560,7 +573,8 @@ public class UserServlet {
     @GET
     @Path("/image/{userId}")
     @Produces("image/png")
-    public Response downloadImage(@PathParam("userId") String userId) {
+    public Response downloadImage(@PathParam("userId") String userId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             User user = new UserDAO().getUser(Integer.parseInt(userId), false);
         

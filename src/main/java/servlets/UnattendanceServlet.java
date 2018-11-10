@@ -8,6 +8,7 @@ package servlets;
 import dao.RegisteredCourseDAO;
 import dao.UnattendanceDAO;
 import helpers.DaoStatus;
+import helpers.FilterRequest;
 import helpers.Helpers;
 import hibernate.RegisteredCourse;
 import hibernate.Unattendance;
@@ -21,6 +22,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -39,7 +42,8 @@ public class UnattendanceServlet {
     @GET
     @Path("/byRegisteredCourse/{registeredCourseId: \\d+}")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Unattendance> getUnattendanceByRegCourse (@PathParam("registeredCourseId") String registeredCourseId) {
+    public List<Unattendance> getUnattendanceByRegCourse (@PathParam("registeredCourseId") String registeredCourseId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.IS_STUDENT, FilterRequest.TEACH);
         try {
             return new UnattendanceDAO().getUnattendancesByRegCourse(Integer.parseInt(registeredCourseId));
         } catch (Exception e) {
@@ -51,7 +55,8 @@ public class UnattendanceServlet {
     @GET
     @Path("/byStudent/{studentId: \\d+}")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Unattendance> getUnattendanceByStudent(@PathParam("studentId") String studentId) {
+    public List<Unattendance> getUnattendanceByStudent(@PathParam("studentId") String studentId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.IS_STUDENT, FilterRequest.TEACH);
         try {
             return new UnattendanceDAO().getUnattendancesByStudent(Integer.parseInt(studentId));
         } catch (Exception e) {
@@ -64,7 +69,8 @@ public class UnattendanceServlet {
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
     public Response create (@FormParam("registeredCourseId") String registeredCourseId, 
-                            @FormParam("unattendanceDate") String unattendanceDate) {
+                            @FormParam("unattendanceDate") String unattendanceDate, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.TEACH);
         
         untDao = new UnattendanceDAO(false);
         
@@ -148,7 +154,8 @@ public class UnattendanceServlet {
     @DELETE
     @Path("/{id: \\d+}")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response delete(@PathParam("id") String id) {
+    public Response delete(@PathParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.TEACH);
         
         String msg = "";
         UnattendanceDAO unattendanceDao = new UnattendanceDAO();

@@ -8,6 +8,7 @@ package servlets;
 import hibernate.Faculty;
 import dao.FacultyDAO;
 import helpers.DaoStatus;
+import helpers.FilterRequest;
 import helpers.Helpers;
 import java.util.List;
 import javax.ws.rs.DELETE;
@@ -18,6 +19,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -35,7 +38,8 @@ public class FacultyServlet {
     @GET
     @Path("/")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Faculty> getFaculties () {
+    public List<Faculty> getFaculties (@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new FacultyDAO().getFacultyList("", false);
         } catch (Exception e) {
@@ -47,7 +51,8 @@ public class FacultyServlet {
     @GET
     @Path("/active")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Faculty> getActiveFaculties () {
+    public List<Faculty> getActiveFaculties (@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new FacultyDAO().getFacultyList("", true);
         } catch (Exception e) {
@@ -68,7 +73,8 @@ public class FacultyServlet {
     @GET
     @Path("/{facultyId: \\d+}")
     @Produces({MediaType.APPLICATION_JSON})
-    public Faculty getFacultyById (@PathParam("facultyId") String facultyId) {
+    public Faculty getFacultyById (@PathParam("facultyId") String facultyId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new FacultyDAO().getFaculty(Integer.parseInt(facultyId));
         } catch (Exception e) {
@@ -81,7 +87,8 @@ public class FacultyServlet {
     @POST
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response create (@FormParam("name") String name) {
+    public Response create (@FormParam("name") String name, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.FACULTY);
         
         fctDao = new FacultyDAO(false);
         
@@ -120,7 +127,9 @@ public class FacultyServlet {
     @PUT
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response update (@FormParam("name") String name, @FormParam("state") String state, @FormParam("id") String id) {
+    public Response update (@FormParam("name") String name, @FormParam("state") String state, 
+            @FormParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.FACULTY);
         
         fctDao = new FacultyDAO(false);
         
@@ -182,7 +191,8 @@ public class FacultyServlet {
     @DELETE
     @Path("/{id: \\d+}")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response delete (@PathParam("id") String id) {
+    public Response delete (@PathParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.FACULTY);
         
         String msg = "";
         FacultyDAO facultyDao = new FacultyDAO();

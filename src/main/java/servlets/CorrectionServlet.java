@@ -12,6 +12,7 @@ import dao.CorrectionDAO;
 import dao.GradeDAO;
 import dto.CorrectionDTO;
 import helpers.DaoStatus;
+import helpers.FilterRequest;
 import helpers.Helpers;
 import hibernate.Correction;
 import hibernate.Grade;
@@ -26,6 +27,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -45,7 +48,8 @@ public class CorrectionServlet {
     @GET
     @Path("/byStudent/{studentId: \\d+}/course/owner")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<CorrectionDTO> getCorrectionsByStudent (@PathParam("studentId") String studentId) {
+    public List<CorrectionDTO> getCorrectionsByStudent (@PathParam("studentId") String studentId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.IS_STUDENT);
         try {
             return new CorrectionDAO().getCorrectionsDTOByStudent(Integer.parseInt(studentId));
         } catch (Exception e) {
@@ -69,7 +73,8 @@ public class CorrectionServlet {
     @GET
     @Path("/byEmployee/{employeeId: \\d+}/course/owner")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<CorrectionDTO> getCorrectionsByTeacher (@PathParam("employeeId") String employeeId) {
+    public List<CorrectionDTO> getCorrectionsByTeacher (@PathParam("employeeId") String employeeId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.TEACH);
         try {
             return new CorrectionDAO().getCorrectionsDTOByTeacher(Integer.parseInt(employeeId));
         } catch (Exception e) {
@@ -81,7 +86,8 @@ public class CorrectionServlet {
     @GET
     @Path("/byGrade/{gradeId: \\d+}/course/studentName")
     @Produces({MediaType.APPLICATION_JSON})
-    public CorrectionDTO getCorrectionByGradeWithStudentName (@PathParam("gradeId") String gradeId) {
+    public CorrectionDTO getCorrectionByGradeWithStudentName (@PathParam("gradeId") String gradeId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.TEACH);
         try {
             return new CorrectionDAO().getCorrectionDTOByGradeWithStudentName(Integer.parseInt(gradeId));
         } catch (Exception e) {
@@ -93,7 +99,8 @@ public class CorrectionServlet {
     @GET
     @Path("/byGrade/{gradeId: \\d+}/course/teacherName")
     @Produces({MediaType.APPLICATION_JSON})
-    public CorrectionDTO getCorrectionByGradeWithEmployeeName (@PathParam("gradeId") String gradeId) {
+    public CorrectionDTO getCorrectionByGradeWithEmployeeName (@PathParam("gradeId") String gradeId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.IS_STUDENT);
         try {
             return new CorrectionDAO().getCorrectionDTOByGradeWithTeacherName(Integer.parseInt(gradeId));
         } catch (Exception e) {
@@ -109,7 +116,8 @@ public class CorrectionServlet {
     public Response create (@FormDataParam("description") String description, @FormDataParam("gradeId") String gradeId, 
                             @FormDataParam("filePath") InputStream fileInputStream,
                             @FormDataParam("filePath") FormDataContentDisposition contentDispositionHeader,
-                            @FormDataParam("filePath") FormDataBodyPart fileBody) {
+                            @FormDataParam("filePath") FormDataBodyPart fileBody, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.IS_STUDENT);
         
         corrDao = new CorrectionDAO(false);
         
@@ -217,7 +225,8 @@ public class CorrectionServlet {
     @PUT
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response update (@FormParam("correctionState") String correctionState, @FormParam("id") String id) {
+    public Response update (@FormParam("correctionState") String correctionState, @FormParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.TEACH);
         
         corrDao = new CorrectionDAO(false);
         
@@ -283,7 +292,8 @@ public class CorrectionServlet {
     @GET
     @Path("/file/{correctionId}")
     @Produces("application/zip")
-    public Response downloadFile(@PathParam("correctionId") String correctionId) {
+    public Response downloadFile(@PathParam("correctionId") String correctionId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.IS_STUDENT, FilterRequest.TEACH);
         try {
             Correction correction = new CorrectionDAO().get(Integer.parseInt(correctionId));
         

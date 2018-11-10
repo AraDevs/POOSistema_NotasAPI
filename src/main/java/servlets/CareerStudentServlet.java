@@ -11,6 +11,7 @@ import dao.CareerStudentDAO;
 import dao.RegisteredCourseDAO;
 import dao.StudentDAO;
 import helpers.DaoStatus;
+import helpers.FilterRequest;
 import hibernate.Career;
 import hibernate.CareerCourse;
 import hibernate.CareerStudent;
@@ -28,6 +29,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -41,7 +44,8 @@ public class CareerStudentServlet {
     @GET
     @Path("/byStudent/{studentId: \\d+}/full")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<CareerStudent> getCareerStudentByStudent (@PathParam("studentId") String studentId) {
+    public List<CareerStudent> getCareerStudentByStudent (@PathParam("studentId") String studentId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new CareerStudentDAO().getCareerStudentList(Integer.parseInt(studentId));
         } catch (Exception e) {
@@ -53,7 +57,8 @@ public class CareerStudentServlet {
     @GET
     @Path("/{careerStudentId: \\d+}/careers")
     @Produces({MediaType.APPLICATION_JSON})
-    public CareerStudent getCareerStudentt (@PathParam("careerStudentId") String careerStudentId) {
+    public CareerStudent getCareerStudentt (@PathParam("careerStudentId") String careerStudentId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new CareerStudentDAO().getCareerStudent(Integer.parseInt(careerStudentId));
         } catch (Exception e) {
@@ -65,7 +70,8 @@ public class CareerStudentServlet {
     @POST
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response create (@FormParam("careerId") String careerId, @FormParam("studentId") String studentId) {
+    public Response create (@FormParam("careerId") String careerId, @FormParam("studentId") String studentId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.STUDENT);
         
         CareerStudentDAO carStdDao = new CareerStudentDAO(false);
         
@@ -165,7 +171,8 @@ public class CareerStudentServlet {
     @PUT
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response update (@FormParam("careerState") String careerState, @FormParam("id") String id) {
+    public Response update (@FormParam("careerState") String careerState, @FormParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.STUDENT);
         
         CareerStudentDAO carStdDao = new CareerStudentDAO(false);
         
@@ -278,7 +285,8 @@ public class CareerStudentServlet {
     @DELETE
     @Path("/{id: \\d+}")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response delete(@PathParam("id") String id) {
+    public Response delete(@PathParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.STUDENT);
         
         String msg = "";
         CareerStudentDAO careerStudentDao = new CareerStudentDAO();

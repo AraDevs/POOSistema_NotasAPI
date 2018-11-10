@@ -7,6 +7,7 @@ package servlets;
 
 import dao.RoleDAO;
 import helpers.DaoStatus;
+import helpers.FilterRequest;
 import hibernate.Role;
 import java.util.List;
 import javax.ws.rs.DELETE;
@@ -17,6 +18,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -34,7 +37,8 @@ public class RoleServlet {
     @GET
     @Path("/")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Role> getRoleList () {
+    public List<Role> getRoleList (@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.ROLE);
         try {
             return new RoleDAO().getRoleList("", false);
         } catch (Exception e) {
@@ -46,7 +50,8 @@ public class RoleServlet {
     @GET
     @Path("/active")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Role> getActiveRoleList () {
+    public List<Role> getActiveRoleList (@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.ROLE, FilterRequest.EMPLOYEE);
         try {
             return new RoleDAO().getRoleList("", true);
         } catch (Exception e) {
@@ -58,7 +63,8 @@ public class RoleServlet {
     @GET
     @Path("/{roleId: \\d+}")
     @Produces({MediaType.APPLICATION_JSON})
-    public Role getRole (@PathParam("roleId") String roleId) {
+    public Role getRole (@PathParam("roleId") String roleId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.ROLE);
         try {
             return new RoleDAO().getRole(Integer.parseInt(roleId));
         } catch (Exception e) {
@@ -75,7 +81,8 @@ public class RoleServlet {
             @FormParam("manageEmployees") String manageEmployees, @FormParam("manageFaculties") String manageFaculties, 
             @FormParam("manageCareers") String manageCareers, @FormParam("manageCourses") String manageCourses, 
             @FormParam("managePensums") String managePensums, @FormParam("manageEvaluations") String manageEvaluations, 
-            @FormParam("manageRoles") String manageRoles) {
+            @FormParam("manageRoles") String manageRoles, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.ROLE);
         
         roleDao = new RoleDAO(false);
         
@@ -165,7 +172,9 @@ public class RoleServlet {
             @FormParam("manageEmployees") String manageEmployees, @FormParam("manageFaculties") String manageFaculties, 
             @FormParam("manageCareers") String manageCareers, @FormParam("manageCourses") String manageCourses, 
             @FormParam("managePensums") String managePensums, @FormParam("manageEvaluations") String manageEvaluations, 
-            @FormParam("manageRoles") String manageRoles, @FormParam("state") String state, @FormParam("id") String id) {
+            @FormParam("manageRoles") String manageRoles, @FormParam("state") String state, 
+            @FormParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.ROLE);
         
         roleDao = new RoleDAO(false);
         
@@ -265,7 +274,8 @@ public class RoleServlet {
     @DELETE
     @Path("/{id: \\d+}")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response delete (@PathParam("id") String id) {
+    public Response delete (@PathParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.ROLE);
         
         String msg = "";
         RoleDAO roleDao = new RoleDAO();

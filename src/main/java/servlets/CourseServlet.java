@@ -11,6 +11,7 @@ import dao.CourseDAO;
 import dao.FacultyDAO;
 import dao.RegisteredCourseDAO;
 import helpers.DaoStatus;
+import helpers.FilterRequest;
 import hibernate.CareerCourse;
 import hibernate.CareerStudent;
 import hibernate.Course;
@@ -27,6 +28,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -44,7 +47,8 @@ public class CourseServlet {
     @GET
     @Path("/faculties/prerrequisite")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Course> getCourses() {
+    public List<Course> getCourses(@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new CourseDAO().getCourseList("", false);
         } catch (Exception e) {
@@ -56,7 +60,8 @@ public class CourseServlet {
     @GET
     @Path("/faculties/prerrequisite/active")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Course> getActiveCourses() {
+    public List<Course> getActiveCourses(@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new CourseDAO().getCourseList("", true);
         } catch (Exception e) {
@@ -68,7 +73,8 @@ public class CourseServlet {
     @GET
     @Path("{courseId: \\d+}/faculties/prerrequisite")
     @Produces({MediaType.APPLICATION_JSON})
-    public Course getCourse(@PathParam("courseId") String courseId) {
+    public Course getCourse(@PathParam("courseId") String courseId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new CourseDAO().getCourse(Integer.parseInt(courseId));
         } catch (Exception e) {
@@ -80,7 +86,8 @@ public class CourseServlet {
     @GET
     @Path("/byRegisteredCourse/{regCourseId: \\d+}")
     @Produces({MediaType.APPLICATION_JSON})
-    public Course getCoursesByRegisteredCourse(@PathParam("regCourseId") String regCourseId) {
+    public Course getCoursesByRegisteredCourse(@PathParam("regCourseId") String regCourseId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new CourseDAO().getCourseByRegisteredCourse(Integer.parseInt(regCourseId));
         } catch (Exception e) {
@@ -92,6 +99,95 @@ public class CourseServlet {
     @GET
     @Path("/byStudent/{studentId: \\d+}/available")
     @Produces({MediaType.APPLICATION_JSON})
+    public List<Course> getAvailableCourses(@PathParam("studentId") String studentId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
+        try {
+            CareerCourseDAO carCrsDao = new CareerCourseDAO();
+            
+            //Obteniendo carrera del estudiante para saber cual es y en que año inició
+            CareerStudent careerStudent = new CareerStudentDAO().getCurrentCareerStudentByStudent(Integer.parseInt(studentId));
+            //Obteniendo plan de la carrera
+            int plan = carCrsDao.getPlan(careerStudent);
+            //Obteniendo pensum de la carrera y plan obtenidos
+            List<CareerCourse> careerCourses = carCrsDao.getCareerCourseByCareerPlan(careerStudent.getCareer().getId(), plan);
+            
+            //Obteniendo lista de materias registradas por el estudiante
+            List<RegisteredCourse> registeredCourses = new RegisteredCourseDAO().getRegisteredCourseList(Integer.parseInt(studentId), false);
+            
+            //Agrupando codigo y estado (aprobado, etc) de las materias registradas, para compararlas con el pensum
+            ArrayList<String> courseCodes = new ArrayList<String>();
+            ArrayList<String> courseStates = new ArrayList<String>();
+            
+            for (RegisteredCourse rc : registeredCourses) {
+                courseCodes.add(rc.getCourseTeacher().getCourse().getCourseCode());
+                courseStates.add(rc.getCourseState());
+            }
+            
+            //Colección de materias disponibles para el estudiante
+            List<Course> availableCourses = new ArrayList<Course>();
+            
+            //Comparando cada materia del pensum con las materias registradas por el estudiante
+            for (CareerCourse cc : careerCourses) {
+                boolean available = false;
+                Course course = cc.getCourse();
+                
+                //Si el estudiante ya ha registrado la materia antes
+                if (courseCodes.contains(course.getCourseCode())) {
+                    //Se comprueba en un for por el hecho de que la misma materia podría
+                    //haber sido registrada múltiples veces, no se puede saber si la primera
+                    //que se comprobó es la que se busca
+                    for (int i = 0; i < courseCodes.size(); i++) {
+                        available = true; //Disponible hasta que se demuestre lo contrario
+                        boolean notAvailable = false;
+                        
+                        //Si la materia está registrada y está en curso o ya fue aprobada, no está disponible
+                        if (courseCodes.get(i).equals(course.getCourseCode()) && (courseStates.get(i).equals("Aprobada") || courseStates.get(i).equals("En curso"))) {
+                            notAvailable = true;
+                        }
+                        if (notAvailable) {
+                            available = false;
+                            break;
+                        }
+                    }
+                }
+                //Si nunca ha registrado la materia
+                else {
+                    //Si la materia no tiene prerrequisito, está disponible
+                    if (course.getCourse() == null) {
+                        available = true;
+                    }
+                    //Si la materia tiene prerrequisito
+                    else {
+                        //Si el estudiante ha registrado el prerrequisito de la materia
+                        if (courseCodes.contains(course.getCourse().getCourseCode())) {
+                            for (int i = 0; i < courseCodes.size(); i++) {
+                                //Si el prerrequisito fue aprobado
+                                if (courseCodes.get(i).equals(course.getCourse().getCourseCode()) && courseStates.get(i).equals("Aprobada")) {
+                                    available = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                //Si se determina que el estudiante puede inscribir la materia, la misma
+                //será parte del resultado
+                if (available) {
+                    availableCourses.add(course);
+                }
+            }
+            
+            return availableCourses;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<Course>();
+        }
+    }
+    
+    //Método sobrecargado del anterior a este, exactamente igual, solo que no requiere el HttpHeader
+    //Hice esto porque el POST de registeredCourse requiere de este método para hacer una validación
+    //Solo copiar y pegar un método tan extenso está mal, pero es que no quiero testear de nuevo ese POST xd
     public List<Course> getAvailableCourses(@PathParam("studentId") String studentId) {
         try {
             CareerCourseDAO carCrsDao = new CareerCourseDAO();
@@ -182,7 +278,8 @@ public class CourseServlet {
     @Produces({MediaType.TEXT_PLAIN})
     public Response create (@FormParam("name") String name, @FormParam("semester") String semester, 
             @FormParam("inter") String inter, @FormParam("laboratory") String laboratory, @FormParam("uv") String uv,
-            @FormParam("prerrequisiteId") String prerrequisiteId, @FormParam("facultyId") String facultyId) {
+            @FormParam("prerrequisiteId") String prerrequisiteId, @FormParam("facultyId") String facultyId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.COURSE);
         
         courseDao = new CourseDAO(false);
         
@@ -305,7 +402,8 @@ public class CourseServlet {
     public Response update (@FormParam("name") String name, @FormParam("semester") String semester, 
             @FormParam("inter") String inter, @FormParam("laboratory") String laboratory, @FormParam("uv") String uv,
             @FormParam("prerrequisiteId") String prerrequisiteId, @FormParam("facultyId") String facultyId,
-            @FormParam("state") String state, @FormParam("id") String id) {
+            @FormParam("state") String state, @FormParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.COURSE);
         
         courseDao = new CourseDAO(false);
         
@@ -437,7 +535,8 @@ public class CourseServlet {
     @DELETE
     @Path("/{id: \\d+}")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response delete(@PathParam("id") String id) {
+    public Response delete(@PathParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.COURSE);
         
         String msg = "";
         CourseDAO courseDao = new CourseDAO();

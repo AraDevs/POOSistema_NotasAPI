@@ -8,8 +8,11 @@ package servlets;
 import dao.EmployeeDAO;
 import dao.RoleDAO;
 import dao.UserDAO;
+import dto.EmployeeTokenDTO;
 import helpers.DaoStatus;
+import helpers.FilterRequest;
 import helpers.Helpers;
+import helpers.JWTHelper;
 import hibernate.Course;
 import hibernate.CourseTeacher;
 import hibernate.Employee;
@@ -24,6 +27,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.annotation.XmlSeeAlso;
@@ -41,7 +46,8 @@ public class EmployeeServlet {
     @GET
     @Path("/users/people/roles")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Employee> getEmployees() {
+    public List<Employee> getEmployees(@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new EmployeeDAO().getEmployeeList("", false);
         } catch (Exception e) {
@@ -54,7 +60,8 @@ public class EmployeeServlet {
     @GET
     @Path("/users/people/roles/active")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Employee> getActiveEmployees() {
+    public List<Employee> getActiveEmployees(@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new EmployeeDAO().getEmployeeList("", true);
         } catch (Exception e) {
@@ -66,7 +73,8 @@ public class EmployeeServlet {
     @GET
     @Path("/byStudent/{studentId: \\d+}/users/people")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Employee> getEmployeeByStudent(@PathParam("studentId") String studentId) {
+    public List<Employee> getEmployeeByStudent(@PathParam("studentId") String studentId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new EmployeeDAO().getEmployeeByStudent(Integer.parseInt(studentId));
         } catch (Exception e) {
@@ -78,7 +86,8 @@ public class EmployeeServlet {
     @GET
     @Path("/{employeeId: \\d+}/users/people/roles")
     @Produces({MediaType.APPLICATION_JSON})
-    public Employee getEmployee(@PathParam("employeeId") String employeeId) {
+    public Employee getEmployee(@PathParam("employeeId") String employeeId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             Employee employee = new EmployeeDAO().getEmployee(Integer.parseInt(employeeId));
             employee.getUser().setImagePath(Helpers.downloadFileToString(employee.getUser().getImagePath()));
@@ -92,7 +101,8 @@ public class EmployeeServlet {
     @GET
     @Path("/byRegisteredCourse/{regCourseId: \\d+}/users/people")
     @Produces({MediaType.APPLICATION_JSON})
-    public Employee getEmployeeByRegisteredCourse(@PathParam("regCourseId") String regCourseId) {
+    public Employee getEmployeeByRegisteredCourse(@PathParam("regCourseId") String regCourseId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             Employee employee = new EmployeeDAO().getEmployeeByRegisteredCourse(Integer.parseInt(regCourseId));
             employee.getUser().setImagePath(Helpers.downloadFileToString(employee.getUser().getImagePath()));
@@ -107,7 +117,8 @@ public class EmployeeServlet {
     @GET
     @Path("/{employeeId: \\d+}/full")
     @Produces({MediaType.APPLICATION_JSON})
-    public Employee getTeacher(@PathParam("employeeId") String employeeId) {
+    public Employee getTeacher(@PathParam("employeeId") String employeeId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             Employee employee = new EmployeeDAO().getTeacher(Integer.parseInt(employeeId));
             employee.getUser().setImagePath(Helpers.downloadFileToString(employee.getUser().getImagePath()));
@@ -153,8 +164,14 @@ public class EmployeeServlet {
                 return Response.status(Response.Status.FORBIDDEN).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
             
+            //Generando token 
+            String token = new JWTHelper().createEmployeeJWT(employee);
+            
+            //Generando objeto custom para enviar devuelta al estudiante junto a su token
+            EmployeeTokenDTO employeeWithToken = new EmployeeTokenDTO(employee, token);
+            
             //Login exitoso
-            return Response.status(Response.Status.ACCEPTED).entity(employee).type(MediaType.APPLICATION_JSON).build();
+            return Response.status(Response.Status.ACCEPTED).entity(employeeWithToken).type(MediaType.APPLICATION_JSON).build();
             
         }
         catch (Exception e) {
@@ -169,7 +186,8 @@ public class EmployeeServlet {
     @POST
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response create (@FormParam("userId") String userId, @FormParam("roleId") String roleId) {
+    public Response create (@FormParam("userId") String userId, @FormParam("roleId") String roleId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.EMPLOYEE);
         
         EmployeeDAO empDao = new EmployeeDAO(false);
         
@@ -251,7 +269,9 @@ public class EmployeeServlet {
     @PUT
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response update (@FormParam("roleId") String roleId, @FormParam("state") String state, @FormParam("id") String id) {
+    public Response update (@FormParam("roleId") String roleId, @FormParam("state") String state, 
+            @FormParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.EMPLOYEE);
         
         EmployeeDAO empDao = new EmployeeDAO(false);;
         
@@ -326,7 +346,8 @@ public class EmployeeServlet {
     @DELETE
     @Path("/{id: \\d+}")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response delete(@PathParam("id") String id) {
+    public Response delete(@PathParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.EMPLOYEE);
         
         String msg = "";
         EmployeeDAO employeeDao = new EmployeeDAO();

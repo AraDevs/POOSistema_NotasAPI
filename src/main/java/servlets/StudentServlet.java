@@ -8,8 +8,11 @@ package servlets;
 import hibernate.Student;
 import dao.StudentDAO;
 import dao.UserDAO;
+import dto.StudentTokenDTO;
 import helpers.DaoStatus;
+import helpers.FilterRequest;
 import helpers.Helpers;
+import helpers.JWTHelper;
 import hibernate.User;
 import java.util.Calendar;
 import java.util.List;
@@ -21,6 +24,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -38,7 +43,8 @@ public class StudentServlet {
     @GET
     @Path("/users/people")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Student> getStudentList () {
+    public List<Student> getStudentList (@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new StudentDAO().getStudentList("", false);
         } catch (Exception e) {
@@ -50,7 +56,8 @@ public class StudentServlet {
     @GET
     @Path("/users/people/active")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Student> getActiveStudentList () {
+    public List<Student> getActiveStudentList (@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new StudentDAO().getStudentList("", true);
         } catch (Exception e) {
@@ -62,7 +69,8 @@ public class StudentServlet {
     @GET
     @Path("byCourseTeacher/{courseTeacherId: \\d+}/users/people")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Student> getActiveStudentList (@PathParam("courseTeacherId") String courseTeacherId) {
+    public List<Student> getActiveStudentList (@PathParam("courseTeacherId") String courseTeacherId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new StudentDAO().getStudentsByCourseTeacher(Integer.parseInt(courseTeacherId));
         } catch (Exception e) {
@@ -82,7 +90,8 @@ public class StudentServlet {
     @GET
     @Path("/{studentId: \\d+}/users/people")
     @Produces({MediaType.APPLICATION_JSON})
-    public hibernate.Student getStudent (@PathParam("studentId") String studentId) {
+    public hibernate.Student getStudent (@PathParam("studentId") String studentId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             Student student = new StudentDAO().getStudent(Integer.parseInt(studentId));
             student.getUser().setImagePath(Helpers.downloadFileToString(student.getUser().getImagePath()));
@@ -96,7 +105,8 @@ public class StudentServlet {
     @GET
     @Path("/users/{id: \\d+}/people")
     @Produces({MediaType.APPLICATION_JSON})
-    public hibernate.Student getStudentByUserId (@PathParam("id") String userId) {
+    public hibernate.Student getStudentByUserId (@PathParam("id") String userId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             Student student = new StudentDAO().getStudentByUser(Integer.parseInt(userId), StudentDAO.PERSON);
             student.getUser().setImagePath(Helpers.downloadFileToString(student.getUser().getImagePath()));
@@ -142,8 +152,14 @@ public class StudentServlet {
                 return Response.status(Response.Status.FORBIDDEN).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
             
+            //Generando token 
+            String token = new JWTHelper().createStudentJWT(student);
+            
+            //Generando objeto custom para enviar devuelta al estudiante junto a su token
+            StudentTokenDTO studentWithToken = new StudentTokenDTO(student, token);
+            
             //Login exitoso
-            return Response.status(Response.Status.ACCEPTED).entity(student).type(MediaType.APPLICATION_JSON).build();
+            return Response.status(Response.Status.ACCEPTED).entity(studentWithToken).type(MediaType.APPLICATION_JSON).build();
             
         }
         catch (Exception e) {
@@ -158,7 +174,8 @@ public class StudentServlet {
     @POST
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response create (@FormParam("userId") String userId) {
+    public Response create (@FormParam("userId") String userId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.STUDENT);
         
         stdDAO = new StudentDAO(false);
         
@@ -218,7 +235,8 @@ public class StudentServlet {
     @PUT
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response update (@FormParam("state") String state, @FormParam("id") String id) {
+    public Response update (@FormParam("state") String state, @FormParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.STUDENT);
         
         stdDAO = new StudentDAO(false);
         
@@ -275,7 +293,8 @@ public class StudentServlet {
     @DELETE
     @Path("/{id: \\d+}")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response delete(@PathParam("id") String id) {
+    public Response delete(@PathParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.STUDENT);
         
         String msg = "";
         StudentDAO studentDao = new StudentDAO();

@@ -8,6 +8,7 @@ package servlets;
 import dao.CourseDAO;
 import dao.EvaluationDAO;
 import helpers.DaoStatus;
+import helpers.FilterRequest;
 import hibernate.Course;
 import hibernate.Evaluation;
 import hibernate.Grade;
@@ -21,6 +22,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.annotation.XmlSeeAlso;
@@ -39,7 +42,8 @@ public class EvaluationServlet {
     @GET
     @Path("/byCourse/{courseId}")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Evaluation> getEvaluations(@PathParam("courseId") String courseId) {
+    public List<Evaluation> getEvaluations(@PathParam("courseId") String courseId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new EvaluationDAO().getEvaluationByCourse(Integer.parseInt(courseId), false);
         } catch (Exception e) {
@@ -51,7 +55,8 @@ public class EvaluationServlet {
     @GET
     @Path("/byCourse/{courseId}/active")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Evaluation> getActiveEvaluations(@PathParam("courseId") String courseId) {
+    public List<Evaluation> getActiveEvaluations(@PathParam("courseId") String courseId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new EvaluationDAO().getEvaluationByCourse(Integer.parseInt(courseId), true);
         } catch (Exception e) {
@@ -63,7 +68,8 @@ public class EvaluationServlet {
     @GET
     @Path("/{evaluationId: \\d+}")
     @Produces({MediaType.APPLICATION_JSON})
-    public Evaluation getEvaluation(@PathParam("evaluationId") String evaluationId) {
+    public Evaluation getEvaluation(@PathParam("evaluationId") String evaluationId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new EvaluationDAO().getEvaluation(Integer.parseInt(evaluationId));
         } catch (Exception e) {
@@ -76,7 +82,8 @@ public class EvaluationServlet {
     @Path("/{evaluationId}/byRegisteredCourse/{registeredCourseId}")
     @Produces({MediaType.APPLICATION_JSON})
     public Evaluation getEvaluationWithGrade(@PathParam("evaluationId") String evaluationId, 
-                                             @PathParam("registeredCourseId") String registeredCourseId) {
+                                             @PathParam("registeredCourseId") String registeredCourseId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.IS_STUDENT, FilterRequest.TEACH);
         try {
             return new EvaluationDAO().getEvaluationWithGrade(Integer.parseInt(evaluationId), Integer.parseInt(registeredCourseId));
         } catch (Exception e) {
@@ -88,7 +95,8 @@ public class EvaluationServlet {
     @GET
     @Path("/byRegisteredCourse/{regCourseId}/grades")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Evaluation> getEvaluationsByRegisteredCourse(@PathParam("regCourseId") String regCourseId) {
+    public List<Evaluation> getEvaluationsByRegisteredCourse(@PathParam("regCourseId") String regCourseId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.IS_STUDENT, FilterRequest.TEACH);
         try {
             return new EvaluationDAO().getEvaluationsByRegCourseWithGrade(Integer.parseInt(regCourseId), false);
         } catch (Exception e) {
@@ -103,7 +111,8 @@ public class EvaluationServlet {
     public Response create (@FormParam("name") String name, @FormParam("description") String description, 
             @FormParam("percentage") String percentage, @FormParam("period") String period, 
             @FormParam("laboratory") String laboratory, @FormParam("startDate") String startDate, 
-            @FormParam("endDate") String endDate, @FormParam("courseId") String courseId) {
+            @FormParam("endDate") String endDate, @FormParam("courseId") String courseId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.EVALUATION);
         
         evalDao = new EvaluationDAO(false);
         
@@ -223,7 +232,9 @@ public class EvaluationServlet {
     public Response update (@FormParam("name") String name, @FormParam("description") String description, 
             @FormParam("percentage") String percentage, @FormParam("period") String period, 
             @FormParam("laboratory") String laboratory, @FormParam("startDate") String startDate, 
-            @FormParam("endDate") String endDate, @FormParam("state") String state, @FormParam("id") String id) {
+            @FormParam("endDate") String endDate, @FormParam("state") String state, @FormParam("id") String id,
+            @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.EVALUATION);
         
         evalDao = new EvaluationDAO(false);
         
@@ -336,7 +347,8 @@ public class EvaluationServlet {
     @DELETE
     @Path("/{id: \\d+}")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response delete(@PathParam("id") String id) {
+    public Response delete(@PathParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.EVALUATION);
         
         String msg = "";
         EvaluationDAO evaluationDao = new EvaluationDAO();

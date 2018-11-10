@@ -7,6 +7,7 @@ package servlets;
 
 import dao.CareerTypeDAO;
 import helpers.DaoStatus;
+import helpers.FilterRequest;
 import hibernate.CareerType;
 import java.util.List;
 import javax.ws.rs.DELETE;
@@ -17,6 +18,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -31,7 +34,8 @@ public class CareerTypeServlet {
     @GET
     @Path("/")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<CareerType> getCareerTypes () {
+    public List<CareerType> getCareerTypes (@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new CareerTypeDAO().getCareerTypeList("", false);
         } catch (Exception e) {
@@ -43,7 +47,8 @@ public class CareerTypeServlet {
     @GET
     @Path("/active")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<CareerType> getActiveCareerTypes () {
+    public List<CareerType> getActiveCareerTypes (@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new CareerTypeDAO().getCareerTypeList("", true);
         } catch (Exception e) {
@@ -55,7 +60,8 @@ public class CareerTypeServlet {
     @GET
     @Path("/{careerTypeId: \\d+}")
     @Produces({MediaType.APPLICATION_JSON})
-    public CareerType getCareerType (@PathParam("careerTypeId") String careerTypeId) {
+    public CareerType getCareerType (@PathParam("careerTypeId") String careerTypeId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new CareerTypeDAO().getCareerType(Integer.parseInt(careerTypeId));
         } catch (Exception e) {
@@ -67,7 +73,8 @@ public class CareerTypeServlet {
     @POST
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response create (@FormParam("name") String name) {
+    public Response create (@FormParam("name") String name, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.CAREER);
         
         carTypeDao = new CareerTypeDAO(false);
         
@@ -106,7 +113,9 @@ public class CareerTypeServlet {
     @PUT
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response update (@FormParam("name") String name, @FormParam("state") String state, @FormParam("id") String id) {
+    public Response update (@FormParam("name") String name, @FormParam("state") String state, 
+            @FormParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.CAREER);
         
         carTypeDao = new CareerTypeDAO(false);
         
@@ -167,7 +176,8 @@ public class CareerTypeServlet {
     @DELETE
     @Path("/{id: \\d+}")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response delete(@PathParam("id") String id) {
+    public Response delete(@PathParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.CAREER);
         
         String msg = "";
         CareerTypeDAO careerTypeDao = new CareerTypeDAO();

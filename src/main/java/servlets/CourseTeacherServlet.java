@@ -10,6 +10,7 @@ import dao.CourseTeacherDAO;
 import dao.EmployeeDAO;
 import dao.RegisteredCourseDAO;
 import helpers.DaoStatus;
+import helpers.FilterRequest;
 import helpers.Helpers;
 import hibernate.Course;
 import hibernate.CourseTeacher;
@@ -25,6 +26,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -41,7 +44,8 @@ public class CourseTeacherServlet {
     @GET
     @Path("/byEmployee/{employeeId: \\d+}/courses")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<CourseTeacher> getCoursesByEmployee(@PathParam("employeeId") String employeeId) {
+    public List<CourseTeacher> getCoursesByEmployee(@PathParam("employeeId") String employeeId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new CourseTeacherDAO().getCourseTeacherList(Integer.parseInt(employeeId), false);
         } catch (Exception e) {
@@ -53,7 +57,8 @@ public class CourseTeacherServlet {
     @GET
     @Path("/byEmployee/{employeeId: \\d+}/courses/active")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<CourseTeacher> getActiveCoursesByEmployee(@PathParam("employeeId") String employeeId) {
+    public List<CourseTeacher> getActiveCoursesByEmployee(@PathParam("employeeId") String employeeId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new CourseTeacherDAO().getCourseTeacherList(Integer.parseInt(employeeId), true);
         } catch (Exception e) {
@@ -65,7 +70,8 @@ public class CourseTeacherServlet {
     @GET
     @Path("/byCourse/{courseId: \\d+}/employees/users/people")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<CourseTeacher> getTeachersByCourse(@PathParam("courseId") String courseId) {
+    public List<CourseTeacher> getTeachersByCourse(@PathParam("courseId") String courseId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new CourseTeacherDAO().getCourseTeacherByCourse(Integer.parseInt(courseId));
         } catch (Exception e) {
@@ -77,7 +83,8 @@ public class CourseTeacherServlet {
     @GET
     @Path("/{courseTeacherId: \\d+}/courses")
     @Produces({MediaType.APPLICATION_JSON})
-    public CourseTeacher getCoursesTeacher(@PathParam("courseTeacherId") String courseTeacherId) {
+    public CourseTeacher getCoursesTeacher(@PathParam("courseTeacherId") String courseTeacherId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new CourseTeacherDAO().getCourseTeacher(Integer.parseInt(courseTeacherId));
         } catch (Exception e) {
@@ -89,7 +96,8 @@ public class CourseTeacherServlet {
     @GET
     @Path("/passCount/byRegisteredCourse/{regCourseId: \\d+}")
     @Produces({MediaType.APPLICATION_JSON})
-    public String getCoursesByRegisteredCourse(@PathParam("regCourseId") String regCourseId) {
+    public String getCoursesByRegisteredCourse(@PathParam("regCourseId") String regCourseId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new CourseTeacherDAO().getCourseTeacherTendency(Integer.parseInt(regCourseId));
         } catch (Exception e) {
@@ -102,7 +110,9 @@ public class CourseTeacherServlet {
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
     public Response create (@FormParam("courseId") String courseId, @FormParam("employeeId") String employeeId, 
-            @FormParam("courseYear") String courseYear, @FormParam("semester") String semester, @FormParam("classCount") String classCount) {
+            @FormParam("courseYear") String courseYear, @FormParam("semester") String semester, 
+            @FormParam("classCount") String classCount, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.EMPLOYEE);
         
         CourseTeacherDAO crsTchDao = new CourseTeacherDAO(false);
         
@@ -247,7 +257,8 @@ public class CourseTeacherServlet {
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
     public Response update (@FormParam("courseYear") String courseYear, @FormParam("semester") String semester, 
-            @FormParam("classCount") String classCount, @FormParam("id") String id) {
+            @FormParam("classCount") String classCount, @FormParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.EMPLOYEE);
         
         CourseTeacherDAO crsTchDao = new CourseTeacherDAO(false);
         
@@ -391,7 +402,8 @@ public class CourseTeacherServlet {
     @DELETE
     @Path("/{id: \\d+}")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response delete(@PathParam("id") String id) {
+    public Response delete(@PathParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.EMPLOYEE);
         
         String msg = "";
         CourseTeacherDAO courseTeacherDao = new CourseTeacherDAO();

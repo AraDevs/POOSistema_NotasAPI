@@ -9,6 +9,7 @@ import dao.CareerDAO;
 import dao.CareerTypeDAO;
 import dao.FacultyDAO;
 import helpers.DaoStatus;
+import helpers.FilterRequest;
 import hibernate.Career;
 import hibernate.CareerType;
 import hibernate.Faculty;
@@ -21,6 +22,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -35,7 +38,8 @@ public class CareerServlet {
     @GET
     @Path("/full")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Career> getCareers () {
+    public List<Career> getCareers (@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new CareerDAO().getCareerList("", false);
         } catch (Exception e) {
@@ -47,7 +51,8 @@ public class CareerServlet {
     @GET
     @Path("/full/active")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Career> getActiveCareers () {
+    public List<Career> getActiveCareers (@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new CareerDAO().getCareerList("", true);
         } catch (Exception e) {
@@ -59,7 +64,8 @@ public class CareerServlet {
     @GET
     @Path("/{careerId: \\d+}/full")
     @Produces({MediaType.APPLICATION_JSON})
-    public Career getCareer (@PathParam("careerId") String careerId) {
+    public Career getCareer (@PathParam("careerId") String careerId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new CareerDAO().getCareer(Integer.parseInt(careerId));
         } catch (Exception e) {
@@ -71,7 +77,9 @@ public class CareerServlet {
     @POST
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response create (@FormParam("name") String name, @FormParam("facultyId") String facultyId, @FormParam("careerTypeId") String careerTypeId) {
+    public Response create (@FormParam("name") String name, @FormParam("facultyId") String facultyId, 
+            @FormParam("careerTypeId") String careerTypeId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.CAREER);
         
         carDao = new CareerDAO(false);
         
@@ -154,7 +162,8 @@ public class CareerServlet {
     @Produces({MediaType.TEXT_PLAIN})
     public Response update (@FormParam("name") String name, @FormParam("facultyId") String facultyId, 
                             @FormParam("careerTypeId") String careerTypeId, @FormParam("state") String state,
-                            @FormParam("id") String id) {
+                            @FormParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.CAREER);
         
         carDao = new CareerDAO(false);
         
@@ -249,7 +258,8 @@ public class CareerServlet {
     @DELETE
     @Path("/{id: \\d+}")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response delete(@PathParam("id") String id) {
+    public Response delete(@PathParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.CAREER);
         
         String msg = "";
         CareerDAO careerDao = new CareerDAO();

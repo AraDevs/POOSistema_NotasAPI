@@ -9,6 +9,7 @@ import dao.EvaluationDAO;
 import dao.GradeDAO;
 import dao.RegisteredCourseDAO;
 import helpers.DaoStatus;
+import helpers.FilterRequest;
 import hibernate.Evaluation;
 import hibernate.Grade;
 import hibernate.RegisteredCourse;
@@ -19,6 +20,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.codehaus.jettison.json.JSONArray;
@@ -41,7 +44,8 @@ public class GradeServlet {
     @Path("/byRegisteredCourse/{regCourseId: \\d+}/byEvaluation/{evalId: \\d+}")
     @Produces({MediaType.APPLICATION_JSON})
     public Grade getGrade(@PathParam("regCourseId") String regCourseId,
-                                                 @PathParam("evalId") String evalId) {
+                          @PathParam("evalId") String evalId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new GradeDAO().getGrade(Integer.parseInt(regCourseId), Integer.parseInt(evalId));
         } catch (Exception e) {
@@ -53,7 +57,8 @@ public class GradeServlet {
     @PUT
     @Path("/byEvaluation")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response updateByEvaluation (@FormParam("array") String array) {
+    public Response updateByEvaluation (@FormParam("array") String array, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.TEACH);
         
         Boolean everythingOk = true;
         String msg = "";
@@ -68,7 +73,7 @@ public class GradeServlet {
                 String registeredCourseId = jsonArray.getJSONObject(i).getString("registeredCourseId");
                 String evaluationId = jsonArray.getJSONObject(i).getString("evaluationId");
                 
-                Response response = update(grade, observations, registeredCourseId, evaluationId);
+                Response response = update(grade, observations, registeredCourseId, evaluationId, header);
                 
                 //Si retornó un error, será necesario notificar al cliente que alguna nota no fue guardada
                 if (response.getStatus() != 200) everythingOk = false;
@@ -94,7 +99,9 @@ public class GradeServlet {
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
     public Response update (@FormParam("grade") String grade, @FormParam("observations") String observations, 
-                            @FormParam("registeredCourseId") String registeredCourseId, @FormParam("evaluationId") String evaluationId) {
+                            @FormParam("registeredCourseId") String registeredCourseId, 
+                            @FormParam("evaluationId") String evaluationId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.TEACH);
         
         gradeDao = new GradeDAO(false);
         

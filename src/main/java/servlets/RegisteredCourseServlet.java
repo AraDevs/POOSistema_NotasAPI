@@ -10,6 +10,7 @@ import dao.EvaluationDAO;
 import dao.RegisteredCourseDAO;
 import dao.StudentDAO;
 import helpers.DaoStatus;
+import helpers.FilterRequest;
 import hibernate.Course;
 import hibernate.CourseTeacher;
 import hibernate.Evaluation;
@@ -24,6 +25,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -41,7 +44,9 @@ public class RegisteredCourseServlet {
     @GET
     @Path("/byCourseTeacher/{courseTeacherId: \\d+}/students/users/people")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<RegisteredCourse> getRegisteredCoursesByCourseTeacher(@PathParam("courseTeacherId") String courseTeacherId) {
+    public List<RegisteredCourse> getRegisteredCoursesByCourseTeacher(@PathParam("courseTeacherId") String courseTeacherId, 
+                                                                    @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new RegisteredCourseDAO().getRegisteredCourseByCourseTeacher(Integer.parseInt(courseTeacherId), false);
         } catch (Exception e) {
@@ -53,7 +58,8 @@ public class RegisteredCourseServlet {
     @GET
     @Path("/{registeredCourseId: \\d+}/courses/teachers")
     @Produces({MediaType.APPLICATION_JSON})
-    public RegisteredCourse getRegisteredCourse(@PathParam("registeredCourseId") String registeredCourseId) {
+    public RegisteredCourse getRegisteredCourse(@PathParam("registeredCourseId") String registeredCourseId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new RegisteredCourseDAO().getRegisteredCourse(Integer.parseInt(registeredCourseId));
         } catch (Exception e) {
@@ -65,7 +71,8 @@ public class RegisteredCourseServlet {
     @GET
     @Path("/byStudent/{student_id: \\d+}/full")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<RegisteredCourse> getRegisteredCourses(@PathParam("student_id") String studentId) {
+    public List<RegisteredCourse> getRegisteredCourses(@PathParam("student_id") String studentId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new RegisteredCourseDAO().getRegisteredCourseListWithGrades(Integer.parseInt(studentId), false);
         } catch (Exception e) {
@@ -77,7 +84,8 @@ public class RegisteredCourseServlet {
     @GET
     @Path("/byStudent/{student_id: \\d+}/full/active")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<RegisteredCourse> getActiveRegisteredCourses(@PathParam("student_id") String studentId) {
+    public List<RegisteredCourse> getActiveRegisteredCourses(@PathParam("student_id") String studentId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new RegisteredCourseDAO().getRegisteredCourseListWithGrades(Integer.parseInt(studentId), true);
         } catch (Exception e) {
@@ -90,7 +98,8 @@ public class RegisteredCourseServlet {
     @GET
     @Path("/byStudent/{student_id: \\d+}/courses")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<RegisteredCourse> getRegisteredCoursesWithCourses(@PathParam("student_id") String studentId) {
+    public List<RegisteredCourse> getRegisteredCoursesWithCourses(@PathParam("student_id") String studentId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new RegisteredCourseDAO().getRegisteredCourseWithCourse(Integer.parseInt(studentId), false);
         } catch (Exception e) {
@@ -102,7 +111,9 @@ public class RegisteredCourseServlet {
     @GET
     @Path("/byStudent/{student_id: \\d+}/courses/teachers")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<RegisteredCourse> getRegisteredCoursesWithCoursesAndTeachers(@PathParam("student_id") String studentId) {
+    public List<RegisteredCourse> getRegisteredCoursesWithCoursesAndTeachers(@PathParam("student_id") String studentId, 
+                                                                             @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new RegisteredCourseDAO().getRegisteredCourseWithCourseAndTeacher(Integer.parseInt(studentId), false);
         } catch (Exception e) {
@@ -115,7 +126,8 @@ public class RegisteredCourseServlet {
     @GET
     @Path("/byStudent/{student_id: \\d+}/courses/active")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<RegisteredCourse> getActiveRegisteredCoursesWithCourses(@PathParam("student_id") String studentId) {
+    public List<RegisteredCourse> getActiveRegisteredCoursesWithCourses(@PathParam("student_id") String studentId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
         try {
             return new RegisteredCourseDAO().getRegisteredCourseWithCourse(Integer.parseInt(studentId), true);
         } catch (Exception e) {
@@ -127,7 +139,9 @@ public class RegisteredCourseServlet {
     @GET
     @Path("/byCourseTeacher/{courseTeacherId: \\d+}/byEvaluation/{evaluationId: \\d+}/gradeTable")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<RegisteredCourse> getRegCrsByCrsTchrAndEvalWithGrades(@PathParam("courseTeacherId") String courseTeacherId, @PathParam("evaluationId") String evaluationId) {
+    public List<RegisteredCourse> getRegCrsByCrsTchrAndEvalWithGrades(@PathParam("courseTeacherId") String courseTeacherId, 
+            @PathParam("evaluationId") String evaluationId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.TEACH);
         try {
             CourseTeacher crsTchr = new CourseTeacherDAO().getCourseTeacher(Integer.parseInt(courseTeacherId));
             Evaluation evaluation = new EvaluationDAO().getEvaluationWithCourse(Integer.parseInt(evaluationId));
@@ -149,7 +163,9 @@ public class RegisteredCourseServlet {
     @POST
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response create (@FormParam("studentId") String studentId, @FormParam("courseTeacherId") String courseTeacherId) {
+    public Response create (@FormParam("studentId") String studentId, 
+            @FormParam("courseTeacherId") String courseTeacherId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.STUDENT);
         
         regCrsDAO = new RegisteredCourseDAO(false);
         
@@ -252,7 +268,8 @@ public class RegisteredCourseServlet {
     @PUT
     @Path("/")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response update (@FormParam("courseState") String courseState, @FormParam("id") String id) {
+    public Response update (@FormParam("courseState") String courseState, @FormParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.STUDENT);
         
         regCrsDAO = new RegisteredCourseDAO(false);
         
@@ -324,7 +341,8 @@ public class RegisteredCourseServlet {
     @DELETE
     @Path("/{id: \\d+}")
     @Produces({MediaType.TEXT_PLAIN})
-    public Response delete(@PathParam("id") String id) {
+    public Response delete(@PathParam("id") String id, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR, FilterRequest.STUDENT);
         
         String msg = "";
         RegisteredCourseDAO registeredCourseDao = new RegisteredCourseDAO();
