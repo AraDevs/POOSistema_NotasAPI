@@ -93,6 +93,60 @@ public class FilterRequest {
         
     }
     
+    public FilterRequest(String token, String operator, String... permissions) {
+        
+        Claims tokenInfo;
+        this.operator = operator;
+        this.authorized = false;
+        
+        try {
+            if (token == null || token.equals("")) {
+                throw new NotAuthenticatedException();
+            }
+            
+            tokenInfo = new JWTHelper().parseJWT(token);
+            
+        } catch (Exception e) {
+            throw new NotAuthenticatedException();
+        }
+        
+        //Si no se especificaron permisos requeridos, la operación es autorizada
+        if (permissions.length == 0) {
+            authorized = true;
+        }
+        //Si se especificaron permisos, es necesario verificarlos
+        else {
+            //Si se comparará usando AND, el valor inicial del output debe ser verdadero para que funcione la evaluación
+            if (operator.equals(AND)) {
+                authorized = true;
+            }
+            //Iterando por cada uno de los permisos solicitados
+            for (String permission : permissions) {
+                if (permission.equals(IS_STUDENT)) {
+                    authorized = evaluatePermission(tokenInfo.get("type").equals("student"));
+                }
+                else if (permission.equals(IS_EMPLOYEE)) {
+                    authorized = evaluatePermission(tokenInfo.get("type").equals("employee"));
+                }
+
+                //Verificaciones que solo aplican si se trata de un empleado (osea, los permisos de los roles)
+                if (tokenInfo.get("type").equals("employee")) {
+                    if (permission.equals(TEACH) || permission.equals(USER) || permission.equals(STUDENT) || 
+                            permission.equals(EMPLOYEE) || permission.equals(FACULTY) || permission.equals(CAREER) || 
+                            permission.equals(COURSE) || permission.equals(PENSUM) || permission.equals(EVALUATION) || 
+                            permission.equals(ROLE)) {
+                        authorized = evaluatePermission(Boolean.valueOf(tokenInfo.get(permission).toString()));
+                    }
+                }
+            }
+        }
+        
+        if (!authorized) {
+            throw new NotAuthorizedException();
+        }
+        
+    }
+    
     private Boolean evaluatePermission(Boolean condition) {
         if (operator.equals(AND)) {
             return authorized && condition;

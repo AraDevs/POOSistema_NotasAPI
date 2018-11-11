@@ -593,4 +593,28 @@ public class UserServlet {
             return null;
         }
     }
+    
+    @GET
+    @Path("/image/{userId}/withToken/{token}")
+    @Produces("image/png")
+    public Response downloadImageWithToken(@PathParam("userId") String userId, @PathParam("token") String token) {
+        new FilterRequest(token, FilterRequest.OR);
+        try {
+            User user = new UserDAO().getUser(Integer.parseInt(userId), false);
+        
+            StreamingOutput fileStream = Helpers.downloadFile(user.getImagePath());
+            
+            String[] fileNameParts = user.getImagePath().split("\\\\"); //Regex equivalente a "\"
+            String fileName = fileNameParts[fileNameParts.length - 1];
+
+            return Response
+                    .ok(fileStream, MediaType.APPLICATION_OCTET_STREAM)
+                    .header("content-disposition","attachment; filename = " + fileName)
+                    .build();
+        
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

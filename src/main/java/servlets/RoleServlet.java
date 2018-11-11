@@ -5,10 +5,14 @@
  */
 package servlets;
 
+import dao.EmployeeDAO;
 import dao.RoleDAO;
 import helpers.DaoStatus;
 import helpers.FilterRequest;
+import helpers.JWTHelper;
+import hibernate.Employee;
 import hibernate.Role;
+import io.jsonwebtoken.Claims;
 import java.util.List;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -126,6 +130,24 @@ public class RoleServlet {
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
         }
         
+        if (!(Boolean.valueOf(teach) || Boolean.valueOf(manageUsers) || Boolean.valueOf(manageStudents) || Boolean.valueOf(manageEmployees)
+                 || Boolean.valueOf(manageFaculties) || Boolean.valueOf(manageCareers) || Boolean.valueOf(manageCourses) || Boolean.valueOf(managePensums)
+                 || Boolean.valueOf(manageEvaluations) || Boolean.valueOf(manageRoles))) {
+            msg = "Dele al rol al menos un permiso.";
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        try {
+            if (roleDao.getRoleByPermissions(Boolean.valueOf(teach), Boolean.valueOf(manageUsers), Boolean.valueOf(manageStudents), Boolean.valueOf(manageEmployees),
+                 Boolean.valueOf(manageFaculties), Boolean.valueOf(manageCareers), Boolean.valueOf(manageCourses), Boolean.valueOf(managePensums),
+                 Boolean.valueOf(manageEvaluations), Boolean.valueOf(manageRoles)) != null) {
+                msg = "Ya existe un rol con los permisos especificados.";
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
         try {
             Role newRole = new Role();
             newRole.setRole(role);
@@ -233,6 +255,42 @@ public class RoleServlet {
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
         } catch (Exception e) {e.printStackTrace();}
+        
+        if (!(Boolean.valueOf(teach) || Boolean.valueOf(manageUsers) || Boolean.valueOf(manageStudents) || Boolean.valueOf(manageEmployees)
+                 || Boolean.valueOf(manageFaculties) || Boolean.valueOf(manageCareers) || Boolean.valueOf(manageCourses) || Boolean.valueOf(managePensums)
+                 || Boolean.valueOf(manageEvaluations) || Boolean.valueOf(manageRoles))) {
+            msg = "Dele al rol al menos un permiso.";
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        try {
+            if (roleDao.getRoleByPermissionsExcludeId(Boolean.valueOf(teach), Boolean.valueOf(manageUsers), Boolean.valueOf(manageStudents), Boolean.valueOf(manageEmployees),
+                 Boolean.valueOf(manageFaculties), Boolean.valueOf(manageCareers), Boolean.valueOf(manageCourses), Boolean.valueOf(managePensums),
+                 Boolean.valueOf(manageEvaluations), Boolean.valueOf(manageRoles), Integer.parseInt(id)) != null) {
+                msg = "Ya existe un rol con los permisos especificados.";
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        if (id.equals("1") || id.equals("2")) {
+            msg = "Los roles por defecto del sistema no pueden ser modificados.";
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        try {
+            Claims tokenInfo = new JWTHelper().parseJWT(header.getRequestHeader("token").get(0));
+            Employee requester = new EmployeeDAO().getEmployee(Integer.parseInt(tokenInfo.getId()));
+            
+            if (requester.getRole().getId() == Integer.parseInt(id)) {
+                msg = "No puede modificar su propio rol.";
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         
         try {
             newRole.setRole(role);

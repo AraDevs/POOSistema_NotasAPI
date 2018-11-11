@@ -273,9 +273,12 @@ public class CorrectionDAO extends DAO {
                     correction.getGrade().getRegisteredCourse().getStudent().getUser().getPerson().getName() + " " +
                     correction.getGrade().getRegisteredCourse().getStudent().getUser().getPerson().getSurname();
 
+            int registeredCourseId = correction.getGrade().getRegisteredCourse().getId();
+            
             correction.getGrade().setRegisteredCourse(null);
 
             correctionDTO = new CorrectionDTO(correction, studentName);
+            correctionDTO.setRegisteredCourseId(registeredCourseId);
             
             
         } catch (Exception e) {

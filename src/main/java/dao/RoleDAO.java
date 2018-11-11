@@ -123,6 +123,99 @@ public class RoleDAO extends DAO {
         return role;
     }
     
+    public Role getRoleByPermissions(Boolean teach, Boolean manageUsers, Boolean manageStudents, Boolean manageEmployees,
+                                    Boolean manageFaculties, Boolean manageCareers, Boolean manageCourses, Boolean managePensums,
+                                    Boolean manageEvaluations, Boolean manageRoles) {
+        
+        Role role = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM Role where teach = :teach and manageUsers = :manageUsers and manageStudents = :manageStudents "
+                    + "and manageEmployees = :manageEmployees and manageFaculties = :manageFaculties and manageCareers = :manageCareers "
+                    + "and manageCourses = :manageCourses and managePensums = :managePensums and manageEvaluations = :manageEvaluations "
+                    + "and manageRoles = :manageRoles";
+            Query query = ses.createQuery(queryString, Role.class);
+            query.setParameter("teach", teach);
+            query.setParameter("manageUsers", manageUsers);
+            query.setParameter("manageStudents", manageStudents);
+            query.setParameter("manageEmployees", manageEmployees);
+            query.setParameter("manageFaculties", manageFaculties);
+            query.setParameter("manageCareers", manageCareers);
+            query.setParameter("manageCourses", manageCourses);
+            query.setParameter("managePensums", managePensums);
+            query.setParameter("manageEvaluations", manageEvaluations);
+            query.setParameter("manageRoles", manageRoles);
+            role = (Role)query.uniqueResult();
+            
+            if (role != null) {
+                role.setEmployees(null);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return role;
+    }
+    
+    public Role getRoleByPermissionsExcludeId(Boolean teach, Boolean manageUsers, Boolean manageStudents, Boolean manageEmployees,
+                                    Boolean manageFaculties, Boolean manageCareers, Boolean manageCourses, Boolean managePensums,
+                                    Boolean manageEvaluations, Boolean manageRoles, int roleId) {
+        
+        Role role = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM Role where teach = :teach and manageUsers = :manageUsers and manageStudents = :manageStudents "
+                    + "and manageEmployees = :manageEmployees and manageFaculties = :manageFaculties and manageCareers = :manageCareers "
+                    + "and manageCourses = :manageCourses and managePensums = :managePensums and manageEvaluations = :manageEvaluations "
+                    + "and manageRoles = :manageRoles and id != :roleId";
+            Query query = ses.createQuery(queryString, Role.class);
+            query.setParameter("teach", teach);
+            query.setParameter("manageUsers", manageUsers);
+            query.setParameter("manageStudents", manageStudents);
+            query.setParameter("manageEmployees", manageEmployees);
+            query.setParameter("manageFaculties", manageFaculties);
+            query.setParameter("manageCareers", manageCareers);
+            query.setParameter("manageCourses", manageCourses);
+            query.setParameter("managePensums", managePensums);
+            query.setParameter("manageEvaluations", manageEvaluations);
+            query.setParameter("manageRoles", manageRoles);
+            query.setParameter("roleId", roleId);
+            role = (Role)query.uniqueResult();
+            
+            if (role != null) {
+                role.setEmployees(null);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return role;
+    }
+    
     public Role get(int id) throws Exception {
         Role role = null;
         
