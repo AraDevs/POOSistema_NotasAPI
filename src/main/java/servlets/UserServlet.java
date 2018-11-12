@@ -8,13 +8,17 @@ package servlets;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
+import dao.EmployeeDAO;
 import dao.PersonDao;
 import dao.UserDAO;
 import helpers.DaoStatus;
 import helpers.FilterRequest;
 import helpers.Helpers;
+import helpers.JWTHelper;
+import hibernate.Employee;
 import hibernate.Person;
 import hibernate.User;
+import io.jsonwebtoken.Claims;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -436,6 +440,23 @@ public class UserServlet {
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
         } catch (Exception e) {e.printStackTrace();}
+        
+        if (id.equals("1") && !Boolean.valueOf(state)) {
+            msg = "Este usuario no puede ser inhabilitado.";
+            return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        try {
+            Claims tokenInfo = new JWTHelper().parseJWT(header.getRequestHeader("token").get(0));
+            Employee requester = new EmployeeDAO().getEmployee(Integer.parseInt(tokenInfo.getId()));
+
+            if (requester.getUser().getId() == Integer.parseInt(id) && !Boolean.valueOf(state)) {
+                msg = "No puede inhabilitarse a sí mismo.";
+                return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         
         try {
             Person person = user.getPerson();

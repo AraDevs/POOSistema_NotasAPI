@@ -24,7 +24,7 @@ public class CorrectionDTO implements java.io.Serializable{
     //El nombre del maestro al que es dirigida la corrección o del estudiante que la solicita,
     //dependiendo del caso
     private String owner;
-    //Parámetro opcional usado únicamente en el método getCorrectionDTOByGradeWithStudentName
+    //Parámetro opcional usado únicamente en el método getCorrectionsDTOByTeacher
     private int registeredCourseId;
 
     public CorrectionDTO() {

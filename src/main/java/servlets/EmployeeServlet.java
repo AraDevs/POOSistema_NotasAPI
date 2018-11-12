@@ -18,6 +18,7 @@ import hibernate.CourseTeacher;
 import hibernate.Employee;
 import hibernate.Role;
 import hibernate.User;
+import io.jsonwebtoken.Claims;
 import java.util.List;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -316,6 +317,24 @@ public class EmployeeServlet {
             
         } catch (Exception e) {e.printStackTrace();}
         
+        if (id.equals("1")) {
+            msg = "Este empleado no puede ser modificado.";
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+        }
+        
+        try {
+            Claims tokenInfo = new JWTHelper().parseJWT(header.getRequestHeader("token").get(0));
+            Employee requester = new EmployeeDAO().getEmployee(Integer.parseInt(tokenInfo.getId()));
+            
+            if (requester.getId() == Integer.parseInt(id)) {
+                msg = "No puede modificar su propio registro de empleado.";
+                return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
         try {
             employee.setRole(role);
             employee.setState(Boolean.valueOf(state));
@@ -365,6 +384,14 @@ public class EmployeeServlet {
             if (employee.getId() == 1) {
                 msg = "No se puede eliminar al primer usuario.";
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).type(MediaType.TEXT_PLAIN).build();
+            }
+            
+            Claims tokenInfo = new JWTHelper().parseJWT(header.getRequestHeader("token").get(0));
+            Employee requester = new EmployeeDAO().getEmployee(Integer.parseInt(tokenInfo.getId()));
+            
+            if (requester.getId() == Integer.parseInt(id)) {
+                msg = "No puede eliminar su propio registro de empleado.";
+                return Response.status(Response.Status.NOT_ACCEPTABLE).entity(msg).type(MediaType.TEXT_PLAIN).build();
             }
             
         } catch (Exception e) {
