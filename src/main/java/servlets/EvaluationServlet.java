@@ -98,7 +98,7 @@ public class EvaluationServlet {
     public List<Evaluation> getEvaluationsByRegisteredCourse(@PathParam("regCourseId") String regCourseId, @Context HttpHeaders header) {
         new FilterRequest(header, FilterRequest.OR, FilterRequest.IS_STUDENT, FilterRequest.TEACH);
         try {
-            return new EvaluationDAO().getEvaluationsByRegCourseWithGrade(Integer.parseInt(regCourseId), false);
+            return new EvaluationDAO().getAllEvaluationsByRegCourseWithGrade(Integer.parseInt(regCourseId));
         } catch (Exception e) {
             e.printStackTrace();
             return null;

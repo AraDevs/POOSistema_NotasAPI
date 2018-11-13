@@ -638,4 +638,13 @@ public class UserServlet {
             return null;
         }
     }
+    
+    //Verifica que el token no haya expirado
+    @GET
+    @Path("/verifyToken")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response verifyToken(@Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
+        return Response.ok("ok").build();
+    }
 }

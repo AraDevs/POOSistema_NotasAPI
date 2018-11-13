@@ -216,6 +216,52 @@ public class EvaluationDAO extends DAO {
         return evaluations;
     }
     
+    public List<Evaluation> getAllEvaluationsByRegCourseWithGrade(int regCourseId) throws Exception {
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            //Obteniendo materia para obtener su id
+            Course course =  new CourseDAO().getCourseByRegisteredCourse(regCourseId);
+            
+            tra = ses.beginTransaction();
+            String queryString = "FROM Evaluation e where e.course.id = :courseId and e.state = true"; //el manejo de estado es por las evaluaciones de periodos pasados
+            Query query = ses.createQuery(queryString, Evaluation.class);
+            query.setParameter("courseId", course.getId());
+            evaluations = query.list();
+            
+            for (Evaluation e : evaluations) {
+                e.setCourse(null);
+                
+                //Obteniendo notas
+                Grade grade = new GradeDAO().getGrade(regCourseId, e.getId());
+                HashSet<Grade> grades = new HashSet<Grade>();
+                if (grade != null) {
+                    grades.add(grade);
+                }
+                else { //Si no ha sido evaluado, se añadirá una nota de 0
+                    grade = new Grade();
+                    grade.setGrade(0);
+                    grade.setState(false);
+                    grades.add(grade);
+                }
+                e.setGrades(grades);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return evaluations;
+    }
+    
     public Evaluation getEvaluationWithGrade(int regCourseId, int evaluationId) throws Exception {
         Evaluation evaluation = null;
         
