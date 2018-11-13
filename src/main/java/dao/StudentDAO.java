@@ -8,6 +8,7 @@ package dao;
 import hibernate.CareerStudent;
 import hibernate.HibernateUtil;
 import hibernate.Person;
+import hibernate.RegisteredCourse;
 import hibernate.Student;
 import hibernate.User;
 import java.util.ArrayList;
@@ -161,6 +162,43 @@ public class StudentDAO extends DAO {
             Query query = ses.createQuery(queryString, Student.class);
             query.setParameter("id", id);
             student = (Student) query.uniqueResult();
+            
+            student.setCareerStudents(null);
+            student.setRegisteredCourses(null);
+            student.getUser().setEmployees(null);
+            student.getUser().setStudents(null);
+            student.getUser().getPerson().setUsers(null);
+            student.getUser().setPass(null);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (tra != null) {
+                tra.rollback();
+            }
+        } finally {
+            //ses.flush();
+            ses.close();
+        }
+        
+        return student;
+    }
+    
+    public Student getStudentByRegisteredCourse(int registeredCourseId) throws Exception {
+        Student student = null;
+        
+        SessionFactory sesFact = HibernateUtil.getSessionFactory();
+        Session ses = sesFact.openSession();
+        Transaction tra = null;
+        
+        try {
+            tra = ses.beginTransaction();
+            String queryString = "FROM RegisteredCourse rc join fetch rc.student s join fetch s.user u "
+                    + "join fetch u.person where rc.id = :registeredCourseId";
+            Query query = ses.createQuery(queryString, RegisteredCourse.class);
+            query.setParameter("registeredCourseId", registeredCourseId);
+            RegisteredCourse regCrs = (RegisteredCourse) query.uniqueResult();
+            
+            student = regCrs.getStudent();
             
             student.setCareerStudents(null);
             student.setRegisteredCourses(null);

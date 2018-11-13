@@ -117,6 +117,19 @@ public class StudentServlet {
         }
     }
     
+    @GET
+    @Path("/byRegisteredCourse/{registeredCourseId: \\d+}/users/people")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Student getStudentByRegCrs (@PathParam("registeredCourseId") String registeredCourseId, @Context HttpHeaders header) {
+        new FilterRequest(header, FilterRequest.OR);
+        try {
+            return new StudentDAO().getStudentByRegisteredCourse(Integer.parseInt(registeredCourseId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
     @POST
     @Path("/login")
     @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON})
